@@ -40,6 +40,26 @@ dependencies:
 
   equatable: ^2.0.5
 
+  sqflite: ^2.2.8+2
+
+  sqflite_common_ffi: ^2.2.5
+
+  path: ^1.8.1
+
+  crypto: ^3.0.3
+
+  win32: ^3.1.4
+
+  win32_registry: ^1.0.2
+
+  json_serializable: ^6.7.0
+
+  json_annotation: ^4.8.1
+
+  ffi: ^2.0.1
+
+  rxdart: ^0.27.4
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
