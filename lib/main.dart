@@ -160,14 +160,19 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                   Row(
                     mainAxisSize: MainAxisSize.min,
-                    children: teammates
-                        .map((e) => Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 4),
-                              child:
-                                  _createPlayerWidget(e, textColor: textColor),
-                            ))
-                        .toList(),
+                    children: [
+                      const SizedBox(
+                        width: 4,
+                      ),
+                      ...teammates.map((e) => Flexible(
+                              child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            child: _createPlayerWidget(e, textColor: textColor),
+                          ))),
+                      const SizedBox(
+                        width: 4,
+                      )
+                    ],
                   )
                 ],
                 const SizedBox(
@@ -197,14 +202,15 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget _createPlayerWidget(HuntPlayer player, {Color? textColor}) {
-    //final mmr = Mmr.get(player.mmr);
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(player.username,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(
               color: textColor,
-              fontSize: 16,
+              fontSize: 14,
               fontWeight: FontWeight.w500,
             )),
         const SizedBox(
