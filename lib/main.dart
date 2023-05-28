@@ -222,7 +222,7 @@ class _MyHomePageState extends State<MyHomePage> {
       children: [
         Text(
           'Total',
-          style: TextStyle(color: textColor),
+          style: TextStyle(color: textColor, fontWeight: FontWeight.w500),
         ),
         const SizedBox(
           width: 8,
@@ -239,7 +239,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
         Text(
           'Team',
-          style: TextStyle(color: textColor),
+          style: TextStyle(color: textColor, fontWeight: FontWeight.w500),
         ),
       ],
     );
