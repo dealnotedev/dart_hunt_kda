@@ -28,7 +28,7 @@ void main() async {
   doWhenWindowReady(() {
     final window = appWindow;
 
-    const initialSize = Size(360, 320);
+    const initialSize = Size(360, 256);
     window.minSize = initialSize;
     window.size = initialSize;
     window.alignment = Alignment.center;
@@ -92,7 +92,7 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.indigo,
       ),
       home: Column(
         children: [
@@ -158,7 +158,10 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                   Text(
                     teammates.join(', '),
-                    style: const TextStyle(color: textColor, fontSize: 16),
+                    style: const TextStyle(
+                        color: textColor,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500),
                   ),
                 ],
                 const SizedBox(
