@@ -80,17 +80,26 @@ class StatsDb {
         'SELECT '
         'sum(${HuntMatchColumns.teamDeaths}) as team_deaths, '
         'sum(${HuntMatchColumns.teamDowns}) as team_downs, '
+        'sum(${HuntMatchColumns.ownDowns}) as own_downs, '
+        'sum(${HuntMatchColumns.ownDeaths}) as own_deaths, '
+        'sum(${HuntMatchColumns.ownEnemyDeaths}) as own_enemy_deaths, '
+        'sum(${HuntMatchColumns.ownEnemyDowns}) as own_enemy_downs, '
         'sum(${HuntMatchColumns.teamEnemyDeaths}) as team_enemy_deaths, '
         'sum(${HuntMatchColumns.teamEnemyDowns}) as team_enemy_downs '
         'FROM ${HuntMatchColumns.table} '
         'WHERE ${HuntMatchColumns.teamId} LIKE ?',
         [teamId]);
-    final row = cursor[0];
 
+    final row = cursor[0];
     return TeamStats(
-        teamKills: (row['team_enemy_deaths'] as int) +
-            (row['team_enemy_downs'] as int),
-        teamDeaths: (row['team_deaths'] as int) + (row['team_downs'] as int));
+        teamKills: row.intOf('team_enemy_deaths') +
+            row.intOf('team_enemy_downs') +
+            row.intOf('own_enemy_deaths') +
+            row.intOf('own_enemy_downs'),
+        teamDeaths: row.intOf('team_deaths') +
+            row.intOf('team_downs') +
+            row.intOf('own_downs') +
+            row.intOf('own_deaths'));
   }
 
   Future<OwnStats> getOwnStats() async {
@@ -102,16 +111,30 @@ class StatsDb {
         'sum(${HuntMatchColumns.ownEnemyDeaths}) as own_enemy_deaths, '
         'sum(${HuntMatchColumns.ownDeaths}) as own_deaths, '
         'sum(${HuntMatchColumns.ownDowns}) as own_downs, '
+        'sum(${HuntMatchColumns.teamDeaths}) as team_deaths, '
+        'sum(${HuntMatchColumns.teamDowns}) as team_downs, '
+        'sum(${HuntMatchColumns.teamEnemyDeaths}) as team_enemy_deaths, '
+        'sum(${HuntMatchColumns.teamEnemyDowns}) as team_enemy_downs, '
         'sum(${HuntMatchColumns.ownAssists}) as own_assists '
         'FROM ${HuntMatchColumns.table} '
         'WHERE ${HuntMatchColumns.outdated} = ?',
         [0]);
+
     final row = cursor[0];
     return OwnStats(
-        ownKills:
-            (row['own_enemy_downs'] as int) + (row['own_enemy_deaths'] as int),
-        ownDeaths: (row['own_deaths'] as int) + (row['own_downs'] as int),
-        ownAssists: row['own_assists'] as int);
+        teamDeaths: row.intOf('team_deaths') + row.intOf('team_downs'),
+        teamKills:
+            row.intOf('team_enemy_deaths') + row.intOf('team_enemy_downs'),
+        ownKills: row.intOf('own_enemy_downs') + row.intOf('own_enemy_deaths'),
+        ownDeaths: row.intOf('own_deaths') + row.intOf('own_downs'),
+        ownAssists: row.intOf('own_assists'));
+  }
+
+  Future<void> outdate() async {
+    final db = await database;
+    db.rawUpdate(
+        'UPDATE ${HuntMatchColumns.table} SET ${HuntMatchColumns.outdated} = ?',
+        [1]);
   }
 
   Future<List<HuntPlayer>> getMatchPlayers(int matchId) async {
@@ -268,4 +291,8 @@ class StatsDb {
         'CONSTRAINT fk_match FOREIGN KEY ([${HuntPlayerColumns.matchId}]) REFERENCES [${HuntMatchColumns.table}] ([${HuntMatchColumns.id}]) ON DELETE CASCADE,'
         'UNIQUE([${HuntPlayerColumns.matchId}],[${HuntPlayerColumns.profileId}]));');
   }
+}
+
+extension _MapExt on Map<String, Object?> {
+  int intOf(String column) => this[column] as int? ?? 0;
 }

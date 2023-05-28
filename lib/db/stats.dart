@@ -5,10 +5,22 @@ class OwnStats {
 
   final int ownAssists;
 
+  final int teamKills;
+
+  final int teamDeaths;
+
   OwnStats(
       {required this.ownKills,
       required this.ownDeaths,
+      required this.teamKills,
+      required this.teamDeaths,
       required this.ownAssists});
+
+  int get totalKills => ownKills + teamKills;
+
+  int get totalDeaths => ownDeaths + teamDeaths;
+
+  double get kda => (ownKills + ownAssists).toDouble() / ownDeaths.toDouble();
 
   @override
   String toString() {
@@ -22,6 +34,8 @@ class TeamStats {
   final int teamDeaths;
 
   TeamStats({required this.teamKills, required this.teamDeaths});
+
+  double get kd => teamKills.toDouble() / teamDeaths.toDouble();
 
   @override
   String toString() {

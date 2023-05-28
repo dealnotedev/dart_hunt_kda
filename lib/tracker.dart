@@ -4,7 +4,7 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:crypto/crypto.dart';
-import 'package:hunt_stats/HuntBundle.dart';
+import 'package:hunt_stats/hunt_bundle.dart';
 import 'package:hunt_stats/db/entities.dart';
 import 'package:hunt_stats/db/stats_db.dart';
 import 'package:hunt_stats/match_data.dart';
@@ -13,25 +13,14 @@ import 'package:rxdart/rxdart.dart';
 import 'package:xml/xml.dart';
 
 class TrackerEngine {
-  final _bundleSubject = StreamController<HuntBundle>.broadcast();
+  final _bundleSubject = StreamController<HuntBundle?>.broadcast();
 
   final StatsDb db;
 
   TrackerEngine(this.db);
 
   Future<void> start() async {
-    final header = await db.getLastMatch();
-
-    if (header != null) {
-      final players = await db.getMatchPlayers(header.id);
-      final match = MatchData(match: header, players: players);
-      final ownStats = await db.getOwnStats();
-      final teamStats = await db.getTeamStats(header.teamId);
-
-      final bundle = HuntBundle(match: match, ownStats: ownStats, teamStats: teamStats);
-      _lastBundle = bundle;
-      _bundleSubject.add(bundle);
-    }
+    await _refreshData();
 
     final ReceivePort port = ReceivePort('Tracking')
       ..listen((dynamic info) {
@@ -43,18 +32,46 @@ class TrackerEngine {
     await Isolate.spawn(_startTracking, port.sendPort);
   }
 
+  Future<void> _refreshData() async {
+    final header = await db.getLastMatch();
+
+    if (header != null) {
+      final players = await db.getMatchPlayers(header.id);
+      final match = MatchData(match: header, players: players);
+      final ownStats = await db.getOwnStats();
+      final teamStats = await db.getTeamStats(header.teamId);
+
+      final bundle = HuntBundle(
+          match: match,
+          ownStats: ownStats,
+          teamStats: teamStats,
+          previousTeamStats: null,
+          previousOwnStats: null,
+          previousMatch: null);
+      _lastBundle = bundle;
+      _bundleSubject.add(bundle);
+    } else {
+      _lastBundle = null;
+      _bundleSubject.add(null);
+    }
+  }
+
   HuntBundle? _lastBundle;
 
-  Stream<HuntBundle> get lastMatch {
+  Stream<HuntBundle?> get lastMatch {
     final last = _lastBundle;
     if(last != null){
-      return Stream.value(last).concatWith([_bundleSubject.stream]);
+      return Stream<HuntBundle?>.value(last).concatWith([_bundleSubject.stream]);
     } else {
       return _bundleSubject.stream;
     }
   }
 
   Future<void> saveHuntMatch(MatchData data) async {
+    final previousTeamStats = data.match.teamId == _lastBundle?.teamId
+        ? _lastBundle?.teamStats
+        : await db.getTeamStats(data.match.teamId);
+
     await db.insertHuntMatch(data.match);
 
     if (data.match.id == 0) return;
@@ -69,9 +86,21 @@ class TrackerEngine {
     final ownStats = await db.getOwnStats();
     final teamStats = await db.getTeamStats(data.match.teamId);
 
-    final bundle = HuntBundle(match: data, ownStats: ownStats, teamStats: teamStats);
+    final bundle = HuntBundle(
+        match: data,
+        ownStats: ownStats,
+        teamStats: teamStats,
+        previousTeamStats: previousTeamStats,
+        previousOwnStats: _lastBundle?.ownStats,
+        previousMatch: _lastBundle?.match);
+
     _lastBundle = bundle;
     _bundleSubject.add(bundle);
+  }
+
+  Future<void> invalidateMatches() async {
+    await db.outdate();
+    await _refreshData();
   }
 
   static void _startTracking(SendPort port) async {

@@ -60,6 +60,14 @@ dependencies:
 
   rxdart: ^0.27.4
 
+  #flutter_acrylic: ^1.1.0
+
+  bitsdojo_window: ^0.1.5
+
+  bitsdojo_window_platform_interface: ^0.1.2
+
+  system_tray: ^2.0.3
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -81,6 +89,9 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+
+  assets:
+    - assets/
 
   # To add assets to your application, add an assets section, like this:
   # assets:
