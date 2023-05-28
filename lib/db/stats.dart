@@ -9,11 +9,14 @@ class OwnStats {
 
   final int teamDeaths;
 
+  final int matches;
+
   OwnStats(
       {required this.ownKills,
       required this.ownDeaths,
       required this.teamKills,
       required this.teamDeaths,
+      required this.matches,
       required this.ownAssists});
 
   int get totalKills => ownKills + teamKills;
@@ -33,7 +36,9 @@ class TeamStats {
 
   final int teamDeaths;
 
-  TeamStats({required this.teamKills, required this.teamDeaths});
+  final int matches;
+
+  TeamStats({required this.teamKills, required this.teamDeaths, required this.matches});
 
   double get kd => teamKills.toDouble() / teamDeaths.toDouble();
 

@@ -68,6 +68,8 @@ dependencies:
 
   system_tray: ^2.0.3
 
+  morphable_shape: ^1.6.6
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

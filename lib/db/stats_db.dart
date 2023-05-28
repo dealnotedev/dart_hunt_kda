@@ -85,13 +85,15 @@ class StatsDb {
         'sum(${HuntMatchColumns.ownEnemyDeaths}) as own_enemy_deaths, '
         'sum(${HuntMatchColumns.ownEnemyDowns}) as own_enemy_downs, '
         'sum(${HuntMatchColumns.teamEnemyDeaths}) as team_enemy_deaths, '
-        'sum(${HuntMatchColumns.teamEnemyDowns}) as team_enemy_downs '
+        'sum(${HuntMatchColumns.teamEnemyDowns}) as team_enemy_downs, '
+        'count(${HuntMatchColumns.id}) as matches '
         'FROM ${HuntMatchColumns.table} '
         'WHERE ${HuntMatchColumns.teamId} LIKE ?',
         [teamId]);
 
     final row = cursor[0];
     return TeamStats(
+        matches: row.intOf('matches'),
         teamKills: row.intOf('team_enemy_deaths') +
             row.intOf('team_enemy_downs') +
             row.intOf('own_enemy_deaths') +
@@ -115,13 +117,15 @@ class StatsDb {
         'sum(${HuntMatchColumns.teamDowns}) as team_downs, '
         'sum(${HuntMatchColumns.teamEnemyDeaths}) as team_enemy_deaths, '
         'sum(${HuntMatchColumns.teamEnemyDowns}) as team_enemy_downs, '
-        'sum(${HuntMatchColumns.ownAssists}) as own_assists '
+        'sum(${HuntMatchColumns.ownAssists}) as own_assists, '
+        'count(${HuntMatchColumns.id}) as matches '
         'FROM ${HuntMatchColumns.table} '
         'WHERE ${HuntMatchColumns.outdated} = ?',
         [0]);
 
     final row = cursor[0];
     return OwnStats(
+        matches: row.intOf('matches'),
         teamDeaths: row.intOf('team_deaths') + row.intOf('team_downs'),
         teamKills:
             row.intOf('team_enemy_deaths') + row.intOf('team_enemy_downs'),

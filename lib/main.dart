@@ -9,6 +9,7 @@ import 'package:hunt_stats/generated/assets.dart';
 import 'package:hunt_stats/hunt_bundle.dart';
 import 'package:hunt_stats/mmr.dart';
 import 'package:hunt_stats/tracker.dart';
+import 'package:morphable_shape/morphable_shape.dart';
 import 'package:system_tray/system_tray.dart' as tray;
 
 void main() async {
@@ -31,7 +32,7 @@ void main() async {
   doWhenWindowReady(() {
     final window = appWindow;
 
-    const initialSize = Size(360, 256);
+    const initialSize = Size(360, 280);
     window.minSize = initialSize;
     window.size = initialSize;
     window.alignment = Alignment.center;
@@ -156,7 +157,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 _createTeamKdWidget(bundle, _teamStats, textColor: textColor),
                 if (_teamStats) ...[
                   const SizedBox(
-                    height: 4,
+                    height: 16,
                   ),
                   Row(
                     mainAxisSize: MainAxisSize.min,
@@ -176,7 +177,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   )
                 ],
                 const SizedBox(
-                  height: 8,
+                  height: 24,
                 ),
                 _createOwnKdaWidget(bundle, textColor: textColor),
                 if (size.height > 480) ...[
@@ -193,12 +194,38 @@ class _MyHomePageState extends State<MyHomePage> {
                 const SizedBox(
                   height: 32,
                 ),
+                _test(),
+                _test2()
               ],
             ),
           );
         },
       ),
     );
+  }
+
+  Widget _test2() {
+    const cornerStyles = RectangleCornerStyles.all(CornerStyle.straight);
+
+    const border = RectangleShapeBorder(
+      borderRadius:
+      DynamicBorderRadius.all(DynamicRadius.circular(Length(50, unit: LengthUnit.percent))),
+      cornerStyles: cornerStyles,
+    );
+
+    return Container(height: 128, decoration: const ShapeDecoration(shape: border, color: Colors.black),);
+  }
+
+  Widget _test() {
+    const cornerStyles = RectangleCornerStyles.all(CornerStyle.concave);
+
+    const border = RectangleShapeBorder(
+      borderRadius:
+          DynamicBorderRadius.all(DynamicRadius.circular(Length(16))),
+      cornerStyles: cornerStyles,
+    );
+
+    return Container(height: 128, decoration: const ShapeDecoration(shape: border, color: Colors.black),);
   }
 
   Widget _createPlayerWidget(HuntPlayer player, {Color? textColor}) {
@@ -210,7 +237,7 @@ class _MyHomePageState extends State<MyHomePage> {
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
               color: textColor,
-              fontSize: 14,
+              fontSize: 16,
               fontWeight: FontWeight.w500,
             )),
         const SizedBox(
@@ -218,12 +245,11 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
         Container(
           padding: const EdgeInsets.all(4),
-          decoration: BoxDecoration(
-              color: const Color(0xFF080808),
-              border: Border.all(
-                  color: const Color(0xFF938663),
-                  width: 2,
-                  strokeAlign: BorderSide.strokeAlignOutside)),
+          decoration: const BoxDecoration(
+              image: DecorationImage(
+                  image: AssetImage(Assets.assetsBgMmr),
+                  fit: BoxFit.fill,
+                  filterQuality: FilterQuality.medium)),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -250,6 +276,7 @@ class _MyHomePageState extends State<MyHomePage> {
             Assets.assetsCrossWhite24dp,
             width: size,
             height: size,
+            filterQuality: FilterQuality.medium,
             color: Colors.black,
           ),
           SizedBox(
@@ -260,6 +287,7 @@ class _MyHomePageState extends State<MyHomePage> {
               alignment: Alignment.centerLeft,
               fit: BoxFit.fitHeight,
               height: size,
+              filterQuality: FilterQuality.medium,
               width: size * fill,
               color: const Color(0xFFCEB379),
             ),
@@ -271,13 +299,15 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Widget _createOwnKdaWidget(HuntBundle bundle, {Color? textColor}) {
     final kdaChanges = bundle.kdaChanges;
+    final stats = bundle.ownStats;
+    final matches = stats.matches;
 
     return Row(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         Text(
-          'KDA ${formatDouble(bundle.ownStats.kda)}',
+          'KDA ${formatDouble(stats.kda)}',
           style: TextStyle(
               fontSize: 24, color: textColor, fontWeight: FontWeight.bold),
         ),
@@ -289,6 +319,16 @@ class _MyHomePageState extends State<MyHomePage> {
             formatDouble(kdaChanges, plusIfPositive: true, precision: 3),
             style: TextStyle(
                 fontSize: 16, fontWeight: FontWeight.w500, color: textColor),
+          )
+        ],
+        if (_teamStats) ...[
+          const SizedBox(
+            width: 8,
+          ),
+          Text(
+            '${matches}mtch',
+            style: TextStyle(
+                color: textColor, fontSize: 16, fontWeight: FontWeight.w500),
           )
         ]
       ],
@@ -336,6 +376,9 @@ class _MyHomePageState extends State<MyHomePage> {
     final deathsChanges =
         teamStats ? bundle.teamDeathsChanges : bundle.ownDeatchChanges;
 
+    final matches =
+        teamStats ? bundle.teamStats.matches : bundle.ownStats.matches;
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.end,
@@ -362,7 +405,14 @@ class _MyHomePageState extends State<MyHomePage> {
             style: TextStyle(
                 fontSize: 16, color: textColor, fontWeight: FontWeight.w500),
           )
-        ]
+        ],
+        const SizedBox(
+          width: 8,
+        ),
+        Text(
+          '${matches}mtch',
+          style: TextStyle(color: textColor, fontSize: 20),
+        )
       ],
     );
   }
