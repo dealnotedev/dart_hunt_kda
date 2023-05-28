@@ -32,7 +32,7 @@ void main() async {
   doWhenWindowReady(() {
     final window = appWindow;
 
-    const initialSize = Size(360, 280);
+    const initialSize = Size(360, 360);
     window.minSize = initialSize;
     window.size = initialSize;
     window.alignment = Alignment.center;
@@ -154,19 +154,17 @@ class _MyHomePageState extends State<MyHomePage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                _createTeamKdWidget(bundle, _teamStats, textColor: textColor),
-                if (_teamStats) ...[
-                  const SizedBox(
-                    height: 16,
-                  ),
-                  Row(
+                Container(
+                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                  decoration: _createConcaveDecoration(color: const Color(0xFF090909), radius: 8),
+                  child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       const SizedBox(
                         width: 4,
                       ),
                       ...teammates.map((e) => Flexible(
-                              child: Padding(
+                          child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 4),
                             child: _createPlayerWidget(e, textColor: textColor),
                           ))),
@@ -174,28 +172,26 @@ class _MyHomePageState extends State<MyHomePage> {
                         width: 4,
                       )
                     ],
-                  )
-                ],
-                const SizedBox(
-                  height: 24,
+                  ),
                 ),
-                _createOwnKdaWidget(bundle, textColor: textColor),
+                const SizedBox(height: 16,),
+                _createIconifiedContaner(
+                    icon: Assets.assetsIcKda,
+                    children: _createMyKdaWidgets(bundle, textColor: textColor),
+                    color: const Color(0xFF090909)),
+                _createIconifiedContaner(
+                    icon: Assets.assetsIcKd,
+                    children:
+                        _createTeamKdWidgets(bundle, textColor: textColor),
+                    color: const Color(0xFF090909)),
                 if (size.height > 480) ...[
                   const SizedBox(
                     height: 64,
                   ),
-                  _createTeamStatsSwitch(textColor: textColor),
-                  const SizedBox(
-                    height: 8,
-                  ),
                   ElevatedButton(
                       onPressed: _handleResetClick, child: const Text('Reset'))
                 ],
-                const SizedBox(
-                  height: 32,
-                ),
-                _test(),
-                _test2()
+                const SizedBox(height: 32,)
               ],
             ),
           );
@@ -204,28 +200,195 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  Widget _test2() {
+  List<Widget> _createTeamKdWidgets(HuntBundle bundle,
+      {required Color textColor}) {
+    final textStyle = TextStyle(color: textColor, fontSize: 18);
+
+    final stats = bundle.teamStats;
+    final kdChanges = bundle.teamKdChanges;
+    final killsChanges = bundle.totalKillsChanges;
+    final deathsChanges = bundle.totalDeathsChanges;
+
+    return [
+      Expanded(
+          child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Team KD',
+            style: TextStyle(
+                color: textColor, fontSize: 14, fontWeight: FontWeight.bold),
+          ),
+          Text('${stats.matches} matches',
+              style: const TextStyle(
+                  color: _colorBlue, fontSize: 14, fontWeight: FontWeight.w500))
+        ],
+      )),
+      Text(
+        formatDouble(stats.kd),
+        style: TextStyle(
+            color: kdChanges != null
+                ? (kdChanges > 0 ? _colorBlue : _colorRed)
+                : textColor,
+            fontWeight: FontWeight.w500,
+            fontSize: 20),
+      ),
+      const SizedBox(
+        width: 16,
+      ),
+      Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(stats.teamKills.toString(), style: textStyle),
+          if (killsChanges != null && killsChanges > 0) ...[
+            _createChangesWidget(killsChanges, positive: true)
+          ],
+          Text(' / ', style: textStyle),
+          Text(stats.teamDeaths.toString(), style: textStyle),
+          if (deathsChanges != null && deathsChanges > 0) ...[
+            _createChangesWidget(deathsChanges, positive: false)
+          ]
+        ],
+      ),
+      const SizedBox(
+        width: 16,
+      )
+    ];
+  }
+
+  List<Widget> _createMyKdaWidgets(HuntBundle bundle,
+      {required Color textColor}) {
+    final textStyle = TextStyle(color: textColor, fontSize: 20);
+    final stats = bundle.ownStats;
+
+    final kdaChanges = bundle.kdaChanges;
+    final killsChanges = bundle.ownKillsChanges;
+    final deathsChanges = bundle.ownDeatchChanges;
+    final assistsChanges = bundle.ownAssistsChanges;
+    return [
+      Expanded(
+          child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'My KDA',
+            style: TextStyle(
+                color: textColor, fontSize: 14, fontWeight: FontWeight.bold),
+          ),
+          Text('${stats.matches} matches',
+              style: const TextStyle(
+                  color: _colorBlue, fontSize: 14, fontWeight: FontWeight.w500))
+        ],
+      )),
+      Text(
+        formatDouble(stats.kda),
+        style: TextStyle(
+            color: kdaChanges != null
+                ? (kdaChanges > 0 ? _colorBlue : _colorRed)
+                : textColor,
+            fontWeight: FontWeight.w500,
+            fontSize: 20),
+      ),
+      const SizedBox(
+        width: 16,
+      ),
+      Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(stats.ownKills.toString(), style: textStyle),
+          if (killsChanges != null && killsChanges > 0) ...[
+            _createChangesWidget(killsChanges, positive: true)
+          ],
+          Text(' / ', style: textStyle),
+          Text(stats.ownDeaths.toString(), style: textStyle),
+          if (deathsChanges != null && deathsChanges > 0) ...[
+            _createChangesWidget(deathsChanges, positive: false)
+          ],
+          Text(' / ', style: textStyle),
+          Text(stats.ownAssists.toString(), style: textStyle),
+          if (assistsChanges != null && assistsChanges > 0) ...[
+            _createChangesWidget(assistsChanges, positive: true)
+          ]
+        ],
+      ),
+      const SizedBox(
+        width: 16,
+      )
+    ];
+  }
+
+  Widget _createChangesWidget(int value, {bool positive = true}) {
+    return Text(value.toString(),
+        style: TextStyle(
+            color: positive ? _colorBlue : _colorRed,
+            fontSize: 14,
+            fontWeight: FontWeight.bold));
+  }
+
+  static const _colorBlue = Color(0xFF1592E4);
+  static const _colorRed = Color(0xFFAC2F30);
+
+  Widget _createIconifiedContaner(
+      {required String icon,
+      required List<Widget> children,
+      required Color color}) {
     const cornerStyles = RectangleCornerStyles.all(CornerStyle.straight);
 
     const border = RectangleShapeBorder(
-      borderRadius:
-      DynamicBorderRadius.all(DynamicRadius.circular(Length(50, unit: LengthUnit.percent))),
+      borderRadius: DynamicBorderRadius.all(
+          DynamicRadius.circular(Length(50, unit: LengthUnit.percent))),
       cornerStyles: cornerStyles,
     );
 
-    return Container(height: 128, decoration: const ShapeDecoration(shape: border, color: Colors.black),);
+    const size = 84.0;
+    return Stack(
+      alignment: Alignment.centerLeft,
+      children: [
+        Row(
+          children: [
+            const SizedBox(
+              width: size / 2,
+            ),
+            Expanded(
+                child: Container(
+              constraints: const BoxConstraints(minHeight: 56),
+              decoration: _createConcaveDecoration(color: color, radius: 8),
+              child: Row(
+                children: [
+                  const SizedBox(
+                    width: size / 2,
+                  ),
+                  ...children
+                ],
+              ),
+            ))
+          ],
+        ),
+        Container(
+          padding: const EdgeInsets.all(size * .05),
+          height: size,
+          width: size,
+          decoration: ShapeDecoration(shape: border, color: color),
+          child: Image.asset(
+            icon,
+            filterQuality: FilterQuality.medium,
+          ),
+        ),
+      ],
+    );
   }
 
-  Widget _test() {
+  ShapeDecoration _createConcaveDecoration(
+      {required Color color, required double radius}) {
     const cornerStyles = RectangleCornerStyles.all(CornerStyle.concave);
 
-    const border = RectangleShapeBorder(
+    final border = RectangleShapeBorder(
       borderRadius:
-          DynamicBorderRadius.all(DynamicRadius.circular(Length(16))),
+          DynamicBorderRadius.all(DynamicRadius.circular(Length(radius))),
       cornerStyles: cornerStyles,
     );
 
-    return Container(height: 128, decoration: const ShapeDecoration(shape: border, color: Colors.black),);
+    return ShapeDecoration(shape: border, color: color);
   }
 
   Widget _createPlayerWidget(HuntPlayer player, {Color? textColor}) {
@@ -295,132 +458,6 @@ class _MyHomePageState extends State<MyHomePage> {
         ],
       ),
     );
-  }
-
-  Widget _createOwnKdaWidget(HuntBundle bundle, {Color? textColor}) {
-    final kdaChanges = bundle.kdaChanges;
-    final stats = bundle.ownStats;
-    final matches = stats.matches;
-
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Text(
-          'KDA ${formatDouble(stats.kda)}',
-          style: TextStyle(
-              fontSize: 24, color: textColor, fontWeight: FontWeight.bold),
-        ),
-        if (kdaChanges != null && kdaChanges != 0) ...[
-          const SizedBox(
-            width: 4,
-          ),
-          Text(
-            formatDouble(kdaChanges, plusIfPositive: true, precision: 3),
-            style: TextStyle(
-                fontSize: 16, fontWeight: FontWeight.w500, color: textColor),
-          )
-        ],
-        if (_teamStats) ...[
-          const SizedBox(
-            width: 8,
-          ),
-          Text(
-            '${matches}mtch',
-            style: TextStyle(
-                color: textColor, fontSize: 16, fontWeight: FontWeight.w500),
-          )
-        ]
-      ],
-    );
-  }
-
-  Widget _createTeamStatsSwitch({Color? textColor}) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          'Total',
-          style: TextStyle(color: textColor, fontWeight: FontWeight.w500),
-        ),
-        const SizedBox(
-          width: 8,
-        ),
-        Switch(
-            value: _teamStats,
-            onChanged: (checked) {
-              setState(() {
-                _teamStats = checked;
-              });
-            }),
-        const SizedBox(
-          width: 8,
-        ),
-        Text(
-          'Team',
-          style: TextStyle(color: textColor, fontWeight: FontWeight.w500),
-        ),
-      ],
-    );
-  }
-
-  Widget _createTeamKdWidget(HuntBundle bundle, bool teamStats,
-      {Color? textColor}) {
-    final kills =
-        teamStats ? bundle.teamStats.teamKills : bundle.ownStats.totalKills;
-    final deaths =
-        teamStats ? bundle.teamStats.teamDeaths : bundle.ownStats.totalDeaths;
-
-    final killsChanges =
-        teamStats ? bundle.teamKillsChanges : bundle.ownKillsChanges;
-    final deathsChanges =
-        teamStats ? bundle.teamDeathsChanges : bundle.ownDeatchChanges;
-
-    final matches =
-        teamStats ? bundle.teamStats.matches : bundle.ownStats.matches;
-
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Text(
-          kills.toString(),
-          style: TextStyle(fontSize: 48, color: textColor),
-        ),
-        if (killsChanges != null && killsChanges != 0) ...[
-          Text(
-            intPlusIfPositive(killsChanges),
-            style: TextStyle(
-                fontSize: 16, color: textColor, fontWeight: FontWeight.w500),
-          )
-        ],
-        Text(' / ', style: TextStyle(fontSize: 48, color: textColor)),
-        Text(
-          deaths.toString(),
-          style: TextStyle(fontSize: 48, color: textColor),
-        ),
-        if (deathsChanges != null && deathsChanges != 0) ...[
-          Text(
-            intPlusIfPositive(deathsChanges),
-            style: TextStyle(
-                fontSize: 16, color: textColor, fontWeight: FontWeight.w500),
-          )
-        ],
-        const SizedBox(
-          width: 8,
-        ),
-        Text(
-          '${matches}mtch',
-          style: TextStyle(color: textColor, fontSize: 20),
-        )
-      ],
-    );
-  }
-
-  bool _teamStats = true;
-
-  static String intPlusIfPositive(int value) {
-    return value > 0 ? '+$value' : value.toString();
   }
 
   static String formatDouble(double value,
