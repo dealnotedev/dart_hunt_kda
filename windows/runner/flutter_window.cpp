@@ -60,6 +60,13 @@ FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
     case WM_FONTCHANGE:
       flutter_controller_->engine()->ReloadSystemFonts();
       break;
+
+    // Close-to-tray START https://github.com/antler119/system_tray/issues/7
+    case WM_CLOSE:
+      ShowWindow(GetHandle(), SW_HIDE);
+      return 0;
+      break;
+    // Close-to-tray END
   }
 
   return Win32Window::MessageHandler(hwnd, message, wparam, lparam);

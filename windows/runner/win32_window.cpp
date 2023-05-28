@@ -123,6 +123,37 @@ Win32Window::~Win32Window() {
 bool Win32Window::Create(const std::wstring& title,
                          const Point& origin,
                          const Size& size) {
+  HANDLE hMutexHandle = CreateMutex(NULL, TRUE, L"hunt.stats.mutex");
+  HWND handle = FindWindowA(NULL, "hunt_stats");
+
+  if (GetLastError() == ERROR_ALREADY_EXISTS) {
+    WINDOWPLACEMENT place = { sizeof(WINDOWPLACEMENT) };
+    GetWindowPlacement(handle, &place);
+
+    switch(place.showCmd) {
+      case SW_SHOWMAXIMIZED:
+        ShowWindow(handle, SW_SHOWMAXIMIZED);
+        break;
+      case SW_SHOWMINIMIZED:
+        ShowWindow(handle, SW_RESTORE);
+        break;
+      default:
+        ShowWindow(handle, SW_NORMAL);
+        break;
+    }
+
+    RECT rc = {};
+    GetClientRect(handle, &rc);
+    int width = rc.right - rc.left;
+    int height = rc.bottom - rc.top;
+    SetWindowPos(handle, 0, 0, 0, width + 1, height + 1, SWP_NOMOVE | SWP_NOACTIVATE);
+    SetWindowPos(handle, 0, 0, 0, width, height, SWP_NOMOVE | SWP_NOACTIVATE);
+
+    ReleaseMutex(hMutexHandle);
+    CloseHandle(hMutexHandle);
+    return 0;
+  }
+
   Destroy();
 
   const wchar_t* window_class =

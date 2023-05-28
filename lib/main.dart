@@ -207,7 +207,7 @@ class _MyHomePageState extends State<MyHomePage> {
             width: 4,
           ),
           Text(
-            '(${formatDouble(kdaChanges, plusIfPositive: true, precision: 3)})',
+            formatDouble(kdaChanges, plusIfPositive: true, precision: 3),
             style: TextStyle(
                 fontSize: 16, fontWeight: FontWeight.w500, color: textColor),
           )
@@ -257,8 +257,6 @@ class _MyHomePageState extends State<MyHomePage> {
     final deathsChanges =
         teamStats ? bundle.teamDeathsChanges : bundle.ownDeatchChanges;
 
-    final assistsChanges = teamStats ? null : bundle.ownAssistsChanges;
-    final assists = teamStats ? null : bundle.ownStats.ownAssists;
     return Row(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.end,
@@ -285,20 +283,6 @@ class _MyHomePageState extends State<MyHomePage> {
             style: TextStyle(
                 fontSize: 16, color: textColor, fontWeight: FontWeight.w500),
           )
-        ],
-        if (assists != null) ...[
-          Text(' / ', style: TextStyle(fontSize: 48, color: textColor)),
-          Text(
-            assists.toString(),
-            style: TextStyle(fontSize: 48, color: textColor),
-          ),
-          if (assistsChanges != null && assistsChanges != 0) ...[
-            Text(
-              intPlusIfPositive(assistsChanges),
-              style: TextStyle(
-                  fontSize: 16, color: textColor, fontWeight: FontWeight.w500),
-            )
-          ]
         ]
       ],
     );
