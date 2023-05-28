@@ -3,8 +3,11 @@ import 'dart:io';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:bitsdojo_window_platform_interface/window.dart';
 import 'package:flutter/material.dart';
+import 'package:hunt_stats/db/entities.dart';
 import 'package:hunt_stats/db/stats_db.dart';
+import 'package:hunt_stats/generated/assets.dart';
 import 'package:hunt_stats/hunt_bundle.dart';
+import 'package:hunt_stats/mmr.dart';
 import 'package:hunt_stats/tracker.dart';
 import 'package:system_tray/system_tray.dart' as tray;
 
@@ -143,9 +146,8 @@ class _MyHomePageState extends State<MyHomePage> {
             );
           }
 
-          final teammates = bundle.match.players
-              .where((element) => element.teammate)
-              .map((e) => e.username);
+          final teammates =
+              bundle.match.players.where((element) => element.teammate);
 
           return Center(
             child: Column(
@@ -156,13 +158,17 @@ class _MyHomePageState extends State<MyHomePage> {
                   const SizedBox(
                     height: 4,
                   ),
-                  Text(
-                    teammates.join(', '),
-                    style: const TextStyle(
-                        color: textColor,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500),
-                  ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: teammates
+                        .map((e) => Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 4),
+                              child:
+                                  _createPlayerWidget(e, textColor: textColor),
+                            ))
+                        .toList(),
+                  )
                 ],
                 const SizedBox(
                   height: 8,
@@ -181,11 +187,78 @@ class _MyHomePageState extends State<MyHomePage> {
                 ],
                 const SizedBox(
                   height: 32,
-                )
+                ),
               ],
             ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _createPlayerWidget(HuntPlayer player, {Color? textColor}) {
+    //final mmr = Mmr.get(player.mmr);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(player.username,
+            style: TextStyle(
+              color: textColor,
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+            )),
+        const SizedBox(
+          height: 4,
+        ),
+        Container(
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+              color: const Color(0xFF080808),
+              border: Border.all(
+                  color: const Color(0xFF938663),
+                  width: 2,
+                  strokeAlign: BorderSide.strokeAlignOutside)),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _createStarWidget(Mmr.star1.getFilled(player.mmr)),
+              _createStarWidget(Mmr.star2.getFilled(player.mmr)),
+              _createStarWidget(Mmr.star3.getFilled(player.mmr)),
+              _createStarWidget(Mmr.star4.getFilled(player.mmr)),
+              _createStarWidget(Mmr.star5.getFilled(player.mmr)),
+              _createStarWidget(Mmr.star6.getFilled(player.mmr))
+            ],
+          ),
+        )
+      ],
+    );
+  }
+
+  Widget _createStarWidget(double fill, {double size = 16}) {
+    return SizedBox(
+      height: size,
+      width: size,
+      child: Stack(
+        children: [
+          Image.asset(
+            Assets.assetsCrossWhite24dp,
+            width: size,
+            height: size,
+            color: Colors.black,
+          ),
+          SizedBox(
+            height: size,
+            width: size * fill,
+            child: Image.asset(
+              Assets.assetsCrossWhite24dp,
+              alignment: Alignment.centerLeft,
+              fit: BoxFit.fitHeight,
+              height: size,
+              width: size * fill,
+              color: const Color(0xFFCEB379),
+            ),
+          )
+        ],
       ),
     );
   }
