@@ -24,30 +24,31 @@ class HuntBundle {
 
   String? get teamId => match.match.teamId;
 
-  int? get ownKillsChanges {
-    final prev = previousOwnStats?.ownKills;
-    return prev != null ? ownStats.ownKills - prev : null;
+  int? get totalKillsChanges {
+    final prev = previousOwnStats?.totalKills;
+    return prev != null ? ownStats.totalKills - prev : null;
   }
 
-  int? get ownDeatchChanges {
-    final prev = previousOwnStats?.ownDeaths;
-    return prev != null ? ownStats.ownDeaths - prev : null;
-  }
+  static int? _intDiff(int? previous, int current) =>
+      previous != null ? current - previous : null;
 
-  int? get ownAssistsChanges {
-    final prev = previousOwnStats?.ownAssists;
-    return prev != null ? ownStats.ownAssists - prev : null;
-  }
+  int? get totalDeathsChanges =>
+      _intDiff(previousOwnStats?.totalDeaths, ownStats.totalDeaths);
 
-  int? get teamKillsChanges {
-    final prev = previousTeamStats?.teamKills;
-    return prev != null ? teamStats.teamKills - prev : null;
-  }
+  int? get ownKillsChanges =>
+      _intDiff(previousOwnStats?.ownKills, ownStats.ownKills);
 
-  int? get teamDeathsChanges {
-    final prev = previousTeamStats?.teamDeaths;
-    return prev != null ? teamStats.teamDeaths - prev : null;
-  }
+  int? get ownDeatchChanges =>
+      _intDiff(previousOwnStats?.ownDeaths, ownStats.ownDeaths);
+
+  int? get ownAssistsChanges =>
+      _intDiff(previousOwnStats?.ownAssists, ownStats.ownAssists);
+
+  int? get teamKillsChanges =>
+      _intDiff(previousTeamStats?.teamKills, teamStats.teamKills);
+
+  int? get teamDeathsChanges =>
+      _intDiff(previousTeamStats?.teamDeaths, teamStats.teamDeaths);
 
   double? get teamKdChanges {
     final prev = previousTeamStats?.kd;

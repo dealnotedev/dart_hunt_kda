@@ -28,7 +28,7 @@ void main() async {
   doWhenWindowReady(() {
     final window = appWindow;
 
-    const initialSize = Size(320, 320);
+    const initialSize = Size(360, 320);
     window.minSize = initialSize;
     window.size = initialSize;
     window.alignment = Alignment.center;
@@ -79,6 +79,8 @@ void _startSystemTray(DesktopWindow window) async {
   });
 }
 
+const backgroundColor = /*Colors.grey.withOpacity(0.2)*/ Colors.green;
+
 class MyApp extends StatelessWidget {
   final TrackerEngine engine;
 
@@ -94,7 +96,8 @@ class MyApp extends StatelessWidget {
       ),
       home: Column(
         children: [
-          SizedBox(
+          Container(
+            color: backgroundColor,
             height: 32,
             width: double.infinity,
             child: MoveWindow(
@@ -125,7 +128,7 @@ class _MyHomePageState extends State<MyHomePage> {
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: backgroundColor,
       body: StreamBuilder<HuntBundle?>(
         stream: widget.engine.lastMatch,
         builder: (cntx, snapshot) {
@@ -143,43 +146,25 @@ class _MyHomePageState extends State<MyHomePage> {
           final teammates = bundle.match.players
               .where((element) => element.teammate)
               .map((e) => e.username);
-          final kdaChanges = bundle.kdaChanges;
+
           return Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 _createTeamKdWidget(bundle, _teamStats, textColor: textColor),
-                const SizedBox(
-                  height: 4,
-                ),
-                Text(
-                  teammates.join(', '),
-                  style: const TextStyle(color: textColor),
-                ),
+                if (_teamStats) ...[
+                  const SizedBox(
+                    height: 4,
+                  ),
+                  Text(
+                    teammates.join(', '),
+                    style: const TextStyle(color: textColor, fontSize: 16),
+                  ),
+                ],
                 const SizedBox(
                   height: 8,
                 ),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      'KDA ${formatDouble(bundle.ownStats.kda)}',
-                      style: const TextStyle(fontSize: 16, color: textColor),
-                    ),
-                    if (kdaChanges != null) ...[
-                      const SizedBox(
-                        width: 4,
-                      ),
-                      Text(
-                        '(${formatDouble(kdaChanges, plusIfPositive: true, precision: 3)})',
-                        style: TextStyle(
-                            fontSize: 12,
-                            color: kdaChanges > 0 ? Colors.green : Colors.red),
-                      )
-                    ]
-                  ],
-                ),
+                _createOwnKdaWidget(bundle, textColor: textColor),
                 if (size.height > 480) ...[
                   const SizedBox(
                     height: 64,
@@ -199,6 +184,33 @@ class _MyHomePageState extends State<MyHomePage> {
           );
         },
       ),
+    );
+  }
+
+  Widget _createOwnKdaWidget(HuntBundle bundle, {Color? textColor}) {
+    final kdaChanges = bundle.kdaChanges;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Text(
+          'KDA ${formatDouble(bundle.ownStats.kda)}',
+          style: TextStyle(
+              fontSize: 16, color: textColor, fontWeight: FontWeight.bold),
+        ),
+        if (kdaChanges != null) ...[
+          const SizedBox(
+            width: 4,
+          ),
+          Text(
+            '(${formatDouble(kdaChanges, plusIfPositive: true, precision: 3)})',
+            style: TextStyle(
+                fontSize: 12,
+                color: kdaChanges > 0 ? Colors.green : Colors.red),
+          )
+        ]
+      ],
     );
   }
 
