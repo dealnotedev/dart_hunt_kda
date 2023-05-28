@@ -200,17 +200,16 @@ class _MyHomePageState extends State<MyHomePage> {
         Text(
           'KDA ${formatDouble(bundle.ownStats.kda)}',
           style: TextStyle(
-              fontSize: 16, color: textColor, fontWeight: FontWeight.bold),
+              fontSize: 24, color: textColor, fontWeight: FontWeight.bold),
         ),
-        if (kdaChanges != null) ...[
+        if (kdaChanges != null && kdaChanges != 0) ...[
           const SizedBox(
             width: 4,
           ),
           Text(
             '(${formatDouble(kdaChanges, plusIfPositive: true, precision: 3)})',
             style: TextStyle(
-                fontSize: 12,
-                color: kdaChanges > 0 ? Colors.green : Colors.red),
+                fontSize: 16, fontWeight: FontWeight.w500, color: textColor),
           )
         ]
       ],
@@ -222,7 +221,7 @@ class _MyHomePageState extends State<MyHomePage> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          'Team stats',
+          'Total',
           style: TextStyle(color: textColor),
         ),
         const SizedBox(
@@ -234,7 +233,14 @@ class _MyHomePageState extends State<MyHomePage> {
               setState(() {
                 _teamStats = checked;
               });
-            })
+            }),
+        const SizedBox(
+          width: 8,
+        ),
+        Text(
+          'Team',
+          style: TextStyle(color: textColor),
+        ),
       ],
     );
   }
@@ -245,27 +251,68 @@ class _MyHomePageState extends State<MyHomePage> {
         teamStats ? bundle.teamStats.teamKills : bundle.ownStats.totalKills;
     final deaths =
         teamStats ? bundle.teamStats.teamDeaths : bundle.ownStats.totalDeaths;
+
+    final killsChanges =
+        teamStats ? bundle.teamKillsChanges : bundle.ownKillsChanges;
+    final deathsChanges =
+        teamStats ? bundle.teamDeathsChanges : bundle.ownDeatchChanges;
+
+    final assistsChanges = teamStats ? null : bundle.ownAssistsChanges;
+    final assists = teamStats ? null : bundle.ownStats.ownAssists;
     return Row(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         Text(
           kills.toString(),
           style: TextStyle(fontSize: 48, color: textColor),
         ),
+        if (killsChanges != null && killsChanges != 0) ...[
+          Text(
+            intPlusIfPositive(killsChanges),
+            style: TextStyle(
+                fontSize: 16, color: textColor, fontWeight: FontWeight.w500),
+          )
+        ],
         Text(' / ', style: TextStyle(fontSize: 48, color: textColor)),
         Text(
           deaths.toString(),
           style: TextStyle(fontSize: 48, color: textColor),
         ),
+        if (deathsChanges != null && deathsChanges != 0) ...[
+          Text(
+            intPlusIfPositive(deathsChanges),
+            style: TextStyle(
+                fontSize: 16, color: textColor, fontWeight: FontWeight.w500),
+          )
+        ],
+        if (assists != null) ...[
+          Text(' / ', style: TextStyle(fontSize: 48, color: textColor)),
+          Text(
+            assists.toString(),
+            style: TextStyle(fontSize: 48, color: textColor),
+          ),
+          if (assistsChanges != null && assistsChanges != 0) ...[
+            Text(
+              intPlusIfPositive(assistsChanges),
+              style: TextStyle(
+                  fontSize: 16, color: textColor, fontWeight: FontWeight.w500),
+            )
+          ]
+        ]
       ],
     );
   }
 
   bool _teamStats = true;
 
+  static String intPlusIfPositive(int value) {
+    return value > 0 ? '+$value' : value.toString();
+  }
+
   static String formatDouble(double value,
       {int precision = 2, bool plusIfPositive = false}) {
-    final formatted = value.toStringAsFixed(precision);
+    final formatted = value.toPrecision(precision).toString();
     return plusIfPositive && value > 0 ? '+$formatted' : formatted;
   }
 
@@ -287,4 +334,8 @@ class _MyHomePageState extends State<MyHomePage> {
       ));
     }
   }
+}
+
+extension Ex on double {
+  double toPrecision(int n) => double.parse(toStringAsFixed(n));
 }
