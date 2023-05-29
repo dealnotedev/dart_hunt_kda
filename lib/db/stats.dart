@@ -24,11 +24,6 @@ class OwnStats {
   int get totalDeaths => ownDeaths + teamDeaths;
 
   double get kda => (ownKills + ownAssists).toDouble() / ownDeaths.toDouble();
-
-  @override
-  String toString() {
-    return 'Stats{ownKills: $ownKills, ownDeaths: $ownDeaths, ownAssists: $ownAssists}';
-  }
 }
 
 class TeamStats {
@@ -38,12 +33,10 @@ class TeamStats {
 
   final int matches;
 
-  TeamStats({required this.teamKills, required this.teamDeaths, required this.matches});
+  TeamStats(
+      {required this.teamKills,
+      required this.teamDeaths,
+      required this.matches});
 
   double get kd => teamKills.toDouble() / teamDeaths.toDouble();
-
-  @override
-  String toString() {
-    return 'TeamStats{teamKills: $teamKills, teamDeaths: $teamDeaths}';
-  }
 }

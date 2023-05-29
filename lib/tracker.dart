@@ -4,9 +4,9 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:crypto/crypto.dart';
-import 'package:hunt_stats/hunt_bundle.dart';
 import 'package:hunt_stats/db/entities.dart';
 import 'package:hunt_stats/db/stats_db.dart';
+import 'package:hunt_stats/hunt_bundle.dart';
 import 'package:hunt_stats/hunt_finder.dart';
 import 'package:hunt_stats/match_data.dart';
 import 'package:hunt_stats/mode.dart';
@@ -61,8 +61,9 @@ class TrackerEngine {
 
   Stream<HuntBundle?> get lastMatch {
     final last = _lastBundle;
-    if(last != null){
-      return Stream<HuntBundle?>.value(last).concatWith([_bundleSubject.stream]);
+    if (last != null) {
+      return Stream<HuntBundle?>.value(last)
+          .concatWith([_bundleSubject.stream]);
     } else {
       return _bundleSubject.stream;
     }
@@ -115,8 +116,6 @@ class TrackerEngine {
     final signatures = <String>{};
 
     Timer.periodic(const Duration(minutes: 1), (timer) async {
-      final start = DateTime.now();
-
       final file = File(attributes);
       final document = XmlDocument.parse(await file.readAsString());
       final huntData = HuntData();
@@ -125,11 +124,9 @@ class TrackerEngine {
       final data = huntData.extractMatchData();
       final signature = data.match.signature;
 
-      if(signatures.add(signature)){
+      if (signatures.add(signature)) {
         port.send(data);
       }
-
-      print('Processed, ${DateTime.now().difference(start).inMilliseconds}ms');
     });
   }
 }

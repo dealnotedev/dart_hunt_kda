@@ -10,5 +10,4 @@ class Assets {
   static const String assetsIcValueDown = 'assets/ic_value_down.png';
   static const String assetsIcValueUp = 'assets/ic_value_up.png';
   static const String assetsIcon = 'assets/icon.ico';
-
 }

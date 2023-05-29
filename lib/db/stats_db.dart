@@ -33,8 +33,7 @@ class StatsDb {
             version: 1, singleInstance: true, onCreate: _onCreate));
   }
 
-  Future<void> insertHuntMatchPlayers(
-      Iterable<HuntPlayer> entities) async {
+  Future<void> insertHuntMatchPlayers(Iterable<HuntPlayer> entities) async {
     final db = await database;
 
     await db.transaction<void>((txn) async {
