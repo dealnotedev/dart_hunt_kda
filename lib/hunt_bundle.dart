@@ -52,12 +52,12 @@ class HuntBundle {
 
   double? get teamKdChanges {
     final prev = previousTeamStats?.kd;
-    return prev != null ? teamStats.kd - prev : null;
+    return prev != null && prev.isFinite ? teamStats.kd - prev : null;
   }
 
   double? get kdaChanges {
     final prev = previousOwnStats?.kda;
-    if (prev != null) {
+    if (prev != null && prev.isFinite) {
       return ownStats.kda - prev;
     } else {
       return null;
