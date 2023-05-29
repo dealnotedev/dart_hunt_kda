@@ -7,6 +7,7 @@ import 'package:crypto/crypto.dart';
 import 'package:hunt_stats/hunt_bundle.dart';
 import 'package:hunt_stats/db/entities.dart';
 import 'package:hunt_stats/db/stats_db.dart';
+import 'package:hunt_stats/hunt_finder.dart';
 import 'package:hunt_stats/match_data.dart';
 import 'package:hunt_stats/mode.dart';
 import 'package:rxdart/rxdart.dart';
@@ -104,24 +105,10 @@ class TrackerEngine {
   }
 
   static void _startTracking(SendPort port) async {
-    String attributes;
+    final finder = HuntFinder();
 
-    while (true) {
-      final settings = File('settings.json');
-
-      try {
-        final data = json.decode(await settings.readAsString());
-        final file = File(
-            '${data['hunt_path']}\\user\\profiles\\default\\attributes.xml');
-
-        if (await file.exists()) {
-          attributes = file.path;
-          break;
-        } else {
-          await Future.delayed(const Duration(seconds: 5));
-        }
-      } catch (_) {}
-    }
+    final file = await finder.findHuntAttributes();
+    final attributes = file.path;
 
     port.send(HuntPath(attributes));
 
