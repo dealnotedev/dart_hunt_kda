@@ -1,3 +1,5 @@
+import 'package:hunt_stats/db/entities.dart';
+
 class OwnStats {
   final int ownKills;
 
@@ -39,4 +41,22 @@ class TeamStats {
       required this.matches});
 
   double get kd => teamKills.toDouble() / teamDeaths.toDouble();
+}
+
+class EnemyStats {
+  final HuntPlayer player;
+  final int killedMe;
+  final int killedByMe;
+  final int matches;
+
+  final int killedMeLastMatch;
+  final int killedByMeLastMatch;
+
+  EnemyStats(
+      {required this.player,
+      required this.killedMe,
+        required this.matches,
+        required this.killedByMeLastMatch,
+        required this.killedMeLastMatch,
+      required this.killedByMe});
 }

@@ -133,6 +133,45 @@ class StatsDb {
         ownAssists: row.intOf('own_assists'));
   }
 
+  Future<Map<int, EnemyStats>> getEnemiesStats(
+      Map<int, HuntPlayer> enemies) async {
+    final db = await database;
+    final keys = enemies.keys;
+
+    final cursor = await db.rawQuery(
+        'SELECT ${HuntPlayerColumns.profileId}, '
+        'count(${HuntPlayerColumns.matchId}) as matches, '
+        'sum(${HuntPlayerColumns.downedByMe}) as downed_by_me, '
+        'sum(${HuntPlayerColumns.killedByMe}) as killed_by_me, '
+        'sum(${HuntPlayerColumns.killedMe}) as killed_me, '
+        'sum(${HuntPlayerColumns.downedMe}) as downed_me '
+        'FROM ${HuntPlayerColumns.table} '
+        'WHERE ${HuntPlayerColumns.profileId} IN (${keys.map((e) => '?').join(',')}) '
+        'GROUP BY ${HuntPlayerColumns.profileId}',
+        keys.toList());
+
+    final map = <int, EnemyStats>{};
+    for (var row in cursor) {
+      final profileId = row[HuntPlayerColumns.profileId] as int;
+      final player = enemies[profileId]!;
+
+      final matches = row.intOf('matches');
+      if(matches < 2){
+        continue;
+      }
+
+      map[profileId] = EnemyStats(
+          matches: matches,
+          player: player,
+          killedByMeLastMatch: player.downedByMe + player.killedByMe,
+          killedMeLastMatch: player.downedMe + player.killedMe,
+          killedMe: row.intOf('killed_me') + row.intOf('downed_me'),
+          killedByMe: row.intOf('downed_by_me') + row.intOf('killed_by_me'));
+    }
+
+    return map;
+  }
+
   Future<void> outdate() async {
     final db = await database;
     db.rawUpdate(

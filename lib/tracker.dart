@@ -42,8 +42,11 @@ class TrackerEngine {
       final ownStats = await db.getOwnStats();
       final teamStats = await db.getTeamStats(header.teamId);
 
+      final enemiesStats = await db.getEnemiesStats(getEnemiesMap(players));
+
       final bundle = HuntBundle(
           match: match,
+          enemyStats: enemiesStats.values.toList(),
           ownStats: ownStats,
           teamStats: teamStats,
           previousTeamStats: null,
@@ -55,6 +58,13 @@ class TrackerEngine {
       _lastBundle = null;
       _bundleSubject.add(null);
     }
+  }
+
+  static Map<int, HuntPlayer> getEnemiesMap(List<HuntPlayer> players) {
+    final enemies = players.where((element) => !element.teammate);
+    final map = <int, HuntPlayer>{};
+    map.addEntries(enemies.map((e) => MapEntry(e.profileId, e)));
+    return map;
   }
 
   HuntBundle? _lastBundle;
@@ -78,18 +88,23 @@ class TrackerEngine {
 
     if (data.match.id == 0) return;
 
-    for (var element in data.players) {
+    final players = data.players;
+
+    for (var element in players) {
       element.matchId = data.match.id;
       element.teamId = data.match.teamId;
     }
 
-    await db.insertHuntMatchPlayers(data.players);
+    await db.insertHuntMatchPlayers(players);
+
+    final enemiesStats = await db.getEnemiesStats(getEnemiesMap(players));
 
     final ownStats = await db.getOwnStats();
     final teamStats = await db.getTeamStats(data.match.teamId);
 
     final bundle = HuntBundle(
         match: data,
+        enemyStats: enemiesStats.values.toList(),
         ownStats: ownStats,
         teamStats: teamStats,
         previousTeamStats: previousTeamStats,
