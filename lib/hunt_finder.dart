@@ -51,13 +51,17 @@ class HuntFinder {
   }
 
   static File? _getNewest(Iterable<File> files) {
-    if (files.length < 2) {
-      return files.firstOrNull;
+    switch (files.length) {
+      case 0:
+        return null;
+      case 1:
+        return files.first;
+      default:
+        final sorted = List<File>.from(files, growable: true)
+          ..sort(
+              (l, r) => r.statSync().modified.compareTo(l.statSync().modified));
+        return sorted.first;
     }
-
-    final sorted = List<File>.from(files, growable: true)
-      ..sort((l, r) => l.statSync().modified.compareTo(r.statSync().modified));
-    return sorted.firstOrNull;
   }
 
   Future<File> _awaitManualHuntDirectory() async {

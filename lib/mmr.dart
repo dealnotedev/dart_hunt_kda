@@ -40,6 +40,9 @@ enum Mmr {
     }
 
     final prev = previous;
+    if(mmr < prev.min){
+      return 0;
+    }
 
     final all = prev.max - prev.min;
     final add = mmr - prev.min;

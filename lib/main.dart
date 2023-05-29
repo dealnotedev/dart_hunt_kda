@@ -25,7 +25,7 @@ void main() async {
   doWhenWindowReady(() {
     final window = appWindow;
 
-    const initialSize = Size(360, 360);
+    const initialSize = Size(362, 360);
     window.minSize = initialSize;
     window.size = initialSize;
     window.alignment = Alignment.center;
@@ -152,12 +152,12 @@ class _MyHomePageState extends State<MyHomePage> {
                   decoration: _createConcaveDecoration(
                       color: const Color(0xFF090909), radius: 8),
                   child: Row(
-                    mainAxisSize: MainAxisSize.min,
+                    mainAxisSize: MainAxisSize.max,
                     children: [
                       const SizedBox(
                         width: 4,
                       ),
-                      ...teammates.map((e) => Flexible(
+                      ...teammates.map((e) => Expanded(
                               child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 4),
                             child: _createPlayerWidget(e, textColor: textColor),
@@ -464,7 +464,7 @@ class _MyHomePageState extends State<MyHomePage> {
             width: size,
             height: size,
             filterQuality: FilterQuality.medium,
-            color: Colors.black,
+            color: const Color(0xFF939598).withOpacity(0.5),
           ),
           SizedBox(
             height: size,
