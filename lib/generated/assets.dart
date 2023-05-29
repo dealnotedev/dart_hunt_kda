@@ -7,6 +7,8 @@ class Assets {
   static const String assetsIcKd = 'assets/ic_kd.png';
   static const String assetsIcKda = 'assets/ic_kda.png';
   static const String assetsIcMatches = 'assets/ic_matches.png';
+  static const String assetsIcValueDown = 'assets/ic_value_down.png';
+  static const String assetsIcValueUp = 'assets/ic_value_up.png';
   static const String assetsIcon = 'assets/icon.ico';
 
 }

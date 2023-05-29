@@ -60,8 +60,6 @@ dependencies:
 
   rxdart: ^0.27.4
 
-  #flutter_acrylic: ^1.1.0
-
   bitsdojo_window: ^0.1.5
 
   bitsdojo_window_platform_interface: ^0.1.2

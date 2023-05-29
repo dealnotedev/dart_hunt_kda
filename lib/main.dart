@@ -15,13 +15,6 @@ import 'package:system_tray/system_tray.dart' as tray;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  //await Window.initialize();
-  //await Window.disableShadow();
-
-  //await Window.setEffect(
-  //  effect: WindowEffect.tabbed,
-  //);
-
   final db = StatsDb();
   final tracker = TrackerEngine(db);
 
@@ -125,7 +118,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
   @override
   Widget build(BuildContext context) {
     const textColor = Colors.white;
@@ -155,8 +147,10 @@ class _MyHomePageState extends State<MyHomePage> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-                  decoration: _createConcaveDecoration(color: const Color(0xFF090909), radius: 8),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                  decoration: _createConcaveDecoration(
+                      color: const Color(0xFF090909), radius: 8),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -164,7 +158,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         width: 4,
                       ),
                       ...teammates.map((e) => Flexible(
-                          child: Padding(
+                              child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 4),
                             child: _createPlayerWidget(e, textColor: textColor),
                           ))),
@@ -174,7 +168,9 @@ class _MyHomePageState extends State<MyHomePage> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 16,),
+                const SizedBox(
+                  height: 16,
+                ),
                 _createIconifiedContaner(
                     icon: Assets.assetsIcKda,
                     children: _createMyKdaWidgets(bundle, textColor: textColor),
@@ -191,7 +187,9 @@ class _MyHomePageState extends State<MyHomePage> {
                   ElevatedButton(
                       onPressed: _handleResetClick, child: const Text('Reset'))
                 ],
-                const SizedBox(height: 32,)
+                const SizedBox(
+                  height: 32,
+                )
               ],
             ),
           );
@@ -224,14 +222,22 @@ class _MyHomePageState extends State<MyHomePage> {
                   color: _colorBlue, fontSize: 14, fontWeight: FontWeight.w500))
         ],
       )),
-      Text(
-        formatDouble(stats.kd),
-        style: TextStyle(
-            color: kdChanges != null
-                ? (kdChanges > 0 ? _colorBlue : _colorRed)
-                : textColor,
-            fontWeight: FontWeight.w500,
-            fontSize: 20),
+      Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            formatDouble(stats.kd),
+            style: TextStyle(
+                color: kdChanges != null
+                    ? (kdChanges > 0 ? _colorBlue : _colorRed)
+                    : textColor,
+                fontWeight: FontWeight.w500,
+                fontSize: 20),
+          ),
+          if (kdChanges != null && kdChanges != 0) ...[
+            _createDirectionIcon(positive: kdChanges > 0)
+          ]
+        ],
       ),
       const SizedBox(
         width: 16,
@@ -280,14 +286,22 @@ class _MyHomePageState extends State<MyHomePage> {
                   color: _colorBlue, fontSize: 14, fontWeight: FontWeight.w500))
         ],
       )),
-      Text(
-        formatDouble(stats.kda),
-        style: TextStyle(
-            color: kdaChanges != null
-                ? (kdaChanges > 0 ? _colorBlue : _colorRed)
-                : textColor,
-            fontWeight: FontWeight.w500,
-            fontSize: 20),
+      Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            formatDouble(stats.kda),
+            style: TextStyle(
+                color: kdaChanges != null
+                    ? (kdaChanges > 0 ? _colorBlue : _colorRed)
+                    : textColor,
+                fontWeight: FontWeight.w500,
+                fontSize: 20),
+          ),
+          if (kdaChanges != null && kdaChanges != 0) ...[
+            _createDirectionIcon(positive: kdaChanges > 0)
+          ]
+        ],
       ),
       const SizedBox(
         width: 16,
@@ -315,6 +329,16 @@ class _MyHomePageState extends State<MyHomePage> {
         width: 16,
       )
     ];
+  }
+
+  Widget _createDirectionIcon({required bool positive}) {
+    return Image.asset(
+      positive ? Assets.assetsIcValueUp : Assets.assetsIcValueDown,
+      filterQuality: FilterQuality.medium,
+      width: 12,
+      height: 12,
+      color: positive ? _colorBlue : _colorRed,
+    );
   }
 
   Widget _createChangesWidget(int value, {bool positive = true}) {
