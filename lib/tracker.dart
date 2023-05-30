@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 
+import 'package:collection/collection.dart';
 import 'package:crypto/crypto.dart';
 import 'package:hunt_stats/db/entities.dart';
 import 'package:hunt_stats/db/stats_db.dart';
@@ -44,8 +45,13 @@ class TrackerEngine {
 
       final enemiesStats = await db.getEnemiesStats(getEnemiesMap(players));
 
+      final myProfileId = await db.calculateMostPlayerTeammate(
+          players.where((element) => element.teammate).map((e) => e.profileId));
+
       final bundle = HuntBundle(
           match: match,
+          me: players
+              .firstWhereOrNull((element) => element.profileId == myProfileId),
           enemyStats: enemiesStats.values.toList(),
           ownStats: ownStats,
           teamStats: teamStats,
@@ -99,11 +105,16 @@ class TrackerEngine {
 
     final enemiesStats = await db.getEnemiesStats(getEnemiesMap(players));
 
+    final myProfileId = await db.calculateMostPlayerTeammate(
+        players.where((element) => element.teammate).map((e) => e.profileId));
+
     final ownStats = await db.getOwnStats();
     final teamStats = await db.getTeamStats(data.match.teamId);
 
     final bundle = HuntBundle(
         match: data,
+        me: players
+            .firstWhereOrNull((element) => element.profileId == myProfileId),
         enemyStats: enemiesStats.values.toList(),
         ownStats: ownStats,
         teamStats: teamStats,

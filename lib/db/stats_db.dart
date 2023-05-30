@@ -146,7 +146,7 @@ class StatsDb {
         'sum(${HuntPlayerColumns.killedMe}) as killed_me, '
         'sum(${HuntPlayerColumns.downedMe}) as downed_me '
         'FROM ${HuntPlayerColumns.table} '
-        'WHERE ${HuntPlayerColumns.profileId} IN (${keys.map((e) => '?').join(',')}) '
+        'WHERE ${HuntPlayerColumns.profileId} IN (${_quotes(keys)}) '
         'GROUP BY ${HuntPlayerColumns.profileId}',
         keys.toList());
 
@@ -171,6 +171,49 @@ class StatsDb {
 
     return map;
   }
+
+  int? _myProfileId;
+
+  Future<int?> calculateMostPlayerTeammate(Iterable<int> profileIds) async {
+    if (_myProfileId != null) {
+      return _myProfileId;
+    }
+
+    final db = await database;
+    final cursor = await db.rawQuery(
+        'SELECT count(${HuntPlayerColumns.id}) as matches, ${HuntPlayerColumns.profileId} '
+        'FROM ${HuntPlayerColumns.table} '
+        'WHERE ${HuntPlayerColumns.teammate} = ? '
+        'AND ${HuntPlayerColumns.profileId} IN (${_quotes(profileIds)})'
+        'GROUP BY ${HuntPlayerColumns.profileId}',
+        [1, ...profileIds]);
+
+    int max = 0;
+    List<int> maxProfileIds = [];
+
+    for (var row in cursor) {
+      final count = row['matches'] as int;
+      final profileId = row[HuntPlayerColumns.profileId] as int;
+
+      if (count > max) {
+        max = count;
+        maxProfileIds = List.of([profileId], growable: true);
+      } else if (count == max) {
+        maxProfileIds.add(profileId);
+      }
+    }
+
+    if (maxProfileIds.length == 1) {
+      final mostPlayedId = maxProfileIds[0];
+      _myProfileId = mostPlayedId;
+      return mostPlayedId;
+    } else {
+      return null;
+    }
+  }
+
+  static String _quotes(Iterable<Object> list) =>
+      list.map((e) => '?').join(',');
 
   Future<void> outdate() async {
     final db = await database;

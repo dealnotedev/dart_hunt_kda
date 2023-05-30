@@ -1,7 +1,10 @@
+import 'package:hunt_stats/db/entities.dart';
 import 'package:hunt_stats/db/stats.dart';
 import 'package:hunt_stats/match_data.dart';
 
 class HuntBundle {
+  final HuntPlayer? me;
+
   final MatchData match;
 
   final OwnStats ownStats;
@@ -18,8 +21,9 @@ class HuntBundle {
 
   HuntBundle(
       {required this.match,
+      required this.me,
       required this.ownStats,
-        required this.enemyStats,
+      required this.enemyStats,
       required this.teamStats,
       required this.previousOwnStats,
       required this.previousTeamStats,
