@@ -158,15 +158,13 @@ class _MyHomePageState extends State<MyHomePage> {
                   me: bundle.me,
                   textColor: textColor,
                   enemies: bundle.enemyStats,
-                  cardColor: const Color(0xFF090909)),
+                  cardColor: _getBlockColor()),
               _createIconifiedContaner(
                   icon: Assets.assetsIcKda,
-                  children: _createMyKdaWidgets(bundle, textColor: textColor),
-                  color: const Color(0xFF090909)),
+                  children: _createMyKdaWidgets(bundle, textColor: textColor)),
               _createIconifiedContaner(
                   icon: Assets.assetsIcKd,
-                  children: _createTeamKdWidgets(bundle, textColor: textColor),
-                  color: const Color(0xFF090909)),
+                  children: _createTeamKdWidgets(bundle, textColor: textColor)),
               if (size.height > 440) ...[
                 const SizedBox(
                   height: 32,
@@ -383,8 +381,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Widget _createIconifiedContaner(
       {required String icon,
-      required List<Widget> children,
-      required Color color}) {
+      required List<Widget> children}) {
     const cornerStyles = RectangleCornerStyles.all(CornerStyle.straight);
 
     const border = RectangleShapeBorder(
