@@ -156,7 +156,19 @@ class StatsDb {
       final player = enemies[profileId]!;
 
       final matches = row.intOf('matches');
-      if(matches < 2){
+      if (matches < 2) {
+        continue;
+      }
+
+      final downedByMe = row.intOf('downed_by_me');
+      final killedByMe = row.intOf('killed_by_me');
+      final downedMe = row.intOf('downed_me');
+      final killedMe = row.intOf('killed_me');
+
+      if (player.downedByMe == downedByMe &&
+          player.killedByMe == killedByMe &&
+          player.downedMe == downedMe &&
+          player.killedMe == killedMe) {
         continue;
       }
 
@@ -165,8 +177,8 @@ class StatsDb {
           player: player,
           killedByMeLastMatch: player.downedByMe + player.killedByMe,
           killedMeLastMatch: player.downedMe + player.killedMe,
-          killedMe: row.intOf('killed_me') + row.intOf('downed_me'),
-          killedByMe: row.intOf('downed_by_me') + row.intOf('killed_by_me'));
+          killedMe: downedMe + killedMe,
+          killedByMe: downedByMe + killedByMe);
     }
 
     return map;

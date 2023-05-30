@@ -43,7 +43,7 @@ class TrackerEngine {
       final ownStats = await db.getOwnStats();
       final teamStats = await db.getTeamStats(header.teamId);
 
-      final enemiesStats = await db.getEnemiesStats(getEnemiesMap(players));
+      final enemiesStats = await db.getEnemiesStats(_getEnemiesMap(players));
 
       final myProfileId = await db.calculateMostPlayerTeammate(
           players.where((element) => element.teammate).map((e) => e.profileId));
@@ -66,7 +66,7 @@ class TrackerEngine {
     }
   }
 
-  static Map<int, HuntPlayer> getEnemiesMap(List<HuntPlayer> players) {
+  static Map<int, HuntPlayer> _getEnemiesMap(List<HuntPlayer> players) {
     final enemies = players
         .where((element) => !element.teammate && element.hasMutuallyKillDowns);
     final map = <int, HuntPlayer>{};
@@ -104,7 +104,7 @@ class TrackerEngine {
 
     await db.insertHuntMatchPlayers(players);
 
-    final enemiesStats = await db.getEnemiesStats(getEnemiesMap(players));
+    final enemiesStats = await db.getEnemiesStats(_getEnemiesMap(players));
 
     final myProfileId = await db.calculateMostPlayerTeammate(
         players.where((element) => element.teammate).map((e) => e.profileId));
@@ -149,9 +149,8 @@ class TrackerEngine {
       huntData._fill(document);
 
       final data = huntData.extractMatchData();
-      final signature = data.match.signature;
 
-      if (signatures.add(signature)) {
+      if (signatures.add(data.match.signature)) {
         port.send(data);
       }
     });
