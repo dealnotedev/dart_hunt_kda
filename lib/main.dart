@@ -495,65 +495,77 @@ class EnemyCardWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bigTextStyle = TextStyle(fontSize: 20, color: textColor);
-    return Container(
-      padding: const EdgeInsets.all(8),
-      decoration: _createConcaveDecoration(color: cardColor, radius: 8),
-      child: Row(
-        children: [
-          const SizedBox(
-            width: 4,
-          ),
-          Expanded(
-            child: PlayerWidget(
-              player: stats.player,
-              textColor: textColor,
-            ),
-          ),
-          const SizedBox(
-            width: 4,
-          ),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return Stack(
+      alignment: AlignmentDirectional.bottomEnd,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          height: double.infinity,
+          decoration: _createConcaveDecoration(color: cardColor, radius: 8),
+          child: Row(
             children: [
+              const SizedBox(
+                width: 4,
+              ),
+              Expanded(
+                child: PlayerWidget(
+                  player: stats.player,
+                  textColor: textColor,
+                ),
+              ),
+              const SizedBox(
+                width: 4,
+              ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    stats.killedMe.toString(),
+                    style: bigTextStyle,
+                  ),
+                  if (stats.killedMeLastMatch > 0) ...[
+                    _createChangesWidget(stats.killedMeLastMatch)
+                  ]
+                ],
+              ),
               Text(
-                stats.killedMe.toString(),
+                ' - ',
                 style: bigTextStyle,
               ),
-              if (stats.killedMeLastMatch > 0) ...[
-                _createChangesWidget(stats.killedMeLastMatch)
-              ]
-            ],
-          ),
-          Text(
-            ' - ',
-            style: bigTextStyle,
-          ),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                stats.killedByMe.toString(),
-                style: bigTextStyle,
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    stats.killedByMe.toString(),
+                    style: bigTextStyle,
+                  ),
+                  if (stats.killedByMeLastMatch > 0) ...[
+                    _createChangesWidget(stats.killedByMeLastMatch)
+                  ]
+                ],
               ),
-              if (stats.killedByMeLastMatch > 0) ...[
-                _createChangesWidget(stats.killedByMeLastMatch)
-              ]
+              const SizedBox(
+                width: 4,
+              ),
+              Expanded(
+                child: PlayerWidget(
+                  player: me,
+                  textColor: textColor,
+                ),
+              ),
+              const SizedBox(
+                width: 4,
+              ),
             ],
           ),
-          const SizedBox(
-            width: 4,
-          ),
-          Expanded(
-            child: PlayerWidget(
-              player: me,
-              textColor: textColor,
-            ),
-          ),
-          const SizedBox(
-            width: 4,
-          ),
-        ],
-      ),
+        ),
+        Image.asset(
+          Assets.assetsCornerEnemy,
+          height: 72,
+          width: 72,
+          filterQuality: FilterQuality.medium,
+        )
+      ],
     );
   }
 }
