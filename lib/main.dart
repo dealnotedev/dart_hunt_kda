@@ -4,6 +4,7 @@ import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:bitsdojo_window_platform_interface/window.dart';
 import 'package:flutter/material.dart';
 import 'package:hunt_stats/db/entities.dart';
+import 'package:hunt_stats/db/stats.dart';
 import 'package:hunt_stats/db/stats_db.dart';
 import 'package:hunt_stats/generated/assets.dart';
 import 'package:hunt_stats/hunt_bundle.dart';
@@ -25,7 +26,7 @@ void main() async {
   doWhenWindowReady(() {
     final window = appWindow;
 
-    const initialSize = Size(362, 362);
+    const initialSize = Size(362, 400);
     window.minSize = initialSize;
     window.size = initialSize;
     window.alignment = Alignment.center;
@@ -142,8 +143,7 @@ class _MyHomePageState extends State<MyHomePage> {
           final teammates =
               bundle.match.players.where((element) => element.teammate);
 
-          return Center(
-            child: Column(
+          return Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
@@ -160,7 +160,10 @@ class _MyHomePageState extends State<MyHomePage> {
                       ...teammates.map((e) => Expanded(
                               child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 4),
-                            child: _createPlayerWidget(e, textColor: textColor),
+                            child: PlayerWidget(
+                              player: e,
+                              textColor: textColor,
+                            ),
                           ))),
                       const SizedBox(
                         width: 4,
@@ -180,18 +183,25 @@ class _MyHomePageState extends State<MyHomePage> {
                     children:
                         _createTeamKdWidgets(bundle, textColor: textColor),
                     color: const Color(0xFF090909)),
-                if (size.height > 480) ...[
+                if (bundle.enemyStats.isNotEmpty) ...[
+                  const SizedBox(
+                    height: 16,
+                  ),
+                  _EnemiesPager(
+                      me: bundle.me,
+                      textColor: textColor,
+                      stats: bundle.enemyStats,
+                      cardColor: const Color(0xFF090909)),
+                ],
+                if (size.height > 500) ...[
                   const SizedBox(
                     height: 64,
                   ),
                   ElevatedButton(
-                      onPressed: _handleResetClick, child: const Text('Reset'))
-                ],
-                const SizedBox(
-                  height: 32,
-                )
+                      onPressed: _handleResetClick, child: const Text('Reset')),
+                  const SizedBox(height: 16,)
+                ]
               ],
-            ),
           );
         },
       ),
@@ -341,17 +351,6 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  Widget _createChangesWidget(int value, {bool positive = true}) {
-    return Text(value.toString(),
-        style: TextStyle(
-            color: positive ? _colorBlue : _colorRed,
-            fontSize: 14,
-            fontWeight: FontWeight.bold));
-  }
-
-  static const _colorBlue = Color(0xFF1592E4);
-  static const _colorRed = Color(0xFFAC2F30);
-
   Widget _createIconifiedContaner(
       {required String icon,
       required List<Widget> children,
@@ -402,24 +401,176 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  ShapeDecoration _createConcaveDecoration(
-      {required Color color, required double radius}) {
-    const cornerStyles = RectangleCornerStyles.all(CornerStyle.concave);
-
-    final border = RectangleShapeBorder(
-      borderRadius:
-          DynamicBorderRadius.all(DynamicRadius.circular(Length(radius))),
-      cornerStyles: cornerStyles,
-    );
-
-    return ShapeDecoration(shape: border, color: color);
+  static String formatDouble(double value,
+      {int precision = 2, bool plusIfPositive = false}) {
+    final formatted = value.toPrecision(precision).toString();
+    return plusIfPositive && value > 0 ? '+$formatted' : formatted;
   }
 
-  Widget _createPlayerWidget(HuntPlayer player, {Color? textColor}) {
+  void _handleResetClick() async {
+    await widget.engine.invalidateMatches();
+
+    _showSnackbar(text: 'Invalidated');
+  }
+
+  void _showSnackbar({required String text, Duration? duration}) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        backgroundColor: Colors.green,
+        duration: duration ?? const Duration(milliseconds: 2000),
+        content: Text(
+          text,
+          style: const TextStyle(color: Colors.white),
+        ),
+      ));
+    }
+  }
+}
+
+ShapeDecoration _createConcaveDecoration(
+    {required Color color, required double radius}) {
+  const cornerStyles = RectangleCornerStyles.all(CornerStyle.concave);
+
+  final border = RectangleShapeBorder(
+    borderRadius:
+        DynamicBorderRadius.all(DynamicRadius.circular(Length(radius))),
+    cornerStyles: cornerStyles,
+  );
+
+  return ShapeDecoration(shape: border, color: color);
+}
+
+class _EnemiesPager extends StatefulWidget {
+  final HuntPlayer? me;
+  final List<EnemyStats> stats;
+  final Color cardColor;
+  final Color? textColor;
+
+  const _EnemiesPager(
+      {required this.stats,
+      required this.cardColor,
+      required this.me,
+      this.textColor});
+
+  @override
+  State<StatefulWidget> createState() => _EnemiesState();
+}
+
+const _colorBlue = Color(0xFF1592E4);
+const _colorRed = Color(0xFFAC2F30);
+
+Widget _createChangesWidget(int value, {bool positive = true}) {
+  return Text(value.toString(),
+      style: TextStyle(
+          color: positive ? _colorBlue : _colorRed,
+          fontSize: 14,
+          fontWeight: FontWeight.bold));
+}
+
+class _EnemiesState extends State<_EnemiesPager> {
+  late final PageController _controller;
+
+  @override
+  void initState() {
+    _controller = PageController(keepPage: true);
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 84,
+      width: double.infinity,
+      child: PageView(
+        controller: _controller,
+        children: widget.stats.map((e) => _createEnemyWidget(e)).toList(),
+      ),
+    );
+  }
+
+  Widget _createEnemyWidget(EnemyStats stats) {
+    final textColor = widget.textColor;
+    final bigTextStyle = TextStyle(fontSize: 20, color: textColor);
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+      decoration: _createConcaveDecoration(color: widget.cardColor, radius: 8),
+      child: Row(
+        children: [
+          const SizedBox(
+            width: 4,
+          ),
+          Expanded(
+            child: PlayerWidget(
+              player: stats.player,
+              textColor: textColor,
+            ),
+          ),
+          const SizedBox(
+            width: 4,
+          ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                stats.killedMe.toString(),
+                style: bigTextStyle,
+              ),
+              if (stats.killedMeLastMatch > 0) ...[
+                _createChangesWidget(stats.killedMeLastMatch)
+              ]
+            ],
+          ),
+          Text(
+            ' - ',
+            style: bigTextStyle,
+          ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                stats.killedByMe.toString(),
+                style: bigTextStyle,
+              ),
+              if (stats.killedByMeLastMatch > 0) ...[
+                _createChangesWidget(stats.killedByMeLastMatch)
+              ]
+            ],
+          ),
+          const SizedBox(
+            width: 4,
+          ),
+          Expanded(
+            child: PlayerWidget(
+              player: widget.me,
+              textColor: textColor,
+            ),
+          ),
+          const SizedBox(
+            width: 4,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+extension Ex on double {
+  double toPrecision(int n) => double.parse(toStringAsFixed(n));
+}
+
+class PlayerWidget extends StatelessWidget {
+  final HuntPlayer? player;
+  final Color? textColor;
+
+  const PlayerWidget({super.key, required this.player, this.textColor});
+
+  @override
+  Widget build(BuildContext context) {
+    final mmr = player?.mmr ?? -1;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(player.username,
+        Text(player?.username ?? 'Me',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
@@ -432,20 +583,15 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
         Container(
           padding: const EdgeInsets.all(4),
-          decoration: const BoxDecoration(
-              image: DecorationImage(
-                  image: AssetImage(Assets.assetsBgMmr),
-                  fit: BoxFit.fill,
-                  filterQuality: FilterQuality.medium)),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _createStarWidget(Mmr.star1.getFilled(player.mmr)),
-              _createStarWidget(Mmr.star2.getFilled(player.mmr)),
-              _createStarWidget(Mmr.star3.getFilled(player.mmr)),
-              _createStarWidget(Mmr.star4.getFilled(player.mmr)),
-              _createStarWidget(Mmr.star5.getFilled(player.mmr)),
-              _createStarWidget(Mmr.star6.getFilled(player.mmr))
+              _createStarWidget(Mmr.star1.getFilled(mmr)),
+              _createStarWidget(Mmr.star2.getFilled(mmr)),
+              _createStarWidget(Mmr.star3.getFilled(mmr)),
+              _createStarWidget(Mmr.star4.getFilled(mmr)),
+              _createStarWidget(Mmr.star5.getFilled(mmr)),
+              _createStarWidget(Mmr.star6.getFilled(mmr))
             ],
           ),
         )
@@ -483,33 +629,4 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
-
-  static String formatDouble(double value,
-      {int precision = 2, bool plusIfPositive = false}) {
-    final formatted = value.toPrecision(precision).toString();
-    return plusIfPositive && value > 0 ? '+$formatted' : formatted;
-  }
-
-  void _handleResetClick() async {
-    await widget.engine.invalidateMatches();
-
-    _showSnackbar(text: 'Invalidated');
-  }
-
-  void _showSnackbar({required String text, Duration? duration}) {
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        backgroundColor: Colors.green,
-        duration: duration ?? const Duration(milliseconds: 2000),
-        content: Text(
-          text,
-          style: const TextStyle(color: Colors.white),
-        ),
-      ));
-    }
-  }
-}
-
-extension Ex on double {
-  double toPrecision(int n) => double.parse(toStringAsFixed(n));
 }
