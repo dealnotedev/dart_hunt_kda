@@ -175,7 +175,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     const Text(
-                      'Dale',
+                      'Dale Style',
                       style: TextStyle(color: textColor, fontSize: 16),
                     ),
                     Switch(
