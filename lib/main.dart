@@ -144,64 +144,44 @@ class _MyHomePageState extends State<MyHomePage> {
               bundle.match.players.where((element) => element.teammate);
 
           return Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-                  decoration: _createConcaveDecoration(
-                      color: const Color(0xFF090909), radius: 8),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                      const SizedBox(
-                        width: 4,
-                      ),
-                      ...teammates.map((e) => Expanded(
-                              child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 4),
-                            child: PlayerWidget(
-                              player: e,
-                              textColor: textColor,
-                            ),
-                          ))),
-                      const SizedBox(
-                        width: 4,
-                      )
-                    ],
-                  ),
-                ),
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              MyTeamWidget(
+                  teammates: teammates,
+                  textColor: textColor,
+                  cardColor: const Color(0xFF090909)),
+              if (bundle.enemyStats.isNotEmpty) ...[
                 const SizedBox(
                   height: 16,
                 ),
-                _createIconifiedContaner(
-                    icon: Assets.assetsIcKda,
-                    children: _createMyKdaWidgets(bundle, textColor: textColor),
-                    color: const Color(0xFF090909)),
-                _createIconifiedContaner(
-                    icon: Assets.assetsIcKd,
-                    children:
-                        _createTeamKdWidgets(bundle, textColor: textColor),
-                    color: const Color(0xFF090909)),
-                if (bundle.enemyStats.isNotEmpty) ...[
-                  const SizedBox(
-                    height: 16,
-                  ),
-                  _EnemiesPager(
-                      me: bundle.me,
-                      textColor: textColor,
-                      stats: bundle.enemyStats,
-                      cardColor: const Color(0xFF090909)),
-                ],
-                if (size.height > 500) ...[
-                  const SizedBox(
-                    height: 64,
-                  ),
-                  ElevatedButton(
-                      onPressed: _handleResetClick, child: const Text('Reset')),
-                  const SizedBox(height: 16,)
-                ]
+                _EnemiesPager(
+                    me: bundle.me,
+                    textColor: textColor,
+                    stats: bundle.enemyStats,
+                    cardColor: const Color(0xFF090909)),
               ],
+              const SizedBox(
+                height: 16,
+              ),
+              _createIconifiedContaner(
+                  icon: Assets.assetsIcKda,
+                  children: _createMyKdaWidgets(bundle, textColor: textColor),
+                  color: const Color(0xFF090909)),
+              _createIconifiedContaner(
+                  icon: Assets.assetsIcKd,
+                  children: _createTeamKdWidgets(bundle, textColor: textColor),
+                  color: const Color(0xFF090909)),
+              if (size.height > 500) ...[
+                const SizedBox(
+                  height: 64,
+                ),
+                ElevatedButton(
+                    onPressed: _handleResetClick, child: const Text('Reset')),
+                const SizedBox(
+                  height: 16,
+                )
+              ]
+            ],
           );
         },
       ),
@@ -440,6 +420,45 @@ ShapeDecoration _createConcaveDecoration(
   return ShapeDecoration(shape: border, color: color);
 }
 
+class MyTeamWidget extends StatelessWidget {
+  final Iterable<HuntPlayer> teammates;
+  final Color? textColor;
+  final Color cardColor;
+
+  const MyTeamWidget(
+      {super.key,
+      required this.teammates,
+      required this.textColor,
+      required this.cardColor});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+      decoration: _createConcaveDecoration(color: cardColor, radius: 8),
+      child: Row(
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          const SizedBox(
+            width: 4,
+          ),
+          ...teammates.map((e) => Expanded(
+                  child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: PlayerWidget(
+                  player: e,
+                  textColor: textColor,
+                ),
+              ))),
+          const SizedBox(
+            width: 4,
+          )
+        ],
+      ),
+    );
+  }
+}
+
 class _EnemiesPager extends StatefulWidget {
   final HuntPlayer? me;
   final List<EnemyStats> stats;
@@ -467,33 +486,25 @@ Widget _createChangesWidget(int value, {bool positive = true}) {
           fontWeight: FontWeight.bold));
 }
 
-class _EnemiesState extends State<_EnemiesPager> {
-  late final PageController _controller;
+class EnemyCardWidget extends StatelessWidget {
+  final HuntPlayer? me;
+  final EnemyStats stats;
+  final Color? textColor;
+  final Color cardColor;
 
-  @override
-  void initState() {
-    _controller = PageController(keepPage: true);
-    super.initState();
-  }
+  const EnemyCardWidget(
+      {super.key,
+      required this.me,
+      required this.stats,
+      required this.textColor,
+      required this.cardColor});
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 84,
-      width: double.infinity,
-      child: PageView(
-        controller: _controller,
-        children: widget.stats.map((e) => _createEnemyWidget(e)).toList(),
-      ),
-    );
-  }
-
-  Widget _createEnemyWidget(EnemyStats stats) {
-    final textColor = widget.textColor;
     final bigTextStyle = TextStyle(fontSize: 20, color: textColor);
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-      decoration: _createConcaveDecoration(color: widget.cardColor, radius: 8),
+      decoration: _createConcaveDecoration(color: cardColor, radius: 8),
       child: Row(
         children: [
           const SizedBox(
@@ -541,7 +552,7 @@ class _EnemiesState extends State<_EnemiesPager> {
           ),
           Expanded(
             child: PlayerWidget(
-              player: widget.me,
+              player: me,
               textColor: textColor,
             ),
           ),
@@ -549,6 +560,35 @@ class _EnemiesState extends State<_EnemiesPager> {
             width: 4,
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _EnemiesState extends State<_EnemiesPager> {
+  late final PageController _controller;
+
+  @override
+  void initState() {
+    _controller = PageController(keepPage: true);
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 84,
+      width: double.infinity,
+      child: PageView(
+        controller: _controller,
+        children: widget.stats
+            .map((e) => EnemyCardWidget(
+                  stats: e,
+                  cardColor: widget.cardColor,
+                  textColor: widget.textColor,
+                  me: widget.me,
+                ))
+            .toList(),
       ),
     );
   }
