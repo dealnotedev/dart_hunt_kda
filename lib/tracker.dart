@@ -67,7 +67,8 @@ class TrackerEngine {
   }
 
   static Map<int, HuntPlayer> getEnemiesMap(List<HuntPlayer> players) {
-    final enemies = players.where((element) => !element.teammate);
+    final enemies = players
+        .where((element) => !element.teammate && element.hasMutuallyKillDowns);
     final map = <int, HuntPlayer>{};
     map.addEntries(enemies.map((e) => MapEntry(e.profileId, e)));
     return map;
