@@ -359,7 +359,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         ),
         Container(
-          padding: const EdgeInsets.all(size * .05),
+          padding: const EdgeInsets.all(size * .1),
           height: size,
           width: size,
           decoration: ShapeDecoration(shape: border, color: color),
