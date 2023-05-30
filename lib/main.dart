@@ -629,12 +629,15 @@ class _PlayersState extends State<_PlayersPager> {
             SmoothPageIndicator(
                 controller: _controller, // PageController
                 count: _pages,
+                onDotClicked: (index) => _controller.animateToPage(index,
+                    duration: const Duration(milliseconds: 250),
+                    curve: Curves.easeIn),
                 effect: const WormEffect(
                     dotColor: Colors.white,
                     dotHeight: 8,
                     dotWidth: 8,
                     spacing: 4,
-                    activeDotColor: _colorRed)),
+                    activeDotColor: Color(0xFFCEB379))),
           ] else ...[
             const SizedBox(
               height: 16,
