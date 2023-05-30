@@ -35,6 +35,9 @@ enum Mmr {
   }
 
   double getFilled(int mmr) {
+    if(mmr < 0){
+      return 0;
+    }
     if (mmr >= min) {
       return 1;
     }
