@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:bitsdojo_window/bitsdojo_window.dart';
@@ -26,7 +27,7 @@ void main() async {
   doWhenWindowReady(() {
     final window = appWindow;
 
-    const initialSize = Size(362, 400);
+    const initialSize = Size(362, 320);
     window.minSize = initialSize;
     window.size = initialSize;
     window.alignment = Alignment.center;
@@ -146,20 +147,12 @@ class _MyHomePageState extends State<MyHomePage> {
           return Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              MyTeamWidget(
+              _PlayersPager(
                   teammates: teammates,
+                  me: bundle.me,
                   textColor: textColor,
+                  enemies: bundle.enemyStats,
                   cardColor: const Color(0xFF090909)),
-              if (bundle.enemyStats.isNotEmpty) ...[
-                const SizedBox(
-                  height: 16,
-                ),
-                _EnemiesPager(
-                    me: bundle.me,
-                    textColor: textColor,
-                    stats: bundle.enemyStats,
-                    cardColor: const Color(0xFF090909)),
-              ],
               const SizedBox(
                 height: 16,
               ),
@@ -171,7 +164,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   icon: Assets.assetsIcKd,
                   children: _createTeamKdWidgets(bundle, textColor: textColor),
                   color: const Color(0xFF090909)),
-              if (size.height > 500) ...[
+              if (size.height > 440) ...[
                 const SizedBox(
                   height: 64,
                 ),
@@ -459,20 +452,22 @@ class MyTeamWidget extends StatelessWidget {
   }
 }
 
-class _EnemiesPager extends StatefulWidget {
+class _PlayersPager extends StatefulWidget {
+  final Iterable<HuntPlayer> teammates;
   final HuntPlayer? me;
-  final List<EnemyStats> stats;
+  final List<EnemyStats> enemies;
   final Color cardColor;
   final Color? textColor;
 
-  const _EnemiesPager(
-      {required this.stats,
+  const _PlayersPager(
+      {required this.enemies,
       required this.cardColor,
+      required this.teammates,
       required this.me,
       this.textColor});
 
   @override
-  State<StatefulWidget> createState() => _EnemiesState();
+  State<StatefulWidget> createState() => _PlayersState();
 }
 
 const _colorBlue = Color(0xFF1592E4);
@@ -565,14 +560,43 @@ class EnemyCardWidget extends StatelessWidget {
   }
 }
 
-class _EnemiesState extends State<_EnemiesPager> {
+class _PlayersState extends State<_PlayersPager> {
   late final PageController _controller;
+  Timer? _timer;
+
+  int _pageIndex = 0;
 
   @override
   void initState() {
-    _controller = PageController(keepPage: true);
+    _controller = PageController(keepPage: true, initialPage: _pageIndex);
+
+    if (_pages > 1) {
+      _timer = Timer.periodic(const Duration(seconds: 5), (timer) {
+        final current = _pageIndex;
+
+        if (current == _pages - 1) {
+          _controller.animateToPage(0,
+              duration: const Duration(milliseconds: 250),
+              curve: Curves.easeIn);
+        } else {
+          _controller.nextPage(
+              duration: const Duration(milliseconds: 250),
+              curve: Curves.easeIn);
+        }
+      });
+    }
+
     super.initState();
   }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  int get _pages => widget.enemies.length + 1;
 
   @override
   Widget build(BuildContext context) {
@@ -581,14 +605,21 @@ class _EnemiesState extends State<_EnemiesPager> {
       width: double.infinity,
       child: PageView(
         controller: _controller,
-        children: widget.stats
-            .map((e) => EnemyCardWidget(
-                  stats: e,
-                  cardColor: widget.cardColor,
-                  textColor: widget.textColor,
-                  me: widget.me,
-                ))
-            .toList(),
+        onPageChanged: (index) => _pageIndex = index,
+        children: [
+          MyTeamWidget(
+              teammates: widget.teammates,
+              textColor: widget.textColor,
+              cardColor: widget.cardColor),
+          ...widget.enemies
+              .map((e) => EnemyCardWidget(
+                    stats: e,
+                    cardColor: widget.cardColor,
+                    textColor: widget.textColor,
+                    me: widget.me,
+                  ))
+              .toList()
+        ],
       ),
     );
   }
