@@ -4,6 +4,8 @@ class Assets {
 
   static const String assetsCornerEnemy = 'assets/corner_enemy.png';
   static const String assetsCrossWhite24dp = 'assets/cross_white_24dp.png';
+  static const String assetsIcFrameCorner = 'assets/ic_frame_corner.png';
+  static const String assetsIcFrameCornerBottom = 'assets/ic_frame_corner_bottom.png';
   static const String assetsIcKd = 'assets/ic_kd.png';
   static const String assetsIcKda = 'assets/ic_kda.png';
   static const String assetsIcMatches = 'assets/ic_matches.png';

@@ -4,11 +4,14 @@ import 'dart:io';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:bitsdojo_window_platform_interface/window.dart';
 import 'package:flutter/material.dart';
+import 'package:hunt_stats/border/corners.dart';
+import 'package:hunt_stats/border/gradient_box_border.dart';
 import 'package:hunt_stats/db/entities.dart';
 import 'package:hunt_stats/db/stats.dart';
 import 'package:hunt_stats/db/stats_db.dart';
 import 'package:hunt_stats/generated/assets.dart';
 import 'package:hunt_stats/hunt_bundle.dart';
+import 'package:hunt_stats/hunt_images.dart';
 import 'package:hunt_stats/mmr.dart';
 import 'package:hunt_stats/tracker.dart';
 import 'package:morphable_shape/morphable_shape.dart';
@@ -17,6 +20,8 @@ import 'package:system_tray/system_tray.dart' as tray;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await HuntImages.init();
 
   final db = StatsDb();
   final tracker = TrackerEngine(db);
@@ -164,7 +169,30 @@ class _MyHomePageState extends State<MyHomePage> {
                   color: const Color(0xFF090909)),
               if (size.height > 440) ...[
                 const SizedBox(
-                  height: 64,
+                  height: 32,
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      'Dale',
+                      style: TextStyle(color: textColor, fontSize: 16),
+                    ),
+                    Switch(
+                        value: _zupaman,
+                        onChanged: (checked) {
+                          setState(() {
+                            _zupaman = checked;
+                          });
+                        }),
+                    const Text(
+                      'Zupaman',
+                      style: TextStyle(color: textColor, fontSize: 16),
+                    )
+                  ],
+                ),
+                const SizedBox(
+                  height: 16,
                 ),
                 ElevatedButton(
                     onPressed: _handleResetClick, child: const Text('Reset')),
@@ -322,6 +350,37 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
+  bool _zupaman = true;
+
+  Decoration _createBlockDecoration() {
+    if (_zupaman) {
+      return BoxDecoration(
+        color: const Color(0xFF282B31),
+        border: GradientBoxBorder(
+          corners: Corners(
+              topRight: HuntImages.cornerTopRight,
+              bottomRight: HuntImages.cornerBottomRight),
+          gradient: LinearGradient(colors: [
+            const Color(0xFF595A5C).withOpacity(0.1),
+            const Color(0xFFE7E7E7),
+            const Color(0xFF595A5C),
+          ]),
+          width: 2,
+        ),
+      );
+    } else {
+      return _createConcaveDecoration(color: _getBlockColor(), radius: 8);
+    }
+  }
+
+  Color _getBlockColor() {
+    if (_zupaman) {
+      return const Color(0xFF282B31);
+    } else {
+      return const Color(0xFF090909);
+    }
+  }
+
   Widget _createIconifiedContaner(
       {required String icon,
       required List<Widget> children,
@@ -346,7 +405,7 @@ class _MyHomePageState extends State<MyHomePage> {
             Expanded(
                 child: Container(
               constraints: const BoxConstraints(minHeight: 56),
-              decoration: _createConcaveDecoration(color: color, radius: 8),
+              decoration: _createBlockDecoration(),
               child: Row(
                 children: [
                   const SizedBox(
@@ -362,7 +421,7 @@ class _MyHomePageState extends State<MyHomePage> {
           padding: const EdgeInsets.all(size * .1),
           height: size,
           width: size,
-          decoration: ShapeDecoration(shape: border, color: color),
+          decoration: ShapeDecoration(shape: border, color: _getBlockColor()),
           child: Image.asset(
             icon,
             filterQuality: FilterQuality.medium,
