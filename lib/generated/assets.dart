@@ -2,7 +2,6 @@
 class Assets {
   Assets._();
 
-  static const String assetsBgMmr = 'assets/bg_mmr.png';
   static const String assetsCrossWhite24dp = 'assets/cross_white_24dp.png';
   static const String assetsIcKd = 'assets/ic_kd.png';
   static const String assetsIcKda = 'assets/ic_kda.png';

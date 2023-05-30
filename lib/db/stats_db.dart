@@ -229,7 +229,7 @@ class StatsDb {
 
   Future<void> outdate() async {
     final db = await database;
-    db.rawUpdate(
+    await db.rawUpdate(
         'UPDATE ${HuntMatchColumns.table} SET ${HuntMatchColumns.outdated} = ?',
         [1]);
   }
