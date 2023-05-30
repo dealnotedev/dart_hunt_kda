@@ -12,6 +12,7 @@ import 'package:hunt_stats/hunt_bundle.dart';
 import 'package:hunt_stats/mmr.dart';
 import 'package:hunt_stats/tracker.dart';
 import 'package:morphable_shape/morphable_shape.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:system_tray/system_tray.dart' as tray;
 
 void main() async {
@@ -153,9 +154,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   textColor: textColor,
                   enemies: bundle.enemyStats,
                   cardColor: const Color(0xFF090909)),
-              const SizedBox(
-                height: 16,
-              ),
               _createIconifiedContaner(
                   icon: Assets.assetsIcKda,
                   children: _createMyKdaWidgets(bundle, textColor: textColor),
@@ -427,7 +425,7 @@ class MyTeamWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+      padding: const EdgeInsets.all(8),
       decoration: _createConcaveDecoration(color: cardColor, radius: 8),
       child: Row(
         mainAxisSize: MainAxisSize.max,
@@ -498,7 +496,7 @@ class EnemyCardWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final bigTextStyle = TextStyle(fontSize: 20, color: textColor);
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+      padding: const EdgeInsets.all(8),
       decoration: _createConcaveDecoration(color: cardColor, radius: 8),
       child: Row(
         children: [
@@ -571,7 +569,7 @@ class _PlayersState extends State<_PlayersPager> {
     _controller = PageController(keepPage: true, initialPage: _pageIndex);
 
     if (_pages > 1) {
-      _timer = Timer.periodic(const Duration(seconds: 5), (timer) {
+      _timer = Timer.periodic(const Duration(seconds: 10), (timer) {
         final current = _pageIndex;
 
         if (current == _pages - 1) {
@@ -601,24 +599,47 @@ class _PlayersState extends State<_PlayersPager> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 84,
+      height: 96,
       width: double.infinity,
-      child: PageView(
-        controller: _controller,
-        onPageChanged: (index) => _pageIndex = index,
+      child: Column(
         children: [
-          MyTeamWidget(
-              teammates: widget.teammates,
-              textColor: widget.textColor,
-              cardColor: widget.cardColor),
-          ...widget.enemies
-              .map((e) => EnemyCardWidget(
-                    stats: e,
-                    cardColor: widget.cardColor,
-                    textColor: widget.textColor,
-                    me: widget.me,
-                  ))
-              .toList()
+          Expanded(
+              child: PageView(
+            controller: _controller,
+            onPageChanged: (index) => _pageIndex = index,
+            children: [
+              MyTeamWidget(
+                  teammates: widget.teammates,
+                  textColor: widget.textColor,
+                  cardColor: widget.cardColor),
+              ...widget.enemies
+                  .map((e) => EnemyCardWidget(
+                        stats: e,
+                        cardColor: widget.cardColor,
+                        textColor: widget.textColor,
+                        me: widget.me,
+                      ))
+                  .toList()
+            ],
+          )),
+          if (_pages > 1) ...[
+            const SizedBox(
+              height: 8,
+            ),
+            SmoothPageIndicator(
+                controller: _controller, // PageController
+                count: _pages,
+                effect: const WormEffect(
+                    dotColor: Colors.white,
+                    dotHeight: 8,
+                    dotWidth: 8,
+                    spacing: 4,
+                    activeDotColor: _colorRed)),
+          ] else ...[
+            const SizedBox(
+              height: 16,
+            ),
+          ]
         ],
       ),
     );
