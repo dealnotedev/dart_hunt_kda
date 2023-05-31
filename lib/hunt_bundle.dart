@@ -31,10 +31,8 @@ class HuntBundle {
 
   String get teamId => match.match.teamId;
 
-  int? get totalKillsChanges {
-    final prev = previousOwnStats?.totalKills;
-    return prev != null ? ownStats.totalKills - prev : null;
-  }
+  int? get totalKillsChanges =>
+      _intDiff(previousOwnStats?.totalKills, ownStats.totalKills);
 
   static int? _intDiff(int? previous, int current) =>
       (previous != null && previous != current) ? current - previous : null;
