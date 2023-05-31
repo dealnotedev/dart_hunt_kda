@@ -235,7 +235,7 @@ class _MyHomePageState extends State<MyHomePage> {
           Text(
             formatDouble(stats.kd),
             style: TextStyle(
-                color: kdChanges != null
+                color: kdChanges != null && kdChanges != 0
                     ? (kdChanges > 0 ? _colorBlue : _colorRed)
                     : textColor,
                 fontWeight: FontWeight.w500,
@@ -299,7 +299,7 @@ class _MyHomePageState extends State<MyHomePage> {
           Text(
             formatDouble(stats.kda),
             style: TextStyle(
-                color: kdaChanges != null
+                color: kdaChanges != null && kdaChanges != 0
                     ? (kdaChanges > 0 ? _colorBlue : _colorRed)
                     : textColor,
                 fontWeight: FontWeight.w500,
@@ -380,8 +380,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget _createIconifiedContaner(
-      {required String icon,
-      required List<Widget> children}) {
+      {required String icon, required List<Widget> children}) {
     const cornerStyles = RectangleCornerStyles.all(CornerStyle.straight);
 
     const border = RectangleShapeBorder(
