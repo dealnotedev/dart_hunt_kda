@@ -233,8 +233,20 @@ class StatsDb {
   Future<void> outdate() async {
     final db = await database;
     await db.rawUpdate(
-        'UPDATE ${HuntMatchColumns.table} SET ${HuntMatchColumns.outdated} = ?',
-        [1]);
+        'UPDATE ${HuntMatchColumns.table} '
+        'SET ${HuntMatchColumns.outdated} = ?, ${HuntMatchColumns.teamOutdated} = ? '
+        'WHERE ${HuntMatchColumns.outdated} = ?',
+        [1, 1, 0]);
+  }
+
+  Future<void> outdateTeam(String teamId) async {
+    final db = await database;
+    await db.rawUpdate(
+        'UPDATE ${HuntMatchColumns.table} '
+        'SET ${HuntMatchColumns.teamOutdated} = ? '
+        'WHERE ${HuntMatchColumns.teamOutdated} = ? '
+        'AND ${HuntMatchColumns.teamId} LIKE ?',
+        [1, 0, teamId]);
   }
 
   Future<List<HuntPlayer>> getMatchPlayers(int matchId) async {
@@ -397,15 +409,15 @@ class StatsDb {
 
   FutureOr<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
     if (oldVersion < 2) {
-      await db.execute('ALTER TABLE [${HuntMatchColumns.table}] '
-          'ADD COLUMN [${HuntMatchColumns.teamOutdated}] '
+      await db.execute('ALTER TABLE ${HuntMatchColumns.table} '
+          'ADD COLUMN ${HuntMatchColumns.teamOutdated} '
           'INTEGER NOT NULL DEFAULT 0;');
 
-      await db.execute('UPDATE [${HuntMatchColumns.table}] '
-          'SET [${HuntMatchColumns.teamOutdated}] = [${HuntMatchColumns.outdated}];');
+      await db.execute('UPDATE ${HuntMatchColumns.table} '
+          'SET ${HuntMatchColumns.teamOutdated} = ${HuntMatchColumns.outdated};');
 
-      await db.execute('ALTER TABLE [${HuntMatchColumns.table}] '
-          'ALTER COLUMN [${HuntMatchColumns.teamOutdated}] '
+      await db.execute('ALTER TABLE ${HuntMatchColumns.table} '
+          'ALTER COLUMN ${HuntMatchColumns.teamOutdated} '
           'DROP DEFAULT;');
     }
   }
