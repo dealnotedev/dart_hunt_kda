@@ -37,7 +37,7 @@ class HuntBundle {
   }
 
   static int? _intDiff(int? previous, int current) =>
-      previous != null ? current - previous : null;
+      (previous != null && previous != current) ? current - previous : null;
 
   int? get totalDeathsChanges =>
       _intDiff(previousOwnStats?.totalDeaths, ownStats.totalDeaths);
@@ -64,10 +64,6 @@ class HuntBundle {
 
   double? get kdaChanges {
     final prev = previousOwnStats?.kda;
-    if (prev != null && prev.isFinite) {
-      return ownStats.kda - prev;
-    } else {
-      return null;
-    }
+    return prev != null && prev.isFinite ? ownStats.kda - prev : null;
   }
 }

@@ -253,12 +253,12 @@ class _MyHomePageState extends State<MyHomePage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(stats.teamKills.toString(), style: textStyle),
-          if (killsChanges != null && killsChanges > 0) ...[
+          if (killsChanges != null) ...[
             _createChangesWidget(killsChanges, positive: true)
           ],
-          Text(' / ', style: textStyle),
+          Text(_spacedSlash(trimLeft: killsChanges != null), style: textStyle),
           Text(stats.teamDeaths.toString(), style: textStyle),
-          if (deathsChanges != null && deathsChanges > 0) ...[
+          if (deathsChanges != null) ...[
             _createChangesWidget(deathsChanges, positive: false)
           ]
         ],
@@ -278,6 +278,8 @@ class _MyHomePageState extends State<MyHomePage> {
     final killsChanges = bundle.ownKillsChanges;
     final deathsChanges = bundle.ownDeatchChanges;
     final assistsChanges = bundle.ownAssistsChanges;
+
+    final hasDirectionIcon = kdaChanges != null && kdaChanges != 0;
     return [
       Expanded(
           child: Column(
@@ -305,29 +307,29 @@ class _MyHomePageState extends State<MyHomePage> {
                 fontWeight: FontWeight.w500,
                 fontSize: 20),
           ),
-          if (kdaChanges != null && kdaChanges != 0) ...[
+          if (hasDirectionIcon) ...[
             _createDirectionIcon(positive: kdaChanges > 0)
           ]
         ],
       ),
-      const SizedBox(
-        width: 16,
+      SizedBox(
+        width: hasDirectionIcon ? 8 : 16,
       ),
       Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(stats.ownKills.toString(), style: textStyle),
-          if (killsChanges != null && killsChanges > 0) ...[
+          if (killsChanges != null) ...[
             _createChangesWidget(killsChanges, positive: true)
           ],
-          Text(' / ', style: textStyle),
+          Text(_spacedSlash(trimLeft: killsChanges != null), style: textStyle),
           Text(stats.ownDeaths.toString(), style: textStyle),
-          if (deathsChanges != null && deathsChanges > 0) ...[
+          if (deathsChanges != null) ...[
             _createChangesWidget(deathsChanges, positive: false)
           ],
-          Text(' / ', style: textStyle),
+          Text(_spacedSlash(trimLeft: deathsChanges != null), style: textStyle),
           Text(stats.ownAssists.toString(), style: textStyle),
-          if (assistsChanges != null && assistsChanges > 0) ...[
+          if (assistsChanges != null) ...[
             _createChangesWidget(assistsChanges, positive: true)
           ]
         ],
@@ -337,6 +339,12 @@ class _MyHomePageState extends State<MyHomePage> {
       )
     ];
   }
+
+  static String _spacedSlash({
+    bool trimRight = false,
+    bool trimLeft = false,
+  }) =>
+      '${trimLeft ? '' : ' '}/${trimRight ? '' : ' '}';
 
   Widget _createDirectionIcon({required bool positive}) {
     return Image.asset(
