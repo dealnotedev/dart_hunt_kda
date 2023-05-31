@@ -627,7 +627,7 @@ class EnemyCardWidget extends StatelessWidget {
 
 class _PlayersState extends State<_PlayersPager> {
   late final PageController _controller;
-  Timer? _timer;
+  late final Timer _timer;
 
   int _pageIndex = 0;
 
@@ -635,21 +635,17 @@ class _PlayersState extends State<_PlayersPager> {
   void initState() {
     _controller = PageController(keepPage: true, initialPage: _pageIndex);
 
-    if (_pages > 1) {
-      _timer = Timer.periodic(const Duration(seconds: 10), (timer) {
-        final current = _pageIndex;
+    _timer = Timer.periodic(const Duration(seconds: 10), (timer) {
+      final current = _pageIndex;
 
-        if (current == _pages - 1) {
-          _controller.animateToPage(0,
-              duration: const Duration(milliseconds: 250),
-              curve: Curves.easeIn);
-        } else {
-          _controller.nextPage(
-              duration: const Duration(milliseconds: 250),
-              curve: Curves.easeIn);
-        }
-      });
-    }
+      if (current == _pages - 1) {
+        _controller.animateToPage(0,
+            duration: const Duration(milliseconds: 250), curve: Curves.easeIn);
+      } else {
+        _controller.nextPage(
+            duration: const Duration(milliseconds: 250), curve: Curves.easeIn);
+      }
+    });
 
     super.initState();
   }
@@ -657,7 +653,7 @@ class _PlayersState extends State<_PlayersPager> {
   @override
   void dispose() {
     _controller.dispose();
-    _timer?.cancel();
+    _timer.cancel();
     super.dispose();
   }
 
