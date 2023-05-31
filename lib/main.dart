@@ -223,8 +223,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
     final stats = bundle.teamStats;
     final kdChanges = bundle.teamKdChanges;
-    final killsChanges = bundle.totalKillsChanges;
-    final deathsChanges = bundle.totalDeathsChanges;
+    final killsChanges = bundle.teamKillsChanges;
+    final deathsChanges = bundle.teamDeathsChanges;
 
     return [
       Expanded(
