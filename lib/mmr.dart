@@ -35,7 +35,7 @@ enum Mmr {
   }
 
   double getFilled(int mmr) {
-    if(mmr < 0){
+    if (mmr < 0) {
       return 0;
     }
     if (mmr >= min) {
@@ -43,7 +43,7 @@ enum Mmr {
     }
 
     final prev = previous;
-    if(mmr < prev.min){
+    if (mmr < prev.min) {
       return 0;
     }
 

@@ -636,6 +636,8 @@ class _PlayersState extends State<_PlayersPager> {
     _controller = PageController(keepPage: true, initialPage: _pageIndex);
 
     _timer = Timer.periodic(const Duration(seconds: 10), (timer) {
+      if (_pages == 0) return;
+
       final current = _pageIndex;
 
       if (current == _pages - 1) {

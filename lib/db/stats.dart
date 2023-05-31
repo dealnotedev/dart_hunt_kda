@@ -55,8 +55,8 @@ class EnemyStats {
   EnemyStats(
       {required this.player,
       required this.killedMe,
-        required this.matches,
-        required this.killedByMeLastMatch,
-        required this.killedMeLastMatch,
+      required this.matches,
+      required this.killedByMeLastMatch,
+      required this.killedMeLastMatch,
       required this.killedByMe});
 }
