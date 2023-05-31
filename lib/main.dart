@@ -202,7 +202,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       width: 8,
                     ),
                     ElevatedButton(
-                        onPressed: _handleResetTeamClick,
+                        onPressed: () => _handleResetTeamClick(bundle.teamId),
                         child: const Text('Reset Team'))
                   ],
                 ),
@@ -458,8 +458,8 @@ class _MyHomePageState extends State<MyHomePage> {
     _showSnackbar(text: 'Invalidated');
   }
 
-  void _handleResetTeamClick() async {
-    await widget.engine.invalidateTeam();
+  void _handleResetTeamClick(String teamId) async {
+    await widget.engine.invalidateTeam(teamId);
     _showSnackbar(text: 'Invalidated');
   }
 

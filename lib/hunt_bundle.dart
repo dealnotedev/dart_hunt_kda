@@ -29,7 +29,7 @@ class HuntBundle {
       required this.previousTeamStats,
       required this.previousMatch});
 
-  String? get teamId => match.match.teamId;
+  String get teamId => match.match.teamId;
 
   int? get totalKillsChanges {
     final prev = previousOwnStats?.totalKills;
