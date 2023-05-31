@@ -592,7 +592,7 @@ class EnemyCardWidget extends StatelessWidget {
                 ],
               ),
               Text(
-                ' - ',
+                _spacedHyphen(trimLeft: stats.killedMeLastMatch > 0),
                 style: bigTextStyle,
               ),
               Row(
@@ -635,6 +635,12 @@ class EnemyCardWidget extends StatelessWidget {
       ],
     );
   }
+
+  static String _spacedHyphen({
+    bool trimRight = false,
+    bool trimLeft = false,
+  }) =>
+      '${trimLeft ? '' : ' '}/${trimRight ? '' : ' '}';
 }
 
 class _PlayersState extends State<_PlayersPager> {
