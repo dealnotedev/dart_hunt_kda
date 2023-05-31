@@ -18,7 +18,7 @@ class GradientBoxBorder extends BoxBorder {
   BorderSide get top => BorderSide.none;
 
   @override
-  EdgeInsetsGeometry get dimensions => EdgeInsets.all(width);
+  EdgeInsetsGeometry get dimensions => EdgeInsets.zero;
 
   @override
   bool get isUniform => true;
