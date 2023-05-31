@@ -142,7 +142,7 @@ class TrackerEngine {
 
     final signatures = <String>{};
 
-    Timer.periodic(const Duration(minutes: 1), (timer) async {
+    Timer.periodic(const Duration(seconds: 30), (timer) async {
       final file = File(attributes);
       final document = XmlDocument.parse(await file.readAsString());
       final huntData = HuntData();
