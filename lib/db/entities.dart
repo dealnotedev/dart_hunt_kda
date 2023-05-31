@@ -16,6 +16,7 @@ class HuntMatchHeader {
   final int teamEnemyDeaths;
   final int ownAssists;
   final bool outdated;
+  final bool teamOutdated;
   final bool extracted;
   final String teamId;
   final String signature;
@@ -34,6 +35,7 @@ class HuntMatchHeader {
       required this.ownEnemyDeaths,
       required this.teamEnemyDeaths,
       required this.ownAssists,
+        required this.teamOutdated,
       required this.outdated,
       required this.extracted,
       required this.teamId,

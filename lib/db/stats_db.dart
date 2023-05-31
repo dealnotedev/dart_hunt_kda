@@ -30,7 +30,10 @@ class StatsDb {
 
     return dbFactory.openDatabase(path,
         options: OpenDatabaseOptions(
-            version: 1, singleInstance: true, onCreate: _onCreate));
+            version: 2,
+            singleInstance: true,
+            onCreate: _onCreate,
+            onUpgrade: _onUpgrade));
   }
 
   Future<void> insertHuntMatchPlayers(Iterable<HuntPlayer> entities) async {
@@ -284,6 +287,7 @@ class StatsDb {
       final entity = HuntMatchHeader(
         mode: row[HuntMatchColumns.mode] as int,
         teams: row[HuntMatchColumns.teams] as int,
+        teamOutdated: row[HuntMatchColumns.teamOutdated] as int == 1,
         teamSize: row[HuntMatchColumns.teamSize] as int,
         teamMmr: row[HuntMatchColumns.teamMmr] as int,
         ownDowns: row[HuntMatchColumns.ownDowns] as int,
@@ -329,6 +333,7 @@ class StatsDb {
     values[HuntMatchColumns.teamEnemyDeaths] = entity.teamEnemyDeaths;
     values[HuntMatchColumns.ownAssists] = entity.ownAssists;
     values[HuntMatchColumns.outdated] = entity.outdated ? 1 : 0;
+    values[HuntMatchColumns.teamOutdated] = entity.teamOutdated ? 1 : 0;
     values[HuntMatchColumns.extracted] = entity.extracted ? 1 : 0;
     values[HuntMatchColumns.teamId] = entity.teamId;
     values[HuntMatchColumns.signature] = entity.signature;
@@ -356,6 +361,7 @@ class StatsDb {
         '[${HuntMatchColumns.teamEnemyDeaths}]	INTEGER NOT NULL,'
         '[${HuntMatchColumns.ownAssists}]	INTEGER NOT NULL,'
         '[${HuntMatchColumns.outdated}]	INTEGER NOT NULL,'
+        '[${HuntMatchColumns.teamOutdated}]	INTEGER NOT NULL,'
         '[${HuntMatchColumns.extracted}]	INTEGER NOT NULL,'
         '[${HuntMatchColumns.teamId}]	TEXT NOT NULL,'
         '[${HuntMatchColumns.signature}]	TEXT NOT NULL UNIQUE);');
@@ -387,6 +393,21 @@ class StatsDb {
         '[${HuntPlayerColumns.skillBased}]	INTEGER NOT NULL,'
         'CONSTRAINT fk_match FOREIGN KEY ([${HuntPlayerColumns.matchId}]) REFERENCES [${HuntMatchColumns.table}] ([${HuntMatchColumns.id}]) ON DELETE CASCADE,'
         'UNIQUE([${HuntPlayerColumns.matchId}],[${HuntPlayerColumns.profileId}]));');
+  }
+
+  FutureOr<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await db.execute('ALTER TABLE [${HuntMatchColumns.table}] '
+          'ADD COLUMN [${HuntMatchColumns.teamOutdated}] '
+          'INTEGER NOT NULL DEFAULT 0;');
+
+      await db.execute('UPDATE [${HuntMatchColumns.table}] '
+          'SET [${HuntMatchColumns.teamOutdated}] = [${HuntMatchColumns.outdated}];');
+
+      await db.execute('ALTER TABLE [${HuntMatchColumns.table}] '
+          'ALTER COLUMN [${HuntMatchColumns.teamOutdated}] '
+          'DROP DEFAULT;');
+    }
   }
 }
 

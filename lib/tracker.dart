@@ -284,6 +284,7 @@ class HuntData {
         teamEnemyDeaths: teamEnemyDeaths,
         ownAssists: ownAssists,
         outdated: false,
+        teamOutdated: false,
         extracted: !(isHunterDead ?? false),
         teamId: teamId.join('-'),
         signature: signature.generate(),

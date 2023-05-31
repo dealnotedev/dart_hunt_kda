@@ -18,6 +18,7 @@ class HuntMatchColumns {
   static const String teamEnemyDeaths = 'team_enemy_deaths';
   static const String ownAssists = 'own_assists';
   static const String outdated = 'outdated';
+  static const String teamOutdated = 'team_outdated';
   static const String extracted = 'extracted';
   static const String teamId = 'team_id';
   static const String signature = 'signature';
