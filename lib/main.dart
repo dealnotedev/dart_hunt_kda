@@ -141,8 +141,8 @@ class _MyHomePageState extends State<MyHomePage> {
           if (bundle == null) {
             return const Center(
               child: Text(
-                'Awaiting for hunt data',
-                style: TextStyle(color: textColor),
+                'Hunt!',
+                style: TextStyle(color: textColor, fontSize: 48),
               ),
             );
           }
