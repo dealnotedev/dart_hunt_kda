@@ -614,11 +614,15 @@ class EnemyCardWidget extends StatelessWidget {
             ],
           ),
         ),
-        Image.asset(
-          Assets.assetsCornerEnemy,
-          height: 72,
-          width: 72,
-          filterQuality: FilterQuality.medium,
+        Tooltip(
+          message: '${stats.matches} matches',
+          textStyle: TextStyle(color: textColor),
+          child: Image.asset(
+            Assets.assetsCornerEnemy,
+            height: 72,
+            width: 72,
+            filterQuality: FilterQuality.medium,
+          ),
         )
       ],
     );
