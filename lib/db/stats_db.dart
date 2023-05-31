@@ -416,9 +416,10 @@ class StatsDb {
       await db.execute('UPDATE ${HuntMatchColumns.table} '
           'SET ${HuntMatchColumns.teamOutdated} = ${HuntMatchColumns.outdated};');
 
-      await db.execute('ALTER TABLE ${HuntMatchColumns.table} '
-          'ALTER COLUMN ${HuntMatchColumns.teamOutdated} '
-          'DROP DEFAULT;');
+      // Not supported in Sqlite
+      //await db.execute('ALTER TABLE ${HuntMatchColumns.table} '
+      //    'ALTER COLUMN ${HuntMatchColumns.teamOutdated} '
+      //    'DROP DEFAULT;');
     }
   }
 }
