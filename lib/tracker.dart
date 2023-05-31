@@ -132,6 +132,15 @@ class TrackerEngine {
     await _refreshData();
   }
 
+  Future<void> invalidateTeam() async {
+    final teamId = _lastBundle?.teamId;
+
+    if(teamId != null){
+      await db.outdateTeam(teamId);
+      await _refreshData();
+    }
+  }
+
   static void _startTracking(SendPort port) async {
     final finder = HuntFinder();
 

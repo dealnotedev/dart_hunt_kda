@@ -192,8 +192,20 @@ class _MyHomePageState extends State<MyHomePage> {
                 const SizedBox(
                   height: 16,
                 ),
-                ElevatedButton(
-                    onPressed: _handleResetClick, child: const Text('Reset')),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ElevatedButton(
+                        onPressed: _handleResetAllClick,
+                        child: const Text('Reset All')),
+                    const SizedBox(
+                      width: 8,
+                    ),
+                    ElevatedButton(
+                        onPressed: _handleResetTeamClick,
+                        child: const Text('Reset Team'))
+                  ],
+                ),
                 const SizedBox(
                   height: 16,
                 )
@@ -441,16 +453,21 @@ class _MyHomePageState extends State<MyHomePage> {
     return plusIfPositive && value > 0 ? '+$formatted' : formatted;
   }
 
-  void _handleResetClick() async {
+  void _handleResetAllClick() async {
     await widget.engine.invalidateMatches();
+    _showSnackbar(text: 'Invalidated');
+  }
 
+  void _handleResetTeamClick() async {
+    await widget.engine.invalidateTeam();
     _showSnackbar(text: 'Invalidated');
   }
 
   void _showSnackbar({required String text, Duration? duration}) {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        backgroundColor: Colors.green,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        backgroundColor: _colorRed,
         duration: duration ?? const Duration(milliseconds: 2000),
         content: Text(
           text,

@@ -90,7 +90,7 @@ class StatsDb {
         'sum(${HuntMatchColumns.teamEnemyDowns}) as team_enemy_downs, '
         'count(${HuntMatchColumns.id}) as matches '
         'FROM ${HuntMatchColumns.table} '
-        'WHERE ${HuntMatchColumns.teamId} LIKE ? AND ${HuntMatchColumns.outdated} = ?',
+        'WHERE ${HuntMatchColumns.teamId} LIKE ? AND ${HuntMatchColumns.teamOutdated} = ?',
         [teamId, 0]);
 
     final row = cursor[0];
