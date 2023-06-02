@@ -144,14 +144,15 @@ class StatsDb {
     final cursor = await db.rawQuery(
         'SELECT ${HuntPlayerColumns.profileId}, '
         'count(${HuntPlayerColumns.matchId}) as matches, '
-        'sum(${HuntPlayerColumns.downedByMe}) as downed_by_me, '
-        'sum(${HuntPlayerColumns.killedByMe}) as killed_by_me, '
-        'sum(${HuntPlayerColumns.killedMe}) as killed_me, '
-        'sum(${HuntPlayerColumns.downedMe}) as downed_me '
+        'sum(${HuntPlayerColumns.downedByMe}) as sum_downed_by_me, '
+        'sum(${HuntPlayerColumns.killedByMe}) as sum_killed_by_me, '
+        'sum(${HuntPlayerColumns.killedMe}) as sum_killed_me, '
+        'sum(${HuntPlayerColumns.downedMe}) as sum_downed_me '
         'FROM ${HuntPlayerColumns.table} '
         'WHERE ${HuntPlayerColumns.profileId} IN (${_quotes(keys)}) '
+        'AND (${HuntPlayerColumns.downedByMe} > ? OR ${HuntPlayerColumns.killedByMe} > ? OR ${HuntPlayerColumns.killedMe} > ? OR ${HuntPlayerColumns.downedMe} > ?)'
         'GROUP BY ${HuntPlayerColumns.profileId}',
-        keys.toList());
+        [...keys, 0, 0, 0, 0]);
 
     final map = <int, EnemyStats>{};
     for (var row in cursor) {
@@ -163,10 +164,10 @@ class StatsDb {
         continue;
       }
 
-      final downedByMe = row.intOf('downed_by_me');
-      final killedByMe = row.intOf('killed_by_me');
-      final downedMe = row.intOf('downed_me');
-      final killedMe = row.intOf('killed_me');
+      final downedByMe = row.intOf('sum_downed_by_me');
+      final killedByMe = row.intOf('sum_killed_by_me');
+      final downedMe = row.intOf('sum_downed_me');
+      final killedMe = row.intOf('sum_killed_me');
 
       if (player.downedByMe == downedByMe &&
           player.killedByMe == killedByMe &&
