@@ -165,47 +165,12 @@ class _MyHomePageState extends State<MyHomePage> {
               _createIconifiedContaner(
                   icon: Assets.assetsIcKd,
                   children: _createTeamKdWidgets(bundle, textColor: textColor)),
-              if (size.height > 440) ...[
-                const SizedBox(
-                  height: 32,
-                ),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Text(
-                      'Dale Style',
-                      style: TextStyle(color: textColor, fontSize: 16),
-                    ),
-                    Switch(
-                        value: _zupaman,
-                        onChanged: (checked) {
-                          setState(() {
-                            _zupaman = checked;
-                          });
-                        }),
-                    const Text(
-                      'Zupaman',
-                      style: TextStyle(color: textColor, fontSize: 16),
-                    )
-                  ],
-                ),
+              if (size.height > 448) ...[
                 const SizedBox(
                   height: 16,
                 ),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    ElevatedButton(
-                        onPressed: _handleResetAllClick,
-                        child: const Text('Reset All')),
-                    const SizedBox(
-                      width: 8,
-                    ),
-                    ElevatedButton(
-                        onPressed: () => _handleResetTeamClick(bundle.teamId),
-                        child: const Text('Reset Team'))
-                  ],
-                ),
+                _createSettingsWidget(context,
+                    bundle: bundle, textColor: textColor),
                 const SizedBox(
                   height: 16,
                 )
@@ -213,6 +178,57 @@ class _MyHomePageState extends State<MyHomePage> {
             ],
           );
         },
+      ),
+    );
+  }
+
+  Widget _createSettingsWidget(BuildContext context,
+      {Color? textColor, required HuntBundle bundle}) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      width: double.infinity,
+      decoration: _createBlockDecoration(),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Dale Style',
+                style: TextStyle(color: textColor, fontSize: 16),
+              ),
+              Switch(
+                  value: _zupaman,
+                  onChanged: (checked) {
+                    setState(() {
+                      _zupaman = checked;
+                    });
+                  }),
+              Text(
+                'Zupaman',
+                style: TextStyle(color: textColor, fontSize: 16),
+              )
+            ],
+          ),
+          const SizedBox(
+            height: 16,
+          ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ElevatedButton(
+                  onPressed: _handleResetAllClick,
+                  child: const Text('Reset All')),
+              const SizedBox(
+                width: 8,
+              ),
+              ElevatedButton(
+                  onPressed: () => _handleResetTeamClick(bundle.teamId),
+                  child: const Text('Reset Team'))
+            ],
+          ),
+        ],
       ),
     );
   }
