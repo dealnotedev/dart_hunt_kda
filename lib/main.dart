@@ -27,6 +27,8 @@ void main() async {
   final db = StatsDb(predefinedProfileId: Constants.profileId);
   final tracker = TrackerEngine(db);
 
+  await tracker.extractFromFile(File('examples/attributes_zoopeek.xml'));
+
   runApp(MyApp(engine: tracker));
 
   await tracker.start();

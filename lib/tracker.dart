@@ -160,6 +160,14 @@ class TrackerEngine {
       }
     });
   }
+
+  Future<MatchData> extractFromFile(File file) async {
+    final document = XmlDocument.parse(await file.readAsString());
+    final huntData = HuntData();
+    huntData._fill(document);
+
+    return huntData.extractMatchData();
+  }
 }
 
 class HuntData {
@@ -176,7 +184,8 @@ class HuntData {
           Map<String, PlayerNode>>>{}; // <team, <player_num, [player_values]>>
 
   final teams = <int, Map<String, TeamNode>>{};
-  final entries = <String, BagEntry>{};
+  final bags = <String, BagEntry>{};
+  final accolades = <String, Accolade>{};
 
   MatchData extractMatchData() {
     if (isTutorial ?? false) {
@@ -204,7 +213,7 @@ class HuntData {
     int? ownTeamSize;
     int? ownTeamMmr;
 
-    final int ownAssists = entries['kill player assist']?.amount ?? 0;
+    final int ownAssists = bags['kill player assist']?.amount ?? 0;
     final teamId = <int>[];
 
     final signature = SignatureBuilder();
@@ -295,7 +304,16 @@ class HuntData {
         signature: signature.generate(),
         date: DateTime.now(),
         teamSize: ownTeamSize,
-        teamMmr: ownTeamMmr);
+        teamMmr: ownTeamMmr,
+        killMeatheads: bags.amountOf('kill meatheads'),
+        killImmolators: bags.amountOf('kill immolator'),
+        killHorses: bags.amountOf('kill horse'),
+        killHives: bags.amountOf('kill hive'),
+        killHellhound: bags.amountOf('kill hellhound'),
+        killArmored: bags.amountOf('kill armored'),
+        killLeeches: bags.amountOf('kill leeches'),
+        killWaterdevils: bags.amountOf('kill waterdevil'),
+        killGrunts: bags.amountOf('kill grunt'));
 
     return MatchData(match: entity, players: users);
   }
@@ -318,8 +336,10 @@ class HuntData {
 
   void _fill(XmlDocument document) {
     int? missionBagNumEntries;
+    int? missionBagNumAccolades;
 
-    final bagEntries = <int, BagEntry>{};
+    final bags = <int, BagEntry>{};
+    final accolades = <int, Accolade>{};
 
     for (var node in document.descendants) {
       final name = node.name;
@@ -364,6 +384,10 @@ class HuntData {
           missionBagNumEntries = node.intValue;
           break;
 
+        case 'MissionBagNumAccolades':
+          missionBagNumAccolades = node.intValue;
+          break;
+
         default:
           if (name.startsWith('MissionBagPlayer_')) {
             final parts = name.split('_');
@@ -395,7 +419,7 @@ class HuntData {
           if (name.startsWith('MissionBagEntry_')) {
             final parts = name.split('_');
             final index = int.parse(parts[1]);
-            final entry = bagEntries.putIfAbsent(index, () => BagEntry());
+            final entry = bags.putIfAbsent(index, () => BagEntry());
 
             if (parts.length > 2) {
               switch (parts[2]) {
@@ -416,17 +440,74 @@ class HuntData {
                   break;
               }
             }
+            continue;
+          }
+
+          if (name.startsWith('MissionAccoladeEntry_')) {
+            final parts = name.split('_');
+            final index = int.parse(parts[1]);
+            final entry = accolades.putIfAbsent(index, () => Accolade());
+
+            if (parts.length > 2) {
+              switch (parts[2]) {
+                case 'bloodlineXp':
+                  entry.bloodlineXp = node.intValue;
+                  break;
+                case 'bounty':
+                  entry.bounty = node.intValue;
+                  break;
+                case 'category':
+                  entry.category = node.stringValue;
+                  break;
+                case 'eventPoints':
+                  entry.eventPoints = node.intValue;
+                  break;
+                case 'gems':
+                  entry.gems = node.intValue;
+                  break;
+                case 'generatedGems':
+                  entry.generatedGems = node.intValue;
+                  break;
+                case 'gold':
+                  entry.gold = node.intValue;
+                  break;
+                case 'hits':
+                  entry.hits = node.intValue;
+                  break;
+                case 'hunterPoints':
+                  entry.hunterPoints = node.intValue;
+                  break;
+                case 'hunterXp':
+                  entry.hunterXp = node.intValue;
+                  break;
+                case 'weighting':
+                  entry.weighting = node.intValue;
+                  break;
+                case 'xp':
+                  entry.xp = node.intValue;
+                  break;
+              }
+            }
           }
           break;
       }
     }
 
     for (int i = 0; i < (missionBagNumEntries ?? 0); i++) {
-      final entry = bagEntries[i];
-      final descriptor = entry?.descriptor;
+      final bag = bags[i];
+      final descriptor = bag?.descriptor;
 
-      if (entry != null && descriptor != null) {
-        entries.addEntries([MapEntry(descriptor, entry)]);
+      if (bag != null && descriptor != null) {
+        this.bags[descriptor] = bag;
+      }
+    }
+
+    for (int i = 0; i < (missionBagNumAccolades ?? 0); i++) {
+      final accolade = accolades[i];
+      final category = accolade?.category;
+
+      if (accolade != null && category != null) {
+        this.accolades[category] = accolade;
       }
     }
   }
@@ -436,12 +517,32 @@ class HuntData {
   }
 }
 
+extension BagEntriesExt on Map<String, BagEntry> {
+  int amountOf(String name, {int fallback = 0}) =>
+      this[name]?.amount ?? fallback;
+}
+
 class BagEntry {
   int? amount;
   String? category;
   String? descriptor;
   int? rewardType;
   int? rewardAmount;
+}
+
+class Accolade {
+  int? bloodlineXp;
+  int? bounty;
+  String? category;
+  int? eventPoints;
+  int? gems;
+  int? generatedGems;
+  int? gold;
+  int? hits;
+  int? hunterPoints;
+  int? hunterXp;
+  int? weighting;
+  int? xp;
 }
 
 class TeamNode {

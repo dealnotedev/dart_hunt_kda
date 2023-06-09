@@ -22,6 +22,16 @@ class HuntMatchColumns {
   static const String extracted = 'extracted';
   static const String teamId = 'team_id';
   static const String signature = 'signature';
+
+  static const String killGrunts = 'kill_grunts';
+  static const String killHives = 'kill_hives';
+  static const String killImmolators = 'kill_immolators';
+  static const String killArmored = 'kill_armored';
+  static const String killHorses = 'kill_horses';
+  static const String killHellhound = 'kill_hellhounds';
+  static const String killMeatheads = 'kill_meathead';
+  static const String killLeeches = 'kill_leeches';
+  static const String killWaterdevils = 'kill_waterdevils';
 }
 
 class HuntPlayerColumns {

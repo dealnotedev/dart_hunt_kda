@@ -32,7 +32,7 @@ class StatsDb {
 
     return _factory.openDatabase(path,
         options: OpenDatabaseOptions(
-            version: 2,
+            version: 3,
             singleInstance: true,
             onCreate: _onCreate,
             onUpgrade: _onUpgrade));
@@ -320,6 +320,15 @@ class StatsDb {
         signature: row[HuntMatchColumns.signature] as String,
         date: DateTime.fromMillisecondsSinceEpoch(
             row[HuntMatchColumns.date] as int),
+        killMeatheads: row[HuntMatchColumns.killMeatheads] as int,
+        killImmolators: row[HuntMatchColumns.killImmolators] as int,
+        killHorses: row[HuntMatchColumns.killHorses] as int,
+        killHives: row[HuntMatchColumns.killHives] as int,
+        killHellhound: row[HuntMatchColumns.killHellhound] as int,
+        killWaterdevils: row[HuntMatchColumns.killWaterdevils] as int,
+        killGrunts: row[HuntMatchColumns.killGrunts] as int,
+        killLeeches: row[HuntMatchColumns.killLeeches] as int,
+        killArmored: row[HuntMatchColumns.killArmored] as int,
       );
 
       entity.id = row[HuntMatchColumns.id] as int;
@@ -352,6 +361,15 @@ class StatsDb {
     values[HuntMatchColumns.extracted] = entity.extracted ? 1 : 0;
     values[HuntMatchColumns.teamId] = entity.teamId;
     values[HuntMatchColumns.signature] = entity.signature;
+    values[HuntMatchColumns.killGrunts] = entity.killGrunts;
+    values[HuntMatchColumns.killHives] = entity.killHives;
+    values[HuntMatchColumns.killImmolators] = entity.killImmolators;
+    values[HuntMatchColumns.killArmored] = entity.killArmored;
+    values[HuntMatchColumns.killHorses] = entity.killHorses;
+    values[HuntMatchColumns.killHellhound] = entity.killHellhound;
+    values[HuntMatchColumns.killMeatheads] = entity.killMeatheads;
+    values[HuntMatchColumns.killLeeches] = entity.killLeeches;
+    values[HuntMatchColumns.killWaterdevils] = entity.killWaterdevils;
 
     final id = await db.insert(HuntMatchColumns.table, values,
         conflictAlgorithm: ConflictAlgorithm.ignore);
@@ -379,6 +397,15 @@ class StatsDb {
         '[${HuntMatchColumns.teamOutdated}]	INTEGER NOT NULL,'
         '[${HuntMatchColumns.extracted}]	INTEGER NOT NULL,'
         '[${HuntMatchColumns.teamId}]	TEXT NOT NULL,'
+        '[${HuntMatchColumns.killGrunts}]	TEXT NOT NULL,'
+        '[${HuntMatchColumns.killHives}]	TEXT NOT NULL,'
+        '[${HuntMatchColumns.killImmolators}]	TEXT NOT NULL,'
+        '[${HuntMatchColumns.killArmored}]	TEXT NOT NULL,'
+        '[${HuntMatchColumns.killHorses}]	TEXT NOT NULL,'
+        '[${HuntMatchColumns.killHellhound}]	TEXT NOT NULL,'
+        '[${HuntMatchColumns.killMeatheads}]	TEXT NOT NULL,'
+        '[${HuntMatchColumns.killLeeches}]	TEXT NOT NULL,'
+        '[${HuntMatchColumns.killWaterdevils}]	TEXT NOT NULL,'
         '[${HuntMatchColumns.signature}]	TEXT NOT NULL UNIQUE);');
 
     await db.execute('CREATE TABLE [${HuntPlayerColumns.table}] ('
@@ -418,12 +445,36 @@ class StatsDb {
 
       await db.execute('UPDATE ${HuntMatchColumns.table} '
           'SET ${HuntMatchColumns.teamOutdated} = ${HuntMatchColumns.outdated};');
-
-      // Not supported in Sqlite
-      //await db.execute('ALTER TABLE ${HuntMatchColumns.table} '
-      //    'ALTER COLUMN ${HuntMatchColumns.teamOutdated} '
-      //    'DROP DEFAULT;');
     }
+
+    if (oldVersion < 3) {
+      await _createIntNotNullColumn(
+          db, HuntMatchColumns.table, HuntMatchColumns.killGrunts);
+      await _createIntNotNullColumn(
+          db, HuntMatchColumns.table, HuntMatchColumns.killHives);
+      await _createIntNotNullColumn(
+          db, HuntMatchColumns.table, HuntMatchColumns.killImmolators);
+      await _createIntNotNullColumn(
+          db, HuntMatchColumns.table, HuntMatchColumns.killArmored);
+      await _createIntNotNullColumn(
+          db, HuntMatchColumns.table, HuntMatchColumns.killHorses);
+      await _createIntNotNullColumn(
+          db, HuntMatchColumns.table, HuntMatchColumns.killHellhound);
+      await _createIntNotNullColumn(
+          db, HuntMatchColumns.table, HuntMatchColumns.killMeatheads);
+      await _createIntNotNullColumn(
+          db, HuntMatchColumns.table, HuntMatchColumns.killLeeches);
+      await _createIntNotNullColumn(
+          db, HuntMatchColumns.table, HuntMatchColumns.killWaterdevils);
+    }
+  }
+
+  static Future<void> _createIntNotNullColumn(
+      Database db, String table, String name,
+      {int defaultValue = 0}) {
+    return db.execute('ALTER TABLE $table '
+        'ADD COLUMN $name '
+        'INTEGER NOT NULL DEFAULT $defaultValue;');
   }
 }
 

@@ -21,6 +21,16 @@ class HuntMatchHeader {
   final String teamId;
   final String signature;
 
+  final int killGrunts;
+  final int killHives;
+  final int killImmolators;
+  final int killArmored;
+  final int killHorses;
+  final int killHellhound;
+  final int killMeatheads;
+  final int killLeeches;
+  final int killWaterdevils;
+
   HuntMatchHeader(
       {required this.mode,
       required this.teams,
@@ -35,12 +45,21 @@ class HuntMatchHeader {
       required this.ownEnemyDeaths,
       required this.teamEnemyDeaths,
       required this.ownAssists,
-        required this.teamOutdated,
+      required this.teamOutdated,
       required this.outdated,
       required this.extracted,
       required this.teamId,
       required this.signature,
-      required this.date});
+      required this.date,
+      required this.killArmored,
+      required this.killLeeches,
+      required this.killGrunts,
+      required this.killHellhound,
+      required this.killHives,
+      required this.killHorses,
+      required this.killImmolators,
+      required this.killMeatheads,
+      required this.killWaterdevils});
 }
 
 class HuntPlayer {
