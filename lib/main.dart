@@ -6,6 +6,7 @@ import 'package:bitsdojo_window_platform_interface/window.dart';
 import 'package:flutter/material.dart';
 import 'package:hunt_stats/border/corners.dart';
 import 'package:hunt_stats/border/gradient_box_border.dart';
+import 'package:hunt_stats/constants.dart';
 import 'package:hunt_stats/db/entities.dart';
 import 'package:hunt_stats/db/stats.dart';
 import 'package:hunt_stats/db/stats_db.dart';
@@ -23,7 +24,7 @@ void main() async {
 
   await HuntImages.init();
 
-  final db = StatsDb();
+  final db = StatsDb(predefinedProfileId: Constants.profileId);
   final tracker = TrackerEngine(db);
 
   runApp(MyApp(engine: tracker));

@@ -8,11 +8,13 @@ import 'package:path/path.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 class StatsDb {
-  late final DatabaseFactory dbFactory;
+  late final DatabaseFactory _factory;
 
-  StatsDb() {
+  StatsDb({int? predefinedProfileId}) {
     sqfliteFfiInit();
-    dbFactory = createDatabaseFactoryFfi();
+
+    _myProfileId = predefinedProfileId;
+    _factory = createDatabaseFactoryFfi();
   }
 
   Future<Database> get database {
@@ -28,7 +30,7 @@ class StatsDb {
       path = 'stats.db';
     }
 
-    return dbFactory.openDatabase(path,
+    return _factory.openDatabase(path,
         options: OpenDatabaseOptions(
             version: 2,
             singleInstance: true,
