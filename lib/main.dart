@@ -384,7 +384,7 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  bool _zupaman = true;
+  bool _zupaman = false;
 
   Decoration _createBlockDecoration() {
     if (_zupaman) {
