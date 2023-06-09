@@ -812,13 +812,14 @@ class PlayerWidget extends StatelessWidget {
   }
 
   Widget _createStarWidget(double fill, {double size = 16}) {
-    return SizedBox(
+    return Container(
+      padding: const EdgeInsets.all(1),
       height: size,
       width: size,
       child: Stack(
         children: [
           Image.asset(
-            Assets.assetsCrossWhite24dp,
+            Assets.assetsCrossWhite20dp,
             width: size,
             height: size,
             filterQuality: FilterQuality.medium,
@@ -828,7 +829,7 @@ class PlayerWidget extends StatelessWidget {
             height: size,
             width: size * fill,
             child: Image.asset(
-              Assets.assetsCrossWhite24dp,
+              Assets.assetsCrossWhite20dp,
               alignment: Alignment.centerLeft,
               fit: BoxFit.fitHeight,
               height: size,
