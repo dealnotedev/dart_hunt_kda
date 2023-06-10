@@ -793,18 +793,21 @@ class PlayerWidget extends StatelessWidget {
         const SizedBox(
           height: 4,
         ),
-        Container(
-          padding: const EdgeInsets.all(4),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _createStarWidget(Mmr.star1.getFilled(mmr)),
-              _createStarWidget(Mmr.star2.getFilled(mmr)),
-              _createStarWidget(Mmr.star3.getFilled(mmr)),
-              _createStarWidget(Mmr.star4.getFilled(mmr)),
-              _createStarWidget(Mmr.star5.getFilled(mmr)),
-              _createStarWidget(Mmr.star6.getFilled(mmr))
-            ],
+        Tooltip(
+          message: player?.mmr.toString() ?? 'No mmr',
+          child: Container(
+            padding: const EdgeInsets.all(4),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _createStarWidget(Mmr.star1.getFilled(mmr)),
+                _createStarWidget(Mmr.star2.getFilled(mmr)),
+                _createStarWidget(Mmr.star3.getFilled(mmr)),
+                _createStarWidget(Mmr.star4.getFilled(mmr)),
+                _createStarWidget(Mmr.star5.getFilled(mmr)),
+                _createStarWidget(Mmr.star6.getFilled(mmr))
+              ],
+            ),
           ),
         )
       ],
