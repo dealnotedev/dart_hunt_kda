@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "hunt_stats" "\0"
+            VALUE "CompanyName", "pro.hunt" "\0"
+            VALUE "FileDescription", "Hunt: Stats" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "hunt_stats" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2023 com.example. All rights reserved." "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2023 pro.hunt. All rights reserved." "\0"
             VALUE "OriginalFilename", "hunt_stats.exe" "\0"
-            VALUE "ProductName", "hunt_stats" "\0"
+            VALUE "ProductName", "Hunt: Stats" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

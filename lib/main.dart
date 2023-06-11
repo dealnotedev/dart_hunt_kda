@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:bitsdojo_window_platform_interface/window.dart';
 import 'package:flutter/material.dart';
+import 'package:hunt_stats/auto_launcher_windows.dart';
 import 'package:hunt_stats/border/corners.dart';
 import 'package:hunt_stats/border/gradient_box_border.dart';
 import 'package:hunt_stats/constants.dart';
@@ -19,7 +20,7 @@ import 'package:morphable_shape/morphable_shape.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:system_tray/system_tray.dart' as tray;
 
-void main() async {
+void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await HuntImages.init();
@@ -40,8 +41,37 @@ void main() async {
     window.alignment = Alignment.center;
     window.show();
 
+    if (args.contains('-silent')) {
+      window.close();
+    } else {
+      window.show();
+    }
+
     _startSystemTray(window);
   });
+}
+
+final launcher = AppAutoLauncherImplWindows(
+    appName: 'Hunt: Stats',
+    appPath: Platform.resolvedExecutable,
+    args: ['-silent']);
+
+final _starupPublisher = StreamController<bool>.broadcast();
+
+Stream<bool> _autostart() async* {
+  final enabled = await launcher.isEnabled();
+  yield enabled;
+
+  yield* _starupPublisher.stream;
+}
+
+void _setStartupEnabled(bool enabled) async {
+  if (enabled) {
+    await launcher.enable();
+  } else {
+    await launcher.disable();
+  }
+  _starupPublisher.add(enabled);
 }
 
 void _startSystemTray(DesktopWindow window) async {
@@ -166,7 +196,7 @@ class _MyHomePageState extends State<MyHomePage> {
               _createIconifiedContaner(
                   icon: Assets.assetsIcKd,
                   children: _createTeamKdWidgets(bundle, textColor: textColor)),
-              if (size.height > 448) ...[
+              if (size.height > 484) ...[
                 const SizedBox(
                   height: 16,
                 ),
@@ -212,6 +242,26 @@ class _MyHomePageState extends State<MyHomePage> {
               )
             ],
           ),
+          StreamBuilder<bool>(
+              stream: _autostart(),
+              builder: (cnxt, snapshot) {
+                return Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Disabled',
+                      style: TextStyle(color: textColor, fontSize: 16),
+                    ),
+                    Switch(
+                        value: snapshot.data ?? false,
+                        onChanged: _setStartupEnabled),
+                    Text(
+                      'Startup',
+                      style: TextStyle(color: textColor, fontSize: 16),
+                    )
+                  ],
+                );
+              }),
           const SizedBox(
             height: 16,
           ),
