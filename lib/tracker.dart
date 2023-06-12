@@ -179,6 +179,8 @@ class HuntData {
 
   bool? isTutorial;
 
+  int? missionBagFbeGoldBonus;
+
   final players = <int,
       Map<int,
           Map<String, PlayerNode>>>{}; // <team, <player_num, [player_values]>>
@@ -285,6 +287,16 @@ class HuntData {
       throw StateError('No own team mmr');
     }
 
+    int money = 0;
+    int bounty = 0;
+    int bonds = 0;
+
+    for (var accolade in accolades.values) {
+      money += accolade.gold ?? 0;
+      bounty += accolade.bounty ?? 0;
+      bonds += accolade.generatedGems ?? 0;
+    }
+
     final entity = HuntMatchHeader(
         mode: mode,
         teams: teamsCount,
@@ -317,6 +329,10 @@ class HuntData {
 
     return MatchData(match: entity, players: users);
   }
+
+  static const rewardBounty = 0;
+  static const rewardTypeXp = 2;
+  static const rewardTypeMoney = 4;
 
   static Set<String> extractActionTimes(String? value, String key) {
     if (value == null) return {};
@@ -364,6 +380,10 @@ class HuntData {
       }
 
       switch (name) {
+        case 'MissionBagFbeGoldBonus':
+          missionBagFbeGoldBonus = node.intValue;
+          break;
+
         case 'MissionBagNumTeams':
           numTeams = node.intValue;
           break;
@@ -488,7 +508,11 @@ class HuntData {
                   break;
               }
             }
+            continue;
           }
+
+          print('$name = ${node.stringValue}');
+
           break;
       }
     }
@@ -528,6 +552,11 @@ class BagEntry {
   String? descriptor;
   int? rewardType;
   int? rewardAmount;
+
+  @override
+  String toString() {
+    return 'BagEntry{amount: $amount, category: $category, rewardType: $rewardType, rewardAmount: $rewardAmount}';
+  }
 }
 
 class Accolade {
@@ -543,6 +572,11 @@ class Accolade {
   int? hunterXp;
   int? weighting;
   int? xp;
+
+  @override
+  String toString() {
+    return 'Accolade{bloodlineXp: $bloodlineXp, bounty: $bounty, eventPoints: $eventPoints, gems: $gems, generatedGems: $generatedGems, gold: $gold, hits: $hits, hunterPoints: $hunterPoints, hunterXp: $hunterXp, weighting: $weighting, xp: $xp}';
+  }
 }
 
 class TeamNode {

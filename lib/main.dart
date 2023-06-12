@@ -28,6 +28,8 @@ void main(List<String> args) async {
   final db = StatsDb(predefinedProfileId: Constants.profileId);
   final tracker = TrackerEngine(db);
 
+  //await tracker.extractFromFile(File('examples/attributes_zoop_duo_win.xml'));
+
   runApp(MyApp(engine: tracker));
 
   await tracker.start();
