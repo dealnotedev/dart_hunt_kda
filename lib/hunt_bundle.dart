@@ -1,6 +1,6 @@
 import 'package:hunt_stats/db/entities.dart';
 import 'package:hunt_stats/db/stats.dart';
-import 'package:hunt_stats/match_data.dart';
+import 'package:hunt_stats/parser/match_data.dart';
 
 class HuntBundle {
   final HuntPlayer? me;
