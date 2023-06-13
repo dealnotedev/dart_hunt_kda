@@ -1,3 +1,7 @@
+import 'package:json_annotation/json_annotation.dart';
+
+part 'models.g.dart';
+
 class HuntMatchData {
   final HuntMatchHeader match;
 
@@ -6,6 +10,7 @@ class HuntMatchData {
   HuntMatchData({required this.match, required this.players});
 }
 
+@JsonSerializable()
 class HuntMatchHeader {
   final DateTime date;
   final int mode;
@@ -64,18 +69,24 @@ class HuntMatchHeader {
     required this.killArmored,
     required this.killLeeches,
     required this.killGrunts,
-    required this.killHellhound,
-    required this.killHives,
-    required this.killHorses,
-    required this.killImmolators,
-    required this.killMeatheads,
-    required this.killWaterdevils,
-    required this.moneyFound,
-    required this.bountyFound,
-    required this.bondsFound,
-    required this.teammateRevives});
+      required this.killHellhound,
+      required this.killHives,
+      required this.killHorses,
+      required this.killImmolators,
+      required this.killMeatheads,
+      required this.killWaterdevils,
+      required this.moneyFound,
+      required this.bountyFound,
+      required this.bondsFound,
+      required this.teammateRevives});
+
+  factory HuntMatchHeader.fromJson(Map<String, dynamic> json) =>
+      _$HuntMatchHeaderFromJson(json);
+
+  Map<String, dynamic> toJson() => _$HuntMatchHeaderToJson(this);
 }
 
+@JsonSerializable()
 class HuntPlayer {
   final bool teammate;
   final int teamIndex;
@@ -113,14 +124,19 @@ class HuntPlayer {
     required this.downedMe,
     required this.downedTeam,
     required this.hadWellspring,
-    required this.soulSurvivor,
-    required this.killedByMe,
-    required this.killedByTeam,
-    required this.killedMe,
-    required this.killedTeam,
-    required this.mmr,
-    required this.voiceToMe,
-    required this.voiceToTeam,
-    required this.teamExtraction,
-    required this.skillBased});
+      required this.soulSurvivor,
+      required this.killedByMe,
+      required this.killedByTeam,
+      required this.killedMe,
+      required this.killedTeam,
+      required this.mmr,
+      required this.voiceToMe,
+      required this.voiceToTeam,
+      required this.teamExtraction,
+      required this.skillBased});
+
+  factory HuntPlayer.fromJson(Map<String, dynamic> json) =>
+      _$HuntPlayerFromJson(json);
+
+  Map<String, dynamic> toJson() => _$HuntPlayerToJson(this);
 }
