@@ -325,7 +325,11 @@ class HuntData {
         killArmored: bags.amountOf('kill armored'),
         killLeeches: bags.amountOf('kill leeches'),
         killWaterdevils: bags.amountOf('kill waterdevil'),
-        killGrunts: bags.amountOf('kill grunt'));
+        killGrunts: bags.amountOf('kill grunt'),
+        moneyFound: money,
+        bountyFound: bounty,
+        bondsFound: bonds,
+        teammateRevives: bags.amountOf('revive team mate'));
 
     return MatchData(match: entity, players: users);
   }

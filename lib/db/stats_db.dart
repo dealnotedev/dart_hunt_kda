@@ -32,7 +32,7 @@ class StatsDb {
 
     return _factory.openDatabase(path,
         options: OpenDatabaseOptions(
-            version: 3,
+            version: 4,
             singleInstance: true,
             onCreate: _onCreate,
             onUpgrade: _onUpgrade));
@@ -300,36 +300,39 @@ class StatsDb {
     if (cursor.isNotEmpty) {
       final row = cursor[0];
       final entity = HuntMatchHeader(
-        mode: row[HuntMatchColumns.mode] as int,
-        teams: row[HuntMatchColumns.teams] as int,
-        teamOutdated: row[HuntMatchColumns.teamOutdated] as int == 1,
-        teamSize: row[HuntMatchColumns.teamSize] as int,
-        teamMmr: row[HuntMatchColumns.teamMmr] as int,
-        ownDowns: row[HuntMatchColumns.ownDowns] as int,
-        teamDowns: row[HuntMatchColumns.teamDowns] as int,
-        ownEnemyDowns: row[HuntMatchColumns.ownEnemyDowns] as int,
-        teamEnemyDowns: row[HuntMatchColumns.teamEnemyDowns] as int,
-        ownDeaths: row[HuntMatchColumns.ownDeaths] as int,
-        teamDeaths: row[HuntMatchColumns.teamDeaths] as int,
-        ownEnemyDeaths: row[HuntMatchColumns.ownEnemyDeaths] as int,
-        teamEnemyDeaths: row[HuntMatchColumns.teamEnemyDeaths] as int,
-        ownAssists: row[HuntMatchColumns.ownAssists] as int,
-        outdated: row[HuntMatchColumns.outdated] as int == 1,
-        extracted: row[HuntMatchColumns.extracted] as int == 1,
-        teamId: row[HuntMatchColumns.teamId] as String,
-        signature: row[HuntMatchColumns.signature] as String,
-        date: DateTime.fromMillisecondsSinceEpoch(
-            row[HuntMatchColumns.date] as int),
-        killMeatheads: row[HuntMatchColumns.killMeatheads] as int,
-        killImmolators: row[HuntMatchColumns.killImmolators] as int,
-        killHorses: row[HuntMatchColumns.killHorses] as int,
-        killHives: row[HuntMatchColumns.killHives] as int,
-        killHellhound: row[HuntMatchColumns.killHellhound] as int,
-        killWaterdevils: row[HuntMatchColumns.killWaterdevils] as int,
-        killGrunts: row[HuntMatchColumns.killGrunts] as int,
-        killLeeches: row[HuntMatchColumns.killLeeches] as int,
-        killArmored: row[HuntMatchColumns.killArmored] as int,
-      );
+          mode: row[HuntMatchColumns.mode] as int,
+          teams: row[HuntMatchColumns.teams] as int,
+          teamOutdated: row[HuntMatchColumns.teamOutdated] as int == 1,
+          teamSize: row[HuntMatchColumns.teamSize] as int,
+          teamMmr: row[HuntMatchColumns.teamMmr] as int,
+          ownDowns: row[HuntMatchColumns.ownDowns] as int,
+          teamDowns: row[HuntMatchColumns.teamDowns] as int,
+          ownEnemyDowns: row[HuntMatchColumns.ownEnemyDowns] as int,
+          teamEnemyDowns: row[HuntMatchColumns.teamEnemyDowns] as int,
+          ownDeaths: row[HuntMatchColumns.ownDeaths] as int,
+          teamDeaths: row[HuntMatchColumns.teamDeaths] as int,
+          ownEnemyDeaths: row[HuntMatchColumns.ownEnemyDeaths] as int,
+          teamEnemyDeaths: row[HuntMatchColumns.teamEnemyDeaths] as int,
+          ownAssists: row[HuntMatchColumns.ownAssists] as int,
+          outdated: row[HuntMatchColumns.outdated] as int == 1,
+          extracted: row[HuntMatchColumns.extracted] as int == 1,
+          teamId: row[HuntMatchColumns.teamId] as String,
+          signature: row[HuntMatchColumns.signature] as String,
+          date: DateTime.fromMillisecondsSinceEpoch(
+              row[HuntMatchColumns.date] as int),
+          killMeatheads: row[HuntMatchColumns.killMeatheads] as int,
+          killImmolators: row[HuntMatchColumns.killImmolators] as int,
+          killHorses: row[HuntMatchColumns.killHorses] as int,
+          killHives: row[HuntMatchColumns.killHives] as int,
+          killHellhound: row[HuntMatchColumns.killHellhound] as int,
+          killWaterdevils: row[HuntMatchColumns.killWaterdevils] as int,
+          killGrunts: row[HuntMatchColumns.killGrunts] as int,
+          killLeeches: row[HuntMatchColumns.killLeeches] as int,
+          killArmored: row[HuntMatchColumns.killArmored] as int,
+          moneyFound: row[HuntMatchColumns.moneyFound] as int,
+          bountyFound: row[HuntMatchColumns.bountyFound] as int,
+          bondsFound: row[HuntMatchColumns.bondsFound] as int,
+          teammateRevives: row[HuntMatchColumns.teammateRevives] as int);
 
       entity.id = row[HuntMatchColumns.id] as int;
       return entity;
@@ -370,6 +373,10 @@ class StatsDb {
     values[HuntMatchColumns.killMeatheads] = entity.killMeatheads;
     values[HuntMatchColumns.killLeeches] = entity.killLeeches;
     values[HuntMatchColumns.killWaterdevils] = entity.killWaterdevils;
+    values[HuntMatchColumns.moneyFound] = entity.moneyFound;
+    values[HuntMatchColumns.bountyFound] = entity.bountyFound;
+    values[HuntMatchColumns.bondsFound] = entity.bondsFound;
+    values[HuntMatchColumns.teammateRevives] = entity.teammateRevives;
 
     final id = await db.insert(HuntMatchColumns.table, values,
         conflictAlgorithm: ConflictAlgorithm.ignore);
@@ -406,6 +413,10 @@ class StatsDb {
         '[${HuntMatchColumns.killMeatheads}] INTEGER NOT NULL,'
         '[${HuntMatchColumns.killLeeches}] INTEGER NOT NULL,'
         '[${HuntMatchColumns.killWaterdevils}] INTEGER NOT NULL,'
+        '[${HuntMatchColumns.moneyFound}] INTEGER NOT NULL,'
+        '[${HuntMatchColumns.bountyFound}] INTEGER NOT NULL,'
+        '[${HuntMatchColumns.bondsFound}] INTEGER NOT NULL,'
+        '[${HuntMatchColumns.teammateRevives}] INTEGER NOT NULL,'
         '[${HuntMatchColumns.signature}]	TEXT NOT NULL UNIQUE);');
 
     await db.execute('CREATE TABLE [${HuntPlayerColumns.table}] ('
@@ -466,6 +477,17 @@ class StatsDb {
           db, HuntMatchColumns.table, HuntMatchColumns.killLeeches);
       await _createIntNotNullColumn(
           db, HuntMatchColumns.table, HuntMatchColumns.killWaterdevils);
+    }
+
+    if (oldVersion < 4) {
+      await _createIntNotNullColumn(
+          db, HuntMatchColumns.table, HuntMatchColumns.moneyFound);
+      await _createIntNotNullColumn(
+          db, HuntMatchColumns.table, HuntMatchColumns.bountyFound);
+      await _createIntNotNullColumn(
+          db, HuntMatchColumns.table, HuntMatchColumns.bondsFound);
+      await _createIntNotNullColumn(
+          db, HuntMatchColumns.table, HuntMatchColumns.teammateRevives);
     }
   }
 

@@ -31,6 +31,11 @@ class HuntMatchHeader {
   final int killLeeches;
   final int killWaterdevils;
 
+  final int moneyFound;
+  final int bountyFound;
+  final int bondsFound;
+  final int teammateRevives;
+
   HuntMatchHeader(
       {required this.mode,
       required this.teams,
@@ -59,7 +64,11 @@ class HuntMatchHeader {
       required this.killHorses,
       required this.killImmolators,
       required this.killMeatheads,
-      required this.killWaterdevils});
+      required this.killWaterdevils,
+      required this.moneyFound,
+      required this.bountyFound,
+      required this.bondsFound,
+      required this.teammateRevives});
 }
 
 class HuntPlayer {

@@ -32,6 +32,12 @@ class HuntMatchColumns {
   static const String killMeatheads = 'kill_meathead';
   static const String killLeeches = 'kill_leeches';
   static const String killWaterdevils = 'kill_waterdevils';
+
+  static const String moneyFound = 'money_found';
+  static const String bountyFound = 'bounty_found';
+  static const String bondsFound = 'bonds_found';
+
+  static const String teammateRevives = 'teammate_revives';
 }
 
 class HuntPlayerColumns {
