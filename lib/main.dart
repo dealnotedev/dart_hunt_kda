@@ -191,7 +191,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   me: bundle.me,
                   textColor: textColor,
                   enemies: bundle.enemyStats,
-                  cardColor: _getBlockColor()),
+                  cardColor: _blockColor),
               _createIconifiedContaner(
                   icon: _zupaman ? Assets.assetsIcKdaV2 : Assets.assetsIcKda,
                   children: _createMyKdaWidgets(bundle, textColor: textColor)),
@@ -442,7 +442,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Decoration _createBlockDecoration() {
     if (_zupaman) {
       return BoxDecoration(
-        color: _getBlockColor(),
+        color: _blockColor,
         border: GradientBoxBorder(
           corners: Corners(
               topRight: HuntImages.cornerTopRight,
@@ -456,17 +456,11 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       );
     } else {
-      return _createConcaveDecoration(color: _getBlockColor(), radius: 8);
+      return _createConcaveDecoration(color: _blockColor, radius: 8);
     }
   }
 
-  Color _getBlockColor() {
-    //if (_zupaman) {
-    //  return const Color(0xFF282B31);
-    //} else {
-    return const Color(0xFF090909);
-    //}
-  }
+  Color get _blockColor => const Color(0xFF090909);
 
   Widget _createIconifiedContaner(
       {required String icon, required List<Widget> children}) {
@@ -506,7 +500,7 @@ class _MyHomePageState extends State<MyHomePage> {
           padding: const EdgeInsets.all(size * .1),
           height: size,
           width: size,
-          decoration: ShapeDecoration(shape: border, color: _getBlockColor()),
+          decoration: ShapeDecoration(shape: border, color: _blockColor),
           child: Image.asset(
             icon,
             filterQuality: FilterQuality.medium,
