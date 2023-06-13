@@ -155,8 +155,6 @@ class HuntData {
         ownEnemyDeaths: ownEnemyDeaths,
         teamEnemyDeaths: teamEnemyDeaths,
         ownAssists: ownAssists,
-        outdated: false,
-        teamOutdated: false,
         extracted: !(isHunterDead ?? false),
         teamId: teamId.join('-'),
         signature: signature.generate(),
@@ -177,7 +175,7 @@ class HuntData {
         bondsFound: bonds,
         teammateRevives: bags.amountOf('revive team mate'));
 
-    return HuntMatchData(match: entity, players: users);
+    return HuntMatchData(header: entity, players: users);
   }
 
   static const rewardBounty = 0;

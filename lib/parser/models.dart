@@ -2,15 +2,21 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'models.g.dart';
 
+@JsonSerializable(explicitToJson: true)
 class HuntMatchData {
-  final HuntMatchHeader match;
+  final HuntMatchHeader header;
 
   final List<HuntPlayer> players;
 
-  HuntMatchData({required this.match, required this.players});
+  HuntMatchData({required this.header, required this.players});
+
+  factory HuntMatchData.fromJson(Map<String, dynamic> json) =>
+      _$HuntMatchDataFromJson(json);
+
+  Map<String, dynamic> toJson() => _$HuntMatchDataToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class HuntMatchHeader {
   final DateTime date;
   final int mode;
@@ -26,8 +32,6 @@ class HuntMatchHeader {
   final int ownEnemyDeaths;
   final int teamEnemyDeaths;
   final int ownAssists;
-  final bool outdated;
-  final bool teamOutdated;
   final bool extracted;
   final String teamId;
   final String signature;
@@ -47,28 +51,27 @@ class HuntMatchHeader {
   final int bondsFound;
   final int teammateRevives;
 
-  HuntMatchHeader({required this.mode,
-    required this.teams,
-    required this.teamSize,
-    required this.teamMmr,
-    required this.ownDowns,
-    required this.teamDowns,
-    required this.ownEnemyDowns,
-    required this.teamEnemyDowns,
-    required this.ownDeaths,
-    required this.teamDeaths,
-    required this.ownEnemyDeaths,
-    required this.teamEnemyDeaths,
-    required this.ownAssists,
-    required this.teamOutdated,
-    required this.outdated,
-    required this.extracted,
-    required this.teamId,
-    required this.signature,
-    required this.date,
-    required this.killArmored,
-    required this.killLeeches,
-    required this.killGrunts,
+  HuntMatchHeader(
+      {required this.mode,
+      required this.teams,
+      required this.teamSize,
+      required this.teamMmr,
+      required this.ownDowns,
+      required this.teamDowns,
+      required this.ownEnemyDowns,
+      required this.teamEnemyDowns,
+      required this.ownDeaths,
+      required this.teamDeaths,
+      required this.ownEnemyDeaths,
+      required this.teamEnemyDeaths,
+      required this.ownAssists,
+      required this.extracted,
+      required this.teamId,
+      required this.signature,
+      required this.date,
+      required this.killArmored,
+      required this.killLeeches,
+      required this.killGrunts,
       required this.killHellhound,
       required this.killHives,
       required this.killHorses,
@@ -86,7 +89,7 @@ class HuntMatchHeader {
   Map<String, dynamic> toJson() => _$HuntMatchHeaderToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class HuntPlayer {
   final bool teammate;
   final int teamIndex;
@@ -113,17 +116,18 @@ class HuntPlayer {
   bool get hasMutuallyKillDowns =>
       killedByMe > 0 || killedMe > 0 || downedMe > 0 || downedByMe > 0;
 
-  HuntPlayer({required this.teammate,
-    required this.teamIndex,
-    required this.profileId,
-    required this.username,
-    required this.bountyExtracted,
-    required this.bountyPickedup,
-    required this.downedByMe,
-    required this.downedByTeam,
-    required this.downedMe,
-    required this.downedTeam,
-    required this.hadWellspring,
+  HuntPlayer(
+      {required this.teammate,
+      required this.teamIndex,
+      required this.profileId,
+      required this.username,
+      required this.bountyExtracted,
+      required this.bountyPickedup,
+      required this.downedByMe,
+      required this.downedByTeam,
+      required this.downedMe,
+      required this.downedTeam,
+      required this.hadWellspring,
       required this.soulSurvivor,
       required this.killedByMe,
       required this.killedByTeam,

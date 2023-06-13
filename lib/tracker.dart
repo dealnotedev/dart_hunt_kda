@@ -150,8 +150,8 @@ class TrackerEngine {
       final file = File(attributes);
 
       final data = await parser.parseFromFile(file);
-      if (signatures.add(data.match.signature)) {
-        port.send(data.toEntity());
+      if (signatures.add(data.header.signature)) {
+        port.send(data.toEntity(outdated: false, teamOutdated: false));
       }
     });
   }

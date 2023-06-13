@@ -6,6 +6,20 @@ part of 'models.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
+HuntMatchData _$HuntMatchDataFromJson(Map<String, dynamic> json) =>
+    HuntMatchData(
+      header: HuntMatchHeader.fromJson(json['header'] as Map<String, dynamic>),
+      players: (json['players'] as List<dynamic>)
+          .map((e) => HuntPlayer.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+
+Map<String, dynamic> _$HuntMatchDataToJson(HuntMatchData instance) =>
+    <String, dynamic>{
+      'header': instance.header.toJson(),
+      'players': instance.players.map((e) => e.toJson()).toList(),
+    };
+
 HuntMatchHeader _$HuntMatchHeaderFromJson(Map<String, dynamic> json) =>
     HuntMatchHeader(
       mode: json['mode'] as int,
@@ -21,8 +35,6 @@ HuntMatchHeader _$HuntMatchHeaderFromJson(Map<String, dynamic> json) =>
       ownEnemyDeaths: json['ownEnemyDeaths'] as int,
       teamEnemyDeaths: json['teamEnemyDeaths'] as int,
       ownAssists: json['ownAssists'] as int,
-      teamOutdated: json['teamOutdated'] as bool,
-      outdated: json['outdated'] as bool,
       extracted: json['extracted'] as bool,
       teamId: json['teamId'] as String,
       signature: json['signature'] as String,
@@ -58,8 +70,6 @@ Map<String, dynamic> _$HuntMatchHeaderToJson(HuntMatchHeader instance) =>
       'ownEnemyDeaths': instance.ownEnemyDeaths,
       'teamEnemyDeaths': instance.teamEnemyDeaths,
       'ownAssists': instance.ownAssists,
-      'outdated': instance.outdated,
-      'teamOutdated': instance.teamOutdated,
       'extracted': instance.extracted,
       'teamId': instance.teamId,
       'signature': instance.signature,

@@ -2,15 +2,16 @@ import 'package:hunt_stats/db/entities.dart';
 import 'package:hunt_stats/parser/models.dart';
 
 extension MatchDataExt on HuntMatchData {
-  MatchEntity toEntity() {
+  MatchEntity toEntity({required bool teamOutdated, required bool outdated}) {
     return MatchEntity(
-        match: match.toEntity(),
+        match: header.toEntity(teamOutdated: teamOutdated, outdated: outdated),
         players: players.map((e) => e.toEntity()).toList());
   }
 }
 
 extension MatchHeaderExt on HuntMatchHeader {
-  MatchHeaderEntity toEntity() {
+  MatchHeaderEntity toEntity(
+      {required bool teamOutdated, required bool outdated}) {
     return MatchHeaderEntity(
         mode: mode,
         teams: teams,

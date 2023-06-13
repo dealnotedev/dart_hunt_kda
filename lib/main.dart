@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:bitsdojo_window/bitsdojo_window.dart';
@@ -28,7 +29,9 @@ void main(List<String> args) async {
   final db = StatsDb(predefinedProfileId: Constants.profileId);
   final tracker = TrackerEngine(db);
 
-  //await tracker.extractFromFile(File('examples/attributes_zoop_duo_win.xml'));
+  final data = await tracker
+      .extractFromFile(File('examples/attributes_zoop_duo_win.xml'));
+  await File('json.json').writeAsString(json.encode(data));
 
   runApp(MyApp(engine: tracker));
 
