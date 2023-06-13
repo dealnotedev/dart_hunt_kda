@@ -193,10 +193,10 @@ class _MyHomePageState extends State<MyHomePage> {
                   enemies: bundle.enemyStats,
                   cardColor: _getBlockColor()),
               _createIconifiedContaner(
-                  icon: Assets.assetsIcKda,
+                  icon: _zupaman ? Assets.assetsIcKdaV2 : Assets.assetsIcKda,
                   children: _createMyKdaWidgets(bundle, textColor: textColor)),
               _createIconifiedContaner(
-                  icon: Assets.assetsIcKd,
+                  icon: _zupaman ? Assets.assetsIcKdV2 : Assets.assetsIcKd,
                   children: _createTeamKdWidgets(bundle, textColor: textColor)),
               if (size.height > 484) ...[
                 const SizedBox(
@@ -442,7 +442,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Decoration _createBlockDecoration() {
     if (_zupaman) {
       return BoxDecoration(
-        color: const Color(0xFF282B31),
+        color: _getBlockColor(),
         border: GradientBoxBorder(
           corners: Corners(
               topRight: HuntImages.cornerTopRight,
@@ -461,11 +461,11 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Color _getBlockColor() {
-    if (_zupaman) {
-      return const Color(0xFF282B31);
-    } else {
-      return const Color(0xFF090909);
-    }
+    //if (_zupaman) {
+    //  return const Color(0xFF282B31);
+    //} else {
+    return const Color(0xFF090909);
+    //}
   }
 
   Widget _createIconifiedContaner(
