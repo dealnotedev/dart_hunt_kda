@@ -38,7 +38,7 @@ class StatsDb {
             onUpgrade: _onUpgrade));
   }
 
-  Future<void> insertHuntMatchPlayers(Iterable<HuntPlayer> entities) async {
+  Future<void> insertHuntMatchPlayers(Iterable<PlayerEntity> entities) async {
     final db = await database;
 
     await db.transaction<void>((txn) async {
@@ -139,7 +139,7 @@ class StatsDb {
   }
 
   Future<Map<int, EnemyStats>> getEnemiesStats(
-      Map<int, HuntPlayer> enemies) async {
+      Map<int, PlayerEntity> enemies) async {
     final db = await database;
     final keys = enemies.keys;
 
@@ -252,7 +252,7 @@ class StatsDb {
         [1, 0, teamId]);
   }
 
-  Future<List<HuntPlayer>> getMatchPlayers(int matchId) async {
+  Future<List<PlayerEntity>> getMatchPlayers(int matchId) async {
     final db = await database;
 
     final cursor = await db.rawQuery(
@@ -260,7 +260,7 @@ class StatsDb {
         [matchId]);
 
     return cursor.map((row) {
-      final entity = HuntPlayer(
+      final entity = PlayerEntity(
           teammate: row[HuntPlayerColumns.teammate] as int == 1,
           teamIndex: row[HuntPlayerColumns.teamIndex] as int,
           profileId: row[HuntPlayerColumns.profileId] as int,
@@ -290,7 +290,7 @@ class StatsDb {
     }).toList();
   }
 
-  Future<HuntMatchHeader?> getLastMatch() async {
+  Future<MatchHeaderEntity?> getLastMatch() async {
     final db = await database;
 
     final cursor = await db.rawQuery(
@@ -299,7 +299,7 @@ class StatsDb {
 
     if (cursor.isNotEmpty) {
       final row = cursor[0];
-      final entity = HuntMatchHeader(
+      final entity = MatchHeaderEntity(
           mode: row[HuntMatchColumns.mode] as int,
           teams: row[HuntMatchColumns.teams] as int,
           teamOutdated: row[HuntMatchColumns.teamOutdated] as int == 1,
@@ -341,7 +341,7 @@ class StatsDb {
     return null;
   }
 
-  Future<void> insertHuntMatch(HuntMatchHeader entity) async {
+  Future<void> insertHuntMatch(MatchHeaderEntity entity) async {
     final db = await database;
 
     final values = <String, Object?>{};

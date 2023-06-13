@@ -44,7 +44,7 @@ class TeamStats {
 }
 
 class EnemyStats {
-  final HuntPlayer player;
+  final PlayerEntity player;
   final int killedMe;
   final int killedByMe;
   final int matches;

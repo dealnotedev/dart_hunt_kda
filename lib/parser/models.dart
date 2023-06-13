@@ -1,14 +1,4 @@
-class MatchEntity {
-  final MatchHeaderEntity match;
-
-  final List<PlayerEntity> players;
-
-  MatchEntity({required this.match, required this.players});
-}
-
-class MatchHeaderEntity {
-  late final int id;
-
+class HuntMatchHeader {
   final DateTime date;
   final int mode;
   final int teams;
@@ -44,7 +34,7 @@ class MatchHeaderEntity {
   final int bondsFound;
   final int teammateRevives;
 
-  MatchHeaderEntity(
+  HuntMatchHeader(
       {required this.mode,
       required this.teams,
       required this.teamSize,
@@ -79,11 +69,7 @@ class MatchHeaderEntity {
       required this.teammateRevives});
 }
 
-class PlayerEntity {
-  late final int id;
-  late final int matchId;
-  late final String teamId;
-
+class HuntPlayer {
   final bool teammate;
   final int teamIndex;
   final int profileId;
@@ -109,7 +95,7 @@ class PlayerEntity {
   bool get hasMutuallyKillDowns =>
       killedByMe > 0 || killedMe > 0 || downedMe > 0 || downedByMe > 0;
 
-  PlayerEntity(
+  HuntPlayer(
       {required this.teammate,
       required this.teamIndex,
       required this.profileId,

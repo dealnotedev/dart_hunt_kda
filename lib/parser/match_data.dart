@@ -1,4 +1,4 @@
-import 'package:hunt_stats/db/entities.dart';
+import 'package:hunt_stats/parser/models.dart';
 
 class MatchData {
   final HuntMatchHeader match;

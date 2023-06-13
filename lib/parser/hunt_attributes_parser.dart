@@ -2,9 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:crypto/crypto.dart';
-import 'package:hunt_stats/db/entities.dart';
 import 'package:hunt_stats/parser/match_data.dart';
 import 'package:hunt_stats/parser/mode.dart';
+import 'package:hunt_stats/parser/models.dart';
 import 'package:xml/xml.dart';
 
 class HuntAttributesParser {

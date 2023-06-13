@@ -555,7 +555,7 @@ ShapeDecoration _createConcaveDecoration(
 }
 
 class MyTeamWidget extends StatelessWidget {
-  final Iterable<HuntPlayer> teammates;
+  final Iterable<PlayerEntity> teammates;
   final Color? textColor;
   final Color cardColor;
 
@@ -594,8 +594,8 @@ class MyTeamWidget extends StatelessWidget {
 }
 
 class _PlayersPager extends StatefulWidget {
-  final Iterable<HuntPlayer> teammates;
-  final HuntPlayer? me;
+  final Iterable<PlayerEntity> teammates;
+  final PlayerEntity? me;
   final List<EnemyStats> enemies;
   final Color cardColor;
   final Color? textColor;
@@ -623,7 +623,7 @@ Widget _createChangesWidget(int value, {bool positive = true}) {
 }
 
 class EnemyCardWidget extends StatelessWidget {
-  final HuntPlayer? me;
+  final PlayerEntity? me;
   final EnemyStats stats;
   final Color? textColor;
   final Color cardColor;
@@ -817,7 +817,7 @@ extension Ex on double {
 }
 
 class PlayerWidget extends StatelessWidget {
-  final HuntPlayer? player;
+  final PlayerEntity? player;
   final Color? textColor;
 
   const PlayerWidget({super.key, required this.player, this.textColor});

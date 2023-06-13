@@ -4,6 +4,7 @@ import 'dart:isolate';
 
 import 'package:collection/collection.dart';
 import 'package:hunt_stats/db/entities.dart';
+import 'package:hunt_stats/db/entities_ext.dart';
 import 'package:hunt_stats/db/stats_db.dart';
 import 'package:hunt_stats/hunt_bundle.dart';
 import 'package:hunt_stats/hunt_finder.dart';
@@ -23,7 +24,7 @@ class TrackerEngine {
 
     final ReceivePort port = ReceivePort('Tracking')
       ..listen((dynamic info) {
-        if (info is MatchData) {
+        if (info is MatchEntity) {
           saveHuntMatch(info);
         }
       });
@@ -36,7 +37,7 @@ class TrackerEngine {
 
     if (header != null) {
       final players = await db.getMatchPlayers(header.id);
-      final match = MatchData(match: header, players: players);
+      final match = MatchEntity(match: header, players: players);
       final ownStats = await db.getOwnStats();
       final teamStats = await db.getTeamStats(header.teamId);
 
@@ -63,10 +64,10 @@ class TrackerEngine {
     }
   }
 
-  static Map<int, HuntPlayer> _getEnemiesMap(List<HuntPlayer> players) {
+  static Map<int, PlayerEntity> _getEnemiesMap(List<PlayerEntity> players) {
     final enemies = players
         .where((element) => !element.teammate && element.hasMutuallyKillDowns);
-    final map = <int, HuntPlayer>{};
+    final map = <int, PlayerEntity>{};
     map.addEntries(enemies.map((e) => MapEntry(e.profileId, e)));
     return map;
   }
@@ -83,7 +84,7 @@ class TrackerEngine {
     }
   }
 
-  Future<void> saveHuntMatch(MatchData data) async {
+  Future<void> saveHuntMatch(MatchEntity data) async {
     final previousTeamStats = data.match.teamId == _lastBundle?.teamId
         ? _lastBundle?.teamStats
         : await db.getTeamStats(data.match.teamId);
@@ -150,7 +151,7 @@ class TrackerEngine {
 
       final data = await parser.parseFromFile(file);
       if (signatures.add(data.match.signature)) {
-        port.send(data);
+        port.send(data.toEntity());
       }
     });
   }
@@ -159,8 +160,6 @@ class TrackerEngine {
     return HuntAttributesParser().parseFromFile(file);
   }
 }
-
-
 
 class HuntPath {
   final String attributes;
