@@ -1,8 +1,7 @@
 import 'package:hunt_stats/db/entities.dart';
-import 'package:hunt_stats/parser/match_data.dart';
 import 'package:hunt_stats/parser/models.dart';
 
-extension MatchDataExt on MatchData {
+extension MatchDataExt on HuntMatchData {
   MatchEntity toEntity() {
     return MatchEntity(
         match: match.toEntity(),

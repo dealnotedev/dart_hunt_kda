@@ -1,3 +1,11 @@
+class HuntMatchData {
+  final HuntMatchHeader match;
+
+  final List<HuntPlayer> players;
+
+  HuntMatchData({required this.match, required this.players});
+}
+
 class HuntMatchHeader {
   final DateTime date;
   final int mode;
@@ -34,39 +42,38 @@ class HuntMatchHeader {
   final int bondsFound;
   final int teammateRevives;
 
-  HuntMatchHeader(
-      {required this.mode,
-      required this.teams,
-      required this.teamSize,
-      required this.teamMmr,
-      required this.ownDowns,
-      required this.teamDowns,
-      required this.ownEnemyDowns,
-      required this.teamEnemyDowns,
-      required this.ownDeaths,
-      required this.teamDeaths,
-      required this.ownEnemyDeaths,
-      required this.teamEnemyDeaths,
-      required this.ownAssists,
-      required this.teamOutdated,
-      required this.outdated,
-      required this.extracted,
-      required this.teamId,
-      required this.signature,
-      required this.date,
-      required this.killArmored,
-      required this.killLeeches,
-      required this.killGrunts,
-      required this.killHellhound,
-      required this.killHives,
-      required this.killHorses,
-      required this.killImmolators,
-      required this.killMeatheads,
-      required this.killWaterdevils,
-      required this.moneyFound,
-      required this.bountyFound,
-      required this.bondsFound,
-      required this.teammateRevives});
+  HuntMatchHeader({required this.mode,
+    required this.teams,
+    required this.teamSize,
+    required this.teamMmr,
+    required this.ownDowns,
+    required this.teamDowns,
+    required this.ownEnemyDowns,
+    required this.teamEnemyDowns,
+    required this.ownDeaths,
+    required this.teamDeaths,
+    required this.ownEnemyDeaths,
+    required this.teamEnemyDeaths,
+    required this.ownAssists,
+    required this.teamOutdated,
+    required this.outdated,
+    required this.extracted,
+    required this.teamId,
+    required this.signature,
+    required this.date,
+    required this.killArmored,
+    required this.killLeeches,
+    required this.killGrunts,
+    required this.killHellhound,
+    required this.killHives,
+    required this.killHorses,
+    required this.killImmolators,
+    required this.killMeatheads,
+    required this.killWaterdevils,
+    required this.moneyFound,
+    required this.bountyFound,
+    required this.bondsFound,
+    required this.teammateRevives});
 }
 
 class HuntPlayer {
@@ -95,26 +102,25 @@ class HuntPlayer {
   bool get hasMutuallyKillDowns =>
       killedByMe > 0 || killedMe > 0 || downedMe > 0 || downedByMe > 0;
 
-  HuntPlayer(
-      {required this.teammate,
-      required this.teamIndex,
-      required this.profileId,
-      required this.username,
-      required this.bountyExtracted,
-      required this.bountyPickedup,
-      required this.downedByMe,
-      required this.downedByTeam,
-      required this.downedMe,
-      required this.downedTeam,
-      required this.hadWellspring,
-      required this.soulSurvivor,
-      required this.killedByMe,
-      required this.killedByTeam,
-      required this.killedMe,
-      required this.killedTeam,
-      required this.mmr,
-      required this.voiceToMe,
-      required this.voiceToTeam,
-      required this.teamExtraction,
-      required this.skillBased});
+  HuntPlayer({required this.teammate,
+    required this.teamIndex,
+    required this.profileId,
+    required this.username,
+    required this.bountyExtracted,
+    required this.bountyPickedup,
+    required this.downedByMe,
+    required this.downedByTeam,
+    required this.downedMe,
+    required this.downedTeam,
+    required this.hadWellspring,
+    required this.soulSurvivor,
+    required this.killedByMe,
+    required this.killedByTeam,
+    required this.killedMe,
+    required this.killedTeam,
+    required this.mmr,
+    required this.voiceToMe,
+    required this.voiceToTeam,
+    required this.teamExtraction,
+    required this.skillBased});
 }

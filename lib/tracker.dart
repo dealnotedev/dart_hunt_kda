@@ -9,7 +9,7 @@ import 'package:hunt_stats/db/stats_db.dart';
 import 'package:hunt_stats/hunt_bundle.dart';
 import 'package:hunt_stats/hunt_finder.dart';
 import 'package:hunt_stats/parser/hunt_attributes_parser.dart';
-import 'package:hunt_stats/parser/match_data.dart';
+import 'package:hunt_stats/parser/models.dart';
 import 'package:rxdart/rxdart.dart';
 
 class TrackerEngine {
@@ -156,7 +156,7 @@ class TrackerEngine {
     });
   }
 
-  Future<MatchData> extractFromFile(File file) async {
+  Future<HuntMatchData> extractFromFile(File file) async {
     return HuntAttributesParser().parseFromFile(file);
   }
 }

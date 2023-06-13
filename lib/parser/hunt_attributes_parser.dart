@@ -2,13 +2,12 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:crypto/crypto.dart';
-import 'package:hunt_stats/parser/match_data.dart';
 import 'package:hunt_stats/parser/mode.dart';
 import 'package:hunt_stats/parser/models.dart';
 import 'package:xml/xml.dart';
 
 class HuntAttributesParser {
-  Future<MatchData> parseFromFile(File file) async {
+  Future<HuntMatchData> parseFromFile(File file) async {
     final document = XmlDocument.parse(await file.readAsString());
     final huntData = HuntData();
     huntData._fill(document);
@@ -36,7 +35,7 @@ class HuntData {
   final bags = <String, BagEntry>{};
   final accolades = <String, Accolade>{};
 
-  MatchData extractMatchData() {
+  HuntMatchData extractMatchData() {
     if (isTutorial ?? false) {
       throw StateError('Skip tutorial');
     }
@@ -178,7 +177,7 @@ class HuntData {
         bondsFound: bonds,
         teammateRevives: bags.amountOf('revive team mate'));
 
-    return MatchData(match: entity, players: users);
+    return HuntMatchData(match: entity, players: users);
   }
 
   static const rewardBounty = 0;
