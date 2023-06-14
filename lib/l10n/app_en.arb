@@ -1,0 +1,24 @@
+{
+  "app_name": "Hunt: Stats",
+  "stats_empty_text": "Hunt!",
+  "style_dale_title": "Dale Style",
+  "style_zupaman": "Zupaman",
+  "startup_on_text": "Startup",
+  "startup_off_text": "Disabled",
+  "my_kda_title": "My KDA",
+  "team_kd_title": "Team KD",
+  "matches_count": "{matches,plural, =1{{matches} match} other{{matches} matches}}",
+  "@matches_count": {
+    "placeholders": {
+      "matches": {
+        "type": "int",
+        "exmaple": "10"
+      }
+    }
+  },
+  "button_reset_all": "Reset All",
+  "button_reset_team": "Reset Team",
+  "toast_invalidated": "Invalidated",
+  "me": "Me",
+  "no_mmr_text": "No MMR"
+}

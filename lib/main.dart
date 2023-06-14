@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:bitsdojo_window_platform_interface/window.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:hunt_stats/auto_launcher_windows.dart';
 import 'package:hunt_stats/border/corners.dart';
 import 'package:hunt_stats/border/gradient_box_border.dart';
@@ -11,6 +12,7 @@ import 'package:hunt_stats/constants.dart';
 import 'package:hunt_stats/db/entities.dart';
 import 'package:hunt_stats/db/stats.dart';
 import 'package:hunt_stats/db/stats_db.dart';
+import 'package:hunt_stats/extensions.dart';
 import 'package:hunt_stats/generated/assets.dart';
 import 'package:hunt_stats/hunt_bundle.dart';
 import 'package:hunt_stats/hunt_images.dart';
@@ -103,8 +105,6 @@ void _startSystemTray(DesktopWindow window) async {
   await systemTray.setContextMenu(menu);
 
   systemTray.registerSystemTrayEventHandler((eventName) {
-    debugPrint('eventName: $eventName');
-
     switch (eventName) {
       case 'double-click':
         window.restore();
@@ -129,7 +129,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.indigo,
@@ -174,10 +175,10 @@ class _MyHomePageState extends State<MyHomePage> {
           final bundle = snapshot.data;
 
           if (bundle == null) {
-            return const Center(
+            return Center(
               child: Text(
-                'Hunt!',
-                style: TextStyle(color: textColor, fontSize: 48),
+                context.localizations.stats_empty_text,
+                style: const TextStyle(color: textColor, fontSize: 48),
               ),
             );
           }
@@ -230,7 +231,7 @@ class _MyHomePageState extends State<MyHomePage> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'Dale Style',
+                context.localizations.style_dale_title,
                 style: TextStyle(color: textColor, fontSize: 16),
               ),
               Switch(
@@ -241,7 +242,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     });
                   }),
               Text(
-                'Zupaman',
+                context.localizations.style_zupaman,
                 style: TextStyle(color: textColor, fontSize: 16),
               )
             ],
@@ -253,14 +254,14 @@ class _MyHomePageState extends State<MyHomePage> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      'Disabled',
+                      context.localizations.startup_off_text,
                       style: TextStyle(color: textColor, fontSize: 16),
                     ),
                     Switch(
                         value: snapshot.data ?? false,
                         onChanged: _setStartupEnabled),
                     Text(
-                      'Startup',
+                      context.localizations.startup_on_text,
                       style: TextStyle(color: textColor, fontSize: 16),
                     )
                   ],
@@ -274,13 +275,13 @@ class _MyHomePageState extends State<MyHomePage> {
             children: [
               ElevatedButton(
                   onPressed: _handleResetAllClick,
-                  child: const Text('Reset All')),
+                  child: Text(context.localizations.button_reset_all)),
               const SizedBox(
                 width: 8,
               ),
               ElevatedButton(
                   onPressed: () => _handleResetTeamClick(bundle.teamId),
-                  child: const Text('Reset Team'))
+                  child: Text(context.localizations.button_reset_team))
             ],
           ),
         ],
@@ -303,11 +304,11 @@ class _MyHomePageState extends State<MyHomePage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Team KD',
+            context.localizations.team_kd_title,
             style: TextStyle(
                 color: textColor, fontSize: 14, fontWeight: FontWeight.bold),
           ),
-          Text('${stats.matches} matches',
+          Text(context.localizations.matches_count(stats.matches),
               style: const TextStyle(
                   color: _colorBlue, fontSize: 14, fontWeight: FontWeight.w500))
         ],
@@ -369,11 +370,11 @@ class _MyHomePageState extends State<MyHomePage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'My KDA',
+            context.localizations.my_kda_title,
             style: TextStyle(
                 color: textColor, fontSize: 14, fontWeight: FontWeight.bold),
           ),
-          Text('${stats.matches} matches',
+          Text(context.localizations.matches_count(stats.matches),
               style: const TextStyle(
                   color: _colorBlue, fontSize: 14, fontWeight: FontWeight.w500))
         ],
@@ -520,26 +521,31 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _handleResetAllClick() async {
     await widget.engine.invalidateMatches();
-    _showSnackbar(text: 'Invalidated');
+
+    if (mounted) {
+      _showSnackbar(context, text: context.localizations.toast_invalidated);
+    }
   }
 
   void _handleResetTeamClick(String teamId) async {
     await widget.engine.invalidateTeam(teamId);
-    _showSnackbar(text: 'Invalidated');
+
+    if (mounted) {
+      _showSnackbar(context, text: context.localizations.toast_invalidated);
+    }
   }
 
-  void _showSnackbar({required String text, Duration? duration}) {
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        backgroundColor: _colorRed,
-        duration: duration ?? const Duration(milliseconds: 2000),
-        content: Text(
-          text,
-          style: const TextStyle(color: Colors.white),
-        ),
-      ));
-    }
+  void _showSnackbar(BuildContext context,
+      {required String text, Duration? duration}) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      backgroundColor: _colorRed,
+      duration: duration ?? const Duration(milliseconds: 2000),
+      content: Text(
+        text,
+        style: const TextStyle(color: Colors.white),
+      ),
+    ));
   }
 }
 
@@ -705,7 +711,7 @@ class EnemyCardWidget extends StatelessWidget {
           ),
         ),
         Tooltip(
-          message: '${stats.matches} matches',
+          message: context.localizations.matches_count(stats.matches),
           textStyle: TextStyle(color: textColor),
           child: Image.asset(
             Assets.assetsCornerEnemy,
@@ -830,7 +836,7 @@ class PlayerWidget extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(player?.username ?? 'Me',
+        Text(player?.username ?? context.localizations.me,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
@@ -842,7 +848,7 @@ class PlayerWidget extends StatelessWidget {
           height: 4,
         ),
         Tooltip(
-          message: player?.mmr.toString() ?? 'No mmr',
+          message: player?.mmr.toString() ?? context.localizations.no_mmr_text,
           child: Container(
             padding: const EdgeInsets.all(4),
             child: Row(
