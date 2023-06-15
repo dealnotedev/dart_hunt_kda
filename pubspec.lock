@@ -25,6 +25,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.0.7"
+  animated_flip_counter:
+    dependency: "direct main"
+    description:
+      name: animated_flip_counter
+      sha256: abbb8368bf30cb027af59a1ed3747868790070d70c24405ce39dcd65fd3eba33
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.5"
   args:
     dependency: transitive
     description:

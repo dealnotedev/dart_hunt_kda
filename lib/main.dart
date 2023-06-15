@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:bitsdojo_window_platform_interface/window.dart';
 import 'package:flutter/material.dart';
@@ -298,6 +299,13 @@ class _MyHomePageState extends State<MyHomePage> {
     final killsChanges = bundle.teamKillsChanges;
     final deathsChanges = bundle.teamDeathsChanges;
 
+    final kdStyle = TextStyle(
+        color: kdChanges != null && kdChanges != 0
+            ? (kdChanges > 0 ? _colorBlue : _colorRed)
+            : textColor,
+        fontWeight: FontWeight.w500,
+        fontSize: 20);
+
     return [
       Expanded(
           child: Column(
@@ -316,15 +324,19 @@ class _MyHomePageState extends State<MyHomePage> {
       Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            formatDouble(stats.kd),
-            style: TextStyle(
-                color: kdChanges != null && kdChanges != 0
-                    ? (kdChanges > 0 ? _colorBlue : _colorRed)
-                    : textColor,
-                fontWeight: FontWeight.w500,
-                fontSize: 20),
-          ),
+          if (stats.kd.isFinite) ...[
+            AnimatedFlipCounter(
+              value: stats.kd,
+              fractionDigits: 2,
+              textStyle: kdStyle,
+              duration: const Duration(seconds: 1),
+            )
+          ] else ...[
+            Text(
+              formatDouble(stats.kd),
+              style: kdStyle,
+            )
+          ],
           if (kdChanges != null && kdChanges != 0) ...[
             _createDirectionIcon(positive: kdChanges > 0)
           ]
@@ -364,6 +376,13 @@ class _MyHomePageState extends State<MyHomePage> {
     final assistsChanges = bundle.ownAssistsChanges;
 
     final hasDirectionIcon = kdaChanges != null && kdaChanges != 0;
+    final kdaStyle = TextStyle(
+        color: kdaChanges != null && kdaChanges != 0
+            ? (kdaChanges > 0 ? _colorBlue : _colorRed)
+            : textColor,
+        fontWeight: FontWeight.w500,
+        fontSize: 20);
+
     return [
       Expanded(
           child: Column(
@@ -382,15 +401,19 @@ class _MyHomePageState extends State<MyHomePage> {
       Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            formatDouble(stats.kda),
-            style: TextStyle(
-                color: kdaChanges != null && kdaChanges != 0
-                    ? (kdaChanges > 0 ? _colorBlue : _colorRed)
-                    : textColor,
-                fontWeight: FontWeight.w500,
-                fontSize: 20),
-          ),
+          if (stats.kda.isFinite) ...[
+            AnimatedFlipCounter(
+              value: stats.kda,
+              fractionDigits: 2,
+              duration: const Duration(seconds: 1),
+              textStyle: kdaStyle,
+            )
+          ] else ...[
+            Text(
+              formatDouble(stats.kda),
+              style: kdaStyle,
+            )
+          ],
           if (hasDirectionIcon) ...[
             _createDirectionIcon(positive: kdaChanges > 0)
           ]
