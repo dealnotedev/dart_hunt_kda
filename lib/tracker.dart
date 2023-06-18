@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 
@@ -6,18 +7,22 @@ import 'package:collection/collection.dart';
 import 'package:hunt_stats/db/entities.dart';
 import 'package:hunt_stats/db/entities_ext.dart';
 import 'package:hunt_stats/db/stats_db.dart';
+import 'package:hunt_stats/generated/assets.dart';
 import 'package:hunt_stats/hunt_bundle.dart';
 import 'package:hunt_stats/hunt_finder.dart';
 import 'package:hunt_stats/parser/hunt_attributes_parser.dart';
 import 'package:hunt_stats/parser/models.dart';
+import 'package:hunt_stats/ringtone.dart';
 import 'package:rxdart/rxdart.dart';
 
 class TrackerEngine {
   final _bundleSubject = StreamController<HuntBundle?>.broadcast();
+  final _mapSubject = StreamController<String>.broadcast();
 
+  final bool listenGameLog;
   final StatsDb db;
 
-  TrackerEngine(this.db);
+  TrackerEngine(this.db, {required this.listenGameLog});
 
   Future<void> start() async {
     await _refreshData();
@@ -27,9 +32,28 @@ class TrackerEngine {
         if (info is MatchEntity) {
           saveHuntMatch(info);
         }
+
+        if (info is MapLoading) {
+          _mapSubject.add(info.levelName);
+          _playMapSound(info.levelName);
+        }
       });
 
-    await Isolate.spawn(_startTracking, port.sendPort);
+    await Isolate.spawn(_startTracking, [port.sendPort, listenGameLog]);
+  }
+
+  Future<void> _playMapSound(String mapName) async {
+    switch (mapName.trim().toLowerCase().split('/')[1]) {
+      case 'creek':
+        RingtonePlayer.play(Assets.assetsCreek);
+        break;
+      case 'cemetery':
+        RingtonePlayer.play(Assets.assetsCemetery);
+        break;
+      case 'civilwar':
+        RingtonePlayer.play(Assets.assetsCivilwar);
+        break;
+    }
   }
 
   Future<void> _refreshData() async {
@@ -73,6 +97,8 @@ class TrackerEngine {
   }
 
   HuntBundle? _lastBundle;
+
+  Stream<String> get map => _mapSubject.stream;
 
   Stream<HuntBundle?> get lastMatch {
     final last = _lastBundle;
@@ -135,7 +161,9 @@ class TrackerEngine {
     await _refreshData();
   }
 
-  static void _startTracking(SendPort port) async {
+  static void _startTracking(List<dynamic> args) async {
+    final port = args[0] as SendPort;
+    final listenGameLog = args[1] as bool;
     final finder = HuntFinder();
     final parser = HuntAttributesParser();
 
@@ -154,11 +182,44 @@ class TrackerEngine {
         port.send(data.toEntity(outdated: false, teamOutdated: false));
       }
     });
+
+    if (listenGameLog) {
+      final userDirectory = file.parent.parent.parent;
+      final logFile = File('${userDirectory.path}\\game.log');
+
+      var length = await logFile.length();
+
+      Timer.periodic(const Duration(seconds: 1), (timer) {
+        final actualLength = logFile.lengthSync();
+        if (actualLength == length) {
+          return;
+        }
+        if (actualLength < length) {
+          length = 0;
+        }
+
+        logFile.openRead(length).transform(utf8.decoder).forEach((s) {
+          length += s.length;
+
+          final parts = s.split(' ');
+          final index = parts.indexOf('PrepareLevel');
+          if (index != -1) {
+            port.send(MapLoading(parts[index + 1]));
+          }
+        });
+      });
+    }
   }
 
   Future<HuntMatchData> extractFromFile(File file) async {
     return HuntAttributesParser().parseFromFile(file);
   }
+}
+
+class MapLoading {
+  final String levelName;
+
+  MapLoading(this.levelName);
 }
 
 class HuntPath {

@@ -29,7 +29,7 @@ void main(List<String> args) async {
   await HuntImages.init();
 
   final db = StatsDb(predefinedProfileId: Constants.profileId);
-  final tracker = TrackerEngine(db);
+  final tracker = TrackerEngine(db, listenGameLog: true);
 
   //final data = await tracker
   //    .extractFromFile(File('examples/attributes_zoop_duo_win.xml'));
@@ -202,7 +202,7 @@ class _MyHomePageState extends State<MyHomePage> {
               _createIconifiedContaner(
                   icon: _zupaman ? Assets.assetsIcKdV2 : Assets.assetsIcKd,
                   children: _createTeamKdWidgets(bundle, textColor: textColor)),
-              if (size.height > 484) ...[
+              if (size.height > 486) ...[
                 const SizedBox(
                   height: 16,
                 ),
