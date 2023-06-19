@@ -113,9 +113,6 @@ class HuntPlayer {
   final bool teamExtraction;
   final bool skillBased;
 
-  bool get hasMutuallyKillDowns =>
-      killedByMe > 0 || killedMe > 0 || downedMe > 0 || downedByMe > 0;
-
   HuntPlayer(
       {required this.teammate,
       required this.teamIndex,
