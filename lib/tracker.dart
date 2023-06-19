@@ -22,24 +22,58 @@ class TrackerEngine {
   final bool listenGameLog;
   final StatsDb db;
 
-  TrackerEngine(this.db, {required this.listenGameLog});
+  DateTime _lastPingTime = DateTime.now();
+
+  TrackerEngine(this.db, {required this.listenGameLog}) {
+    _port.listen((dynamic info) {
+      if (info is MatchEntity) {
+        saveHuntMatch(info);
+      }
+
+      if (info is MatchEntity || info is _NoNewMatches) {
+        _lastPingTime = DateTime.now();
+      }
+
+      if (info is _MapLoading) {
+        _mapSubject.add(info.levelName);
+        _playMapSound(info.levelName);
+      }
+    });
+
+    _startPinger();
+  }
+
+  void _startPinger() async {
+    while (true) {
+      await Future.delayed(const Duration(seconds: 30));
+
+      final now = DateTime.now();
+
+      if (now.difference(_lastPingTime).inSeconds.abs() > 60) {
+        _lastPingTime = now;
+        _respawnIsolate();
+      }
+    }
+  }
+
+  Isolate? _isolate;
 
   Future<void> start() async {
     await _refreshData();
+    await _respawnIsolate();
+  }
 
-    final ReceivePort port = ReceivePort('Tracking')
-      ..listen((dynamic info) {
-        if (info is MatchEntity) {
-          saveHuntMatch(info);
-        }
+  final _port = ReceivePort('Tracking');
 
-        if (info is MapLoading) {
-          _mapSubject.add(info.levelName);
-          _playMapSound(info.levelName);
-        }
-      });
+  Future<void> _respawnIsolate() async {
+    if (_isolate != null) {
+      _isolate?.kill(priority: Isolate.immediate);
+      _isolate = null;
+    }
 
-    await Isolate.spawn(_startTracking, [port.sendPort, listenGameLog]);
+    _isolate = await Isolate.spawn(
+        _startTracking, [_port.sendPort, listenGameLog],
+        errorsAreFatal: false);
   }
 
   Future<void> _playMapSound(String mapName) async {
@@ -164,13 +198,14 @@ class TrackerEngine {
   static void _startTracking(List<dynamic> args) async {
     final port = args[0] as SendPort;
     final listenGameLog = args[1] as bool;
+
     final finder = HuntFinder();
     final parser = HuntAttributesParser();
 
     final file = await finder.findHuntAttributes();
     final attributes = file.path;
 
-    port.send(HuntPath(attributes));
+    port.send(_HuntPath(attributes));
 
     final signatures = <String>{};
 
@@ -180,6 +215,8 @@ class TrackerEngine {
       final data = await parser.parseFromFile(file);
       if (signatures.add(data.header.signature)) {
         port.send(data.toEntity(outdated: false, teamOutdated: false));
+      } else {
+        port.send(_NoNewMatches());
       }
     });
 
@@ -204,7 +241,7 @@ class TrackerEngine {
           final parts = s.split(' ');
           final index = parts.indexOf('PrepareLevel');
           if (index != -1) {
-            port.send(MapLoading(parts[index + 1]));
+            port.send(_MapLoading(parts[index + 1]));
           }
         });
       });
@@ -216,14 +253,16 @@ class TrackerEngine {
   }
 }
 
-class MapLoading {
+class _NoNewMatches {}
+
+class _MapLoading {
   final String levelName;
 
-  MapLoading(this.levelName);
+  _MapLoading(this.levelName);
 }
 
-class HuntPath {
+class _HuntPath {
   final String attributes;
 
-  HuntPath(this.attributes);
+  _HuntPath(this.attributes);
 }
