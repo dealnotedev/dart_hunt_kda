@@ -51,7 +51,7 @@ class TrackerEngine {
 
       if (now.difference(_lastPingTime).inSeconds.abs() > 60) {
         _lastPingTime = now;
-        _respawnIsolate();
+        await _respawnIsolate();
       }
     }
   }
