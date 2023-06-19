@@ -24,10 +24,16 @@ class TrackerEngine {
 
   DateTime _lastPingTime = DateTime.now();
 
+  bool _huntFound = false;
+
   TrackerEngine(this.db, {required this.listenGameLog}) {
     _port.listen((dynamic info) {
       if (info is MatchEntity) {
         saveHuntMatch(info);
+      }
+
+      if (info is _HuntFound) {
+        _huntFound = true;
       }
 
       if (info is MatchEntity || info is _NoNewMatches) {
@@ -49,7 +55,7 @@ class TrackerEngine {
 
       final now = DateTime.now();
 
-      if (now.difference(_lastPingTime).inSeconds.abs() > 60) {
+      if (_huntFound && now.difference(_lastPingTime).inSeconds.abs() > 60) {
         _lastPingTime = now;
         await _respawnIsolate();
       }
@@ -205,7 +211,7 @@ class TrackerEngine {
     final file = await finder.findHuntAttributes();
     final attributes = file.path;
 
-    port.send(_HuntPath(attributes));
+    port.send(_HuntFound(attributes));
 
     final signatures = <String>{};
 
@@ -261,8 +267,8 @@ class _MapLoading {
   _MapLoading(this.levelName);
 }
 
-class _HuntPath {
+class _HuntFound {
   final String attributes;
 
-  _HuntPath(this.attributes);
+  _HuntFound(this.attributes);
 }
