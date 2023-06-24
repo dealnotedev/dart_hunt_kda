@@ -51,7 +51,7 @@ class TrackerEngine {
 
   void _startPinger() async {
     while (true) {
-      await Future.delayed(const Duration(seconds: 30));
+      await Future.delayed(const Duration(seconds: 15));
 
       final now = DateTime.now();
 
