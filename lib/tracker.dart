@@ -20,33 +20,38 @@ class TrackerEngine {
   final _mapSubject = StreamController<String>.broadcast();
 
   final bool listenGameLog;
+  final bool useSeparateIsolate;
   final StatsDb db;
 
   DateTime _lastPingTime = DateTime.now();
 
   bool _huntFound = false;
 
-  TrackerEngine(this.db, {required this.listenGameLog}) {
-    _port.listen((dynamic info) {
-      if (info is MatchEntity) {
-        saveHuntMatch(info);
-      }
+  static final _gameEventSubject = StreamController<dynamic>.broadcast();
 
-      if (info is _HuntFound) {
-        _huntFound = true;
-      }
+  TrackerEngine(this.db,
+      {required this.listenGameLog, required this.useSeparateIsolate}) {
+    _port.listen(_handleGameEvent);
+    _gameEventSubject.stream.listen(_handleGameEvent);
+  }
 
-      if (info is MatchEntity || info is _NoNewMatches) {
-        _lastPingTime = DateTime.now();
-      }
+  Future<void> _handleGameEvent(dynamic info) async {
+    if (info is MatchEntity) {
+      await saveHuntMatch(info);
+    }
 
-      if (info is _MapLoading) {
-        _mapSubject.add(info.levelName);
-        _playMapSound(info.levelName);
-      }
-    });
+    if (info is _HuntFound) {
+      _huntFound = true;
+    }
 
-    _startPinger();
+    if (info is MatchEntity || info is _NoNewMatches) {
+      _lastPingTime = DateTime.now();
+    }
+
+    if (info is _MapLoading) {
+      _mapSubject.add(info.levelName);
+      await _playMapSound(info.levelName);
+    }
   }
 
   void _startPinger() async {
@@ -67,6 +72,10 @@ class TrackerEngine {
   Future<void> start() async {
     await _refreshData();
     await _respawnIsolate();
+
+    if (useSeparateIsolate) {
+      _startPinger();
+    }
   }
 
   final _port = ReceivePort('Tracking');
@@ -77,9 +86,14 @@ class TrackerEngine {
       _isolate = null;
     }
 
-    _isolate = await Isolate.spawn(
-        _startTracking, [_port.sendPort, listenGameLog],
-        errorsAreFatal: false);
+    final args = [_port.sendPort, listenGameLog, useSeparateIsolate];
+
+    if (useSeparateIsolate) {
+      _isolate =
+          await Isolate.spawn(_startTracking, args, errorsAreFatal: false);
+    } else {
+      _startTracking(args);
+    }
   }
 
   Future<void> _playMapSound(String mapName) async {
@@ -204,6 +218,7 @@ class TrackerEngine {
   static void _startTracking(List<dynamic> args) async {
     final port = args[0] as SendPort;
     final listenGameLog = args[1] as bool;
+    final bool usePort = args[2] as bool;
 
     final finder = HuntFinder();
     final parser = HuntAttributesParser();
@@ -211,18 +226,25 @@ class TrackerEngine {
     final file = await finder.findHuntAttributes();
     final attributes = file.path;
 
-    port.send(_HuntFound(attributes));
+    void emitData(dynamic data) {
+     if(usePort){
+       port.send(data);
+     } else {
+       _gameEventSubject.add(data);
+     }
+    }
+
+    emitData(_HuntFound(attributes));
 
     final signatures = <String>{};
-
     Timer.periodic(const Duration(seconds: 30), (timer) async {
       final file = File(attributes);
 
       final data = await parser.parseFromFile(file);
       if (signatures.add(data.header.signature)) {
-        port.send(data.toEntity(outdated: false, teamOutdated: false));
+        emitData(data.toEntity(outdated: false, teamOutdated: false));
       } else {
-        port.send(_NoNewMatches());
+        emitData(_NoNewMatches());
       }
     });
 
@@ -247,7 +269,7 @@ class TrackerEngine {
           final parts = s.split(' ');
           final index = parts.indexOf('PrepareLevel');
           if (index != -1) {
-            port.send(_MapLoading(parts[index + 1]));
+            emitData(_MapLoading(parts[index + 1]));
           }
         });
       });
