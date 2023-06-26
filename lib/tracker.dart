@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
 import 'package:hunt_stats/db/entities.dart';
 import 'package:hunt_stats/db/entities_ext.dart';
 import 'package:hunt_stats/db/stats_db.dart';
@@ -218,7 +219,7 @@ class TrackerEngine {
   static void _startTracking(List<dynamic> args) async {
     final port = args[0] as SendPort;
     final listenGameLog = args[1] as bool;
-    final bool usePort = args[2] as bool;
+    final bool separateIsolate = args[2] as bool;
 
     final finder = HuntFinder();
     final parser = HuntAttributesParser();
@@ -227,11 +228,11 @@ class TrackerEngine {
     final attributes = file.path;
 
     void emitData(dynamic data) {
-     if(usePort){
-       port.send(data);
-     } else {
-       _gameEventSubject.add(data);
-     }
+      if (separateIsolate) {
+        port.send(data);
+      } else {
+        _gameEventSubject.add(data);
+      }
     }
 
     emitData(_HuntFound(attributes));
@@ -240,7 +241,10 @@ class TrackerEngine {
     Timer.periodic(const Duration(seconds: 30), (timer) async {
       final file = File(attributes);
 
-      final data = await parser.parseFromFile(file);
+      final data = await (separateIsolate
+          ? parser.parseFromFile(file)
+          : compute(parser.parseFromFile, file));
+
       if (signatures.add(data.header.signature)) {
         emitData(data.toEntity(outdated: false, teamOutdated: false));
       } else {
