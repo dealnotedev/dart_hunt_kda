@@ -1,8 +1,8 @@
 {
   "app_name": "Hunt: Stats",
   "stats_empty_text": "Hunt!",
-  "style_dale_title": "Dale Style",
-  "style_zupaman": "Zupaman",
+  "style_0_name": "Style 1",
+  "style_1_name": "Style 2",
   "startup_on_text": "Startup",
   "startup_off_text": "Disabled",
   "my_kda_title": "My KDA",

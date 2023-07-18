@@ -197,10 +197,10 @@ class _MyHomePageState extends State<MyHomePage> {
                   enemies: bundle.enemyStats,
                   cardColor: _blockColor),
               _createIconifiedContaner(
-                  icon: _zupaman ? Assets.assetsIcKdaV2 : Assets.assetsIcKda,
+                  icon: _alternativeStyle ? Assets.assetsIcKdaV2 : Assets.assetsIcKda,
                   children: _createMyKdaWidgets(bundle, textColor: textColor)),
               _createIconifiedContaner(
-                  icon: _zupaman ? Assets.assetsIcKdV2 : Assets.assetsIcKd,
+                  icon: _alternativeStyle ? Assets.assetsIcKdV2 : Assets.assetsIcKd,
                   children: _createTeamKdWidgets(bundle, textColor: textColor)),
               if (size.height > 486) ...[
                 const SizedBox(
@@ -232,18 +232,18 @@ class _MyHomePageState extends State<MyHomePage> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                context.localizations.style_dale_title,
+                context.localizations.style_0_name,
                 style: TextStyle(color: textColor, fontSize: 16),
               ),
               Switch(
-                  value: _zupaman,
+                  value: _alternativeStyle,
                   onChanged: (checked) {
                     setState(() {
-                      _zupaman = checked;
+                      _alternativeStyle = checked;
                     });
                   }),
               Text(
-                context.localizations.style_zupaman,
+                context.localizations.style_1_name,
                 style: TextStyle(color: textColor, fontSize: 16),
               )
             ],
@@ -463,10 +463,10 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  bool _zupaman = false;
+  bool _alternativeStyle = false;
 
   Decoration _createBlockDecoration() {
-    if (_zupaman) {
+    if (_alternativeStyle) {
       return BoxDecoration(
         color: _blockColor,
         border: GradientBoxBorder(
