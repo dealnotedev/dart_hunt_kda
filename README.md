@@ -2,7 +2,7 @@
 
 A new Flutter project.
 
-![plot](./screens/stream_banner.jpeg)
+![plot](./screens/stream_banner.jpg)
 
 ## Getting Started
 
