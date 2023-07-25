@@ -1,6 +1,8 @@
-# hunt_stats
+# hunt_kda
 
 A new Flutter project.
+
+![plot](./screens/stream_banner.jpeg)
 
 ## Getting Started
 
