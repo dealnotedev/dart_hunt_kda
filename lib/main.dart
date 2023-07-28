@@ -29,7 +29,8 @@ void main(List<String> args) async {
   await HuntImages.init();
 
   final db = StatsDb(predefinedProfileId: Constants.profileId);
-  final tracker = TrackerEngine(db, listenGameLog: true, useSeparateIsolate: false);
+  final tracker =
+      TrackerEngine(db, listenGameLog: true, useSeparateIsolate: false);
 
   //final data = await tracker
   //    .extractFromFile(File('examples/attributes_zoop_duo_win.xml'));
@@ -197,10 +198,14 @@ class _MyHomePageState extends State<MyHomePage> {
                   enemies: bundle.enemyStats,
                   cardColor: _blockColor),
               _createIconifiedContaner(
-                  icon: _alternativeStyle ? Assets.assetsIcKdaV2 : Assets.assetsIcKda,
+                  icon: _alternativeStyle
+                      ? Assets.assetsIcKdaV2
+                      : Assets.assetsIcKda,
                   children: _createMyKdaWidgets(bundle, textColor: textColor)),
               _createIconifiedContaner(
-                  icon: _alternativeStyle ? Assets.assetsIcKdV2 : Assets.assetsIcKd,
+                  icon: _alternativeStyle
+                      ? Assets.assetsIcKdV2
+                      : Assets.assetsIcKd,
                   children: _createTeamKdWidgets(bundle, textColor: textColor)),
               if (size.height > 486) ...[
                 const SizedBox(
@@ -538,6 +543,12 @@ class _MyHomePageState extends State<MyHomePage> {
 
   static String formatDouble(double value,
       {int precision = 2, bool plusIfPositive = false}) {
+    if (value.isNaN) {
+      return '-';
+    }
+    if (value.isInfinite) {
+      return value.isNegative ? '-∞' : '∞';
+    }
     final formatted = value.toPrecision(precision).toString();
     return plusIfPositive && value > 0 ? '+$formatted' : formatted;
   }
