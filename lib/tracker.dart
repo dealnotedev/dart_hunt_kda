@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:isolate';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
@@ -21,18 +20,11 @@ class TrackerEngine {
   final _mapSubject = StreamController<String>.broadcast();
 
   final bool listenGameLog;
-  final bool useSeparateIsolate;
   final StatsDb db;
 
-  DateTime _lastPingTime = DateTime.now();
+  final _gameEventSubject = StreamController<dynamic>.broadcast();
 
-  bool _huntFound = false;
-
-  static final _gameEventSubject = StreamController<dynamic>.broadcast();
-
-  TrackerEngine(this.db,
-      {required this.listenGameLog, required this.useSeparateIsolate}) {
-    _port.listen(_handleGameEvent);
+  TrackerEngine(this.db, {required this.listenGameLog}) {
     _gameEventSubject.stream.listen(_handleGameEvent);
   }
 
@@ -41,60 +33,15 @@ class TrackerEngine {
       await saveHuntMatch(info);
     }
 
-    if (info is _HuntFound) {
-      _huntFound = true;
-    }
-
-    if (info is MatchEntity || info is _NoNewMatches) {
-      _lastPingTime = DateTime.now();
-    }
-
     if (info is _MapLoading) {
       _mapSubject.add(info.levelName);
       await _playMapSound(info.levelName);
     }
   }
 
-  void _startPinger() async {
-    while (true) {
-      await Future.delayed(const Duration(seconds: 15));
-
-      final now = DateTime.now();
-
-      if (_huntFound && now.difference(_lastPingTime).inSeconds.abs() > 60) {
-        _lastPingTime = now;
-        await _respawnIsolate();
-      }
-    }
-  }
-
-  Isolate? _isolate;
-
   Future<void> start() async {
     await _refreshData();
-    await _respawnIsolate();
-
-    if (useSeparateIsolate) {
-      _startPinger();
-    }
-  }
-
-  final _port = ReceivePort('Tracking');
-
-  Future<void> _respawnIsolate() async {
-    if (_isolate != null) {
-      _isolate?.kill(priority: Isolate.immediate);
-      _isolate = null;
-    }
-
-    final args = [_port.sendPort, listenGameLog, useSeparateIsolate];
-
-    if (useSeparateIsolate) {
-      _isolate =
-          await Isolate.spawn(_startTracking, args, errorsAreFatal: false);
-    } else {
-      _startTracking(args);
-    }
+    await _startTracking();
   }
 
   Future<void> _playMapSound(String mapName) async {
@@ -216,11 +163,7 @@ class TrackerEngine {
     await _refreshData();
   }
 
-  static void _startTracking(List<dynamic> args) async {
-    final port = args[0] as SendPort;
-    final listenGameLog = args[1] as bool;
-    final bool separateIsolate = args[2] as bool;
-
+  Future<void> _startTracking() async {
     final finder = HuntFinder();
     final parser = HuntAttributesParser();
 
@@ -228,11 +171,7 @@ class TrackerEngine {
     final attributes = file.path;
 
     void emitData(dynamic data) {
-      if (separateIsolate) {
-        port.send(data);
-      } else {
-        _gameEventSubject.add(data);
-      }
+      _gameEventSubject.add(data);
     }
 
     emitData(_HuntFound(attributes));
@@ -241,9 +180,7 @@ class TrackerEngine {
     Timer.periodic(const Duration(seconds: 30), (timer) async {
       final file = File(attributes);
 
-      final data = await (separateIsolate
-          ? parser.parseFromFile(file)
-          : compute(parser.parseFromFile, file));
+      final data = await compute(parser.parseFromFile, file);
 
       if (signatures.add(data.header.signature)) {
         emitData(data.toEntity(outdated: false, teamOutdated: false));
