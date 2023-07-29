@@ -544,7 +544,7 @@ class _MyHomePageState extends State<MyHomePage> {
   static String formatDouble(double value,
       {int precision = 2, bool plusIfPositive = false}) {
     if (value.isNaN) {
-      return '-';
+      return '';
     }
     if (value.isInfinite) {
       return value.isNegative ? '-∞' : '∞';
