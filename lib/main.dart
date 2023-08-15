@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:bitsdojo_window_platform_interface/window.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:hunt_stats/auto_launcher_windows.dart';
@@ -17,8 +18,10 @@ import 'package:hunt_stats/extensions.dart';
 import 'package:hunt_stats/generated/assets.dart';
 import 'package:hunt_stats/hunt_bundle.dart';
 import 'package:hunt_stats/hunt_images.dart';
+import 'package:hunt_stats/lottie_animations.dart';
 import 'package:hunt_stats/mmr.dart';
 import 'package:hunt_stats/tracker.dart';
+import 'package:lottie/lottie.dart';
 import 'package:morphable_shape/morphable_shape.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:system_tray/system_tray.dart' as tray;
@@ -29,8 +32,7 @@ void main(List<String> args) async {
   await HuntImages.init();
 
   final db = StatsDb(predefinedProfileId: Constants.profileId);
-  final tracker =
-      TrackerEngine(db, listenGameLog: true);
+  final tracker = TrackerEngine(db, listenGameLog: true);
 
   //final data = await tracker
   //    .extractFromFile(File('examples/attributes_zoop_duo_win.xml'));
@@ -164,63 +166,102 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  bool _pause = false;
+
+  @override
+  void initState() {
+    _runPauseLoop();
+    super.initState();
+  }
+
+  void _togglePause(bool pause) {
+    setState(() {
+      _pause = pause;
+    });
+  }
+
+  void _runPauseLoop() async {
+    while (true) {
+      await Future.delayed(const Duration(minutes: 10));
+      _togglePause(true);
+      await Future.delayed(const Duration(seconds: 5));
+      _togglePause(false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: backgroundColor,
+      body: _pause ? _createPauseWidget() : _createContentWidget(context),
+    );
+  }
+
+  final _pauseAnimation = Uint8List.fromList(ukraine.codeUnits);
+
+  Widget _createPauseWidget() {
+    return Center(
+        child: Lottie.memory(_pauseAnimation,
+            filterQuality: FilterQuality.medium,
+            width: 128,
+            height: 128,
+            frameRate: FrameRate(60),
+            repeat: false));
+  }
+
+  Widget _createContentWidget(BuildContext context) {
     const textColor = Colors.white;
     final size = MediaQuery.of(context).size;
 
-    return Scaffold(
-      backgroundColor: backgroundColor,
-      body: StreamBuilder<HuntBundle?>(
-        stream: widget.engine.lastMatch,
-        builder: (cntx, snapshot) {
-          final bundle = snapshot.data;
+    return StreamBuilder<HuntBundle?>(
+      initialData: widget.engine.lastBundle,
+      stream: widget.engine.lastMatch,
+      builder: (cntx, snapshot) {
+        final bundle = snapshot.data;
 
-          if (bundle == null) {
-            return Center(
-              child: Text(
-                context.localizations.stats_empty_text,
-                style: const TextStyle(color: textColor, fontSize: 48),
-              ),
-            );
-          }
-
-          final teammates =
-              bundle.match.players.where((element) => element.teammate);
-
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _PlayersPager(
-                  teammates: teammates,
-                  me: bundle.me,
-                  textColor: textColor,
-                  enemies: bundle.enemyStats,
-                  cardColor: _blockColor),
-              _createIconifiedContaner(
-                  icon: _alternativeStyle
-                      ? Assets.assetsIcKdaV2
-                      : Assets.assetsIcKda,
-                  children: _createMyKdaWidgets(bundle, textColor: textColor)),
-              _createIconifiedContaner(
-                  icon: _alternativeStyle
-                      ? Assets.assetsIcKdV2
-                      : Assets.assetsIcKd,
-                  children: _createTeamKdWidgets(bundle, textColor: textColor)),
-              if (size.height > 486) ...[
-                const SizedBox(
-                  height: 16,
-                ),
-                _createSettingsWidget(context,
-                    bundle: bundle, textColor: textColor),
-                const SizedBox(
-                  height: 16,
-                )
-              ]
-            ],
+        if (bundle == null) {
+          return Center(
+            child: Text(
+              context.localizations.stats_empty_text,
+              style: const TextStyle(color: textColor, fontSize: 48),
+            ),
           );
-        },
-      ),
+        }
+
+        final teammates =
+            bundle.match.players.where((element) => element.teammate);
+
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _PlayersPager(
+                teammates: teammates,
+                me: bundle.me,
+                textColor: textColor,
+                enemies: bundle.enemyStats,
+                cardColor: _blockColor),
+            _createIconifiedContaner(
+                icon: _alternativeStyle
+                    ? Assets.assetsIcKdaV2
+                    : Assets.assetsIcKda,
+                children: _createMyKdaWidgets(bundle, textColor: textColor)),
+            _createIconifiedContaner(
+                icon:
+                    _alternativeStyle ? Assets.assetsIcKdV2 : Assets.assetsIcKd,
+                children: _createTeamKdWidgets(bundle, textColor: textColor)),
+            if (size.height > 486) ...[
+              const SizedBox(
+                height: 16,
+              ),
+              _createSettingsWidget(context,
+                  bundle: bundle, textColor: textColor),
+              const SizedBox(
+                height: 16,
+              )
+            ]
+          ],
+        );
+      },
     );
   }
 

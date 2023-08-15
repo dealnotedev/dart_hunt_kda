@@ -82,10 +82,10 @@ class TrackerEngine {
           previousTeamStats: null,
           previousOwnStats: null,
           previousMatch: null);
-      _lastBundle = bundle;
+      lastBundle = bundle;
       _bundleSubject.add(bundle);
     } else {
-      _lastBundle = null;
+      lastBundle = null;
       _bundleSubject.add(null);
     }
   }
@@ -98,12 +98,12 @@ class TrackerEngine {
     return map;
   }
 
-  HuntBundle? _lastBundle;
+  HuntBundle? lastBundle;
 
   Stream<String> get map => _mapSubject.stream;
 
   Stream<HuntBundle?> get lastMatch {
-    final last = _lastBundle;
+    final last = lastBundle;
     if (last != null) {
       return Stream<HuntBundle?>.value(last)
           .concatWith([_bundleSubject.stream]);
@@ -113,8 +113,8 @@ class TrackerEngine {
   }
 
   Future<void> saveHuntMatch(MatchEntity data) async {
-    final previousTeamStats = data.match.teamId == _lastBundle?.teamId
-        ? _lastBundle?.teamStats
+    final previousTeamStats = data.match.teamId == lastBundle?.teamId
+        ? lastBundle?.teamStats
         : await db.getTeamStats(data.match.teamId);
 
     await db.insertHuntMatch(data.match);
@@ -146,10 +146,10 @@ class TrackerEngine {
         ownStats: ownStats,
         teamStats: teamStats,
         previousTeamStats: previousTeamStats,
-        previousOwnStats: _lastBundle?.ownStats,
-        previousMatch: _lastBundle?.match);
+        previousOwnStats: lastBundle?.ownStats,
+        previousMatch: lastBundle?.match);
 
-    _lastBundle = bundle;
+    lastBundle = bundle;
     _bundleSubject.add(bundle);
   }
 

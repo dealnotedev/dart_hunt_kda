@@ -80,6 +80,10 @@ dependencies:
 
   path_provider: ^2.0.15
 
+  shared_preferences: ^2.2.0
+
+  lottie: ^2.6.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
