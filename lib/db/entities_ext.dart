@@ -1,11 +1,19 @@
 import 'package:hunt_stats/db/entities.dart';
+import 'package:hunt_stats/db/stats_db.dart';
 import 'package:hunt_stats/parser/models.dart';
 
 extension MatchDataExt on HuntMatchData {
-  MatchEntity toEntity({required bool teamOutdated, required bool outdated}) {
+  Future<MatchEntity> toEntity(StatsDb db,
+      {required bool teamOutdated, required bool outdated}) async {
+    final List<PlayerEntity> hunters = [];
+
+    for (HuntPlayer player in players) {
+      hunters.add(await player.toEntity(db));
+    }
+
     return MatchEntity(
         match: header.toEntity(teamOutdated: teamOutdated, outdated: outdated),
-        players: players.map((e) => e.toEntity()).toList());
+        players: hunters);
   }
 }
 
@@ -49,12 +57,14 @@ extension MatchHeaderExt on HuntMatchHeader {
 }
 
 extension PlayerExt on HuntPlayer {
-  PlayerEntity toEntity() {
+  Future<PlayerEntity> toEntity(StatsDb db) async {
     return PlayerEntity(
         teammate: teammate,
         teamIndex: teamIndex,
         profileId: profileId,
-        username: username,
+        username: username.isEmpty
+            ? await db.findPlayerName(profileId, fallback: '')
+            : username,
         bountyExtracted: bountyExtracted,
         bountyPickedup: bountyPickedup,
         downedByMe: downedByMe,

@@ -183,7 +183,9 @@ class TrackerEngine {
       final data = await compute(parser.parseFromFile, file);
 
       if (signatures.add(data.header.signature)) {
-        emitData(data.toEntity(outdated: false, teamOutdated: false));
+        final match =
+            await data.toEntity(db, outdated: false, teamOutdated: false);
+        emitData(match);
       } else {
         emitData(_NoNewMatches());
       }

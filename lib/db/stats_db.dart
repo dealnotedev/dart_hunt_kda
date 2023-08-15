@@ -252,6 +252,22 @@ class StatsDb {
         [1, 0, teamId]);
   }
 
+  Future<String> findPlayerName(int profileId, {String fallback = ''}) async {
+    final db = await database;
+
+    final cursor = await db.rawQuery(
+        'SELECT * FROM ${HuntPlayerColumns.table} WHERE ${HuntPlayerColumns.profileId} = ? ORDER BY ${HuntPlayerColumns.id} DESC LIMIT 10',
+        [profileId]);
+
+    for (Map<String, Object?> row in cursor) {
+      final name = row[HuntPlayerColumns.username] as String?;
+      if (name != null && name.trim().isNotEmpty) {
+        return name;
+      }
+    }
+    return fallback;
+  }
+
   Future<List<PlayerEntity>> getMatchPlayers(int matchId) async {
     final db = await database;
 
