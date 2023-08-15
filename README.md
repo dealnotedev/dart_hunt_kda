@@ -1,4 +1,4 @@
-# hunt_kda
+## Getting Started hunt_kda
 
 1. Launch application
 2. Kindly await for 30 seconds
@@ -7,7 +7,7 @@
 
 ![plot](./screens/stream_banner.jpg)
 
-## Getting Started
+
 
 This project is a starting point for a Flutter application.
 
