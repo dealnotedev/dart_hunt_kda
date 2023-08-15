@@ -1,6 +1,9 @@
 # hunt_kda
 
-A new Flutter project.
+1. Launch application
+2. Kindly await for 30 seconds
+3. You will see the counters for the latest match
+4. Just play and receive updated counters after each match.
 
 ![plot](./screens/stream_banner.jpg)
 
