@@ -1,6 +1,6 @@
 ## Getting Started hunt_kda
 
-0. Download last build (.zip archive) from "Releases"
+0. Download last build (.zip archive) from [Releases](https://github.com/dealnotedev/dart_hunt_kda/releases)
 1. Launch application
 2. Kindly await for 30 seconds
 3. You will see the counters for the latest match
