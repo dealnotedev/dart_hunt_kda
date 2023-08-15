@@ -7,4 +7,4 @@
 
 ![plot](./screens/stream_banner.jpg)
 
-5. How to reset session counters? Simply pull down the application window, and you will find the control elements there.
+5. How to reset session counters? Simply expand the height of the application window, and you will find the control elements there.
