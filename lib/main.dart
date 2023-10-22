@@ -132,19 +132,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.indigo,
       ),
-      home: Column(
-        children: [
-          Container(
-            color: backgroundColor,
-            height: 32,
-            width: double.infinity,
-            child: MoveWindow(
-              onDoubleTap: () => appWindow.minimize(),
-            ),
-          ),
-          Expanded(child: MyHomePage(engine: engine)),
-        ],
-      ),
+      home: MyHomePage(engine: engine),
     );
   }
 }
@@ -184,7 +172,12 @@ class _MyHomePageState extends State<MyHomePage> {
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            SimplePlayerWidget(player: bundle.me, textColor: textColor, bgColor: _blockColor,),
+            SizedBox(
+              height: 48,
+              child: MoveWindow(
+                child: SimplePlayerWidget(player: bundle.me, textColor: textColor, bgColor: _blockColor,),
+              ),
+            ),
             const Expanded(child: SizedBox.shrink()),
             Container(
               constraints: const BoxConstraints(minHeight: 48),
@@ -204,9 +197,6 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               _createSettingsWidget(context,
                   bundle: bundle, textColor: textColor),
-              const SizedBox(
-                height: 16,
-              )
             ]
           ],
         );
