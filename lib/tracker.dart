@@ -29,8 +29,10 @@ class TrackerEngine {
   }
 
   Future<void> _handleGameEvent(dynamic info) async {
+    print(info.runtimeType);
+
     if (info is MatchEntity) {
-      await saveHuntMatch(info);
+      await _saveHuntMatch(info);
     }
 
     if (info is _MapLoading) {
@@ -112,7 +114,7 @@ class TrackerEngine {
     }
   }
 
-  Future<void> saveHuntMatch(MatchEntity data) async {
+  Future<void> _saveHuntMatch(MatchEntity data) async {
     final previousTeamStats = data.match.teamId == lastBundle?.teamId
         ? lastBundle?.teamStats
         : await db.getTeamStats(data.match.teamId);
@@ -163,6 +165,26 @@ class TrackerEngine {
     await _refreshData();
   }
 
+  Future<void> _checkHuntMatch(HuntAttributesParser parser, String attributes,
+      Set<String> signatures) async {
+    final file = File(attributes);
+
+    final HuntMatchData data;
+    try {
+      data = await compute(parser.parseFromFile, file);
+    } catch (_) {
+      return;
+    }
+
+    if (signatures.add(data.header.signature)) {
+      final match =
+          await data.toEntity(db, outdated: false, teamOutdated: false);
+      _gameEventSubject.add(match);
+    } else {
+      _gameEventSubject.add(_NoNewMatches());
+    }
+  }
+
   Future<void> _startTracking() async {
     final finder = HuntFinder();
     final parser = HuntAttributesParser();
@@ -170,25 +192,13 @@ class TrackerEngine {
     final file = await finder.findHuntAttributes();
     final attributes = file.path;
 
-    void emitData(dynamic data) {
-      _gameEventSubject.add(data);
-    }
-
-    emitData(_HuntFound(attributes));
+    _gameEventSubject.add(_HuntFound(attributes));
 
     final signatures = <String>{};
-    Timer.periodic(const Duration(seconds: 30), (timer) async {
-      final file = File(attributes);
+    await _checkHuntMatch(parser, attributes, signatures);
 
-      final data = await compute(parser.parseFromFile, file);
-
-      if (signatures.add(data.header.signature)) {
-        final match =
-            await data.toEntity(db, outdated: false, teamOutdated: false);
-        emitData(match);
-      } else {
-        emitData(_NoNewMatches());
-      }
+    Timer.periodic(const Duration(seconds: 15), (timer) async {
+      await _checkHuntMatch(parser, attributes, signatures);
     });
 
     if (listenGameLog) {
@@ -212,7 +222,7 @@ class TrackerEngine {
           final parts = s.split(' ');
           final index = parts.indexOf('PrepareLevel');
           if (index != -1) {
-            emitData(_MapLoading(parts[index + 1]));
+            _gameEventSubject.add(_MapLoading(parts[index + 1]));
           }
         });
       });

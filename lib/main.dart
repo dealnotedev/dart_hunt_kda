@@ -4,12 +4,9 @@ import 'dart:io';
 import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:bitsdojo_window_platform_interface/window.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:hunt_stats/auto_launcher_windows.dart';
-import 'package:hunt_stats/border/corners.dart';
-import 'package:hunt_stats/border/gradient_box_border.dart';
 import 'package:hunt_stats/constants.dart';
 import 'package:hunt_stats/db/entities.dart';
 import 'package:hunt_stats/db/stats.dart';
@@ -17,11 +14,12 @@ import 'package:hunt_stats/db/stats_db.dart';
 import 'package:hunt_stats/extensions.dart';
 import 'package:hunt_stats/generated/assets.dart';
 import 'package:hunt_stats/hunt_bundle.dart';
-import 'package:hunt_stats/hunt_images.dart';
-import 'package:hunt_stats/lottie_animations.dart';
 import 'package:hunt_stats/mmr.dart';
+import 'package:hunt_stats/star_widget.dart';
 import 'package:hunt_stats/tracker.dart';
-import 'package:lottie/lottie.dart';
+import 'package:hunt_stats/twitch/settings.dart';
+import 'package:hunt_stats/twitch/twitch_login_widget.dart';
+import 'package:hunt_stats/twitch/twitch_panel.dart';
 import 'package:morphable_shape/morphable_shape.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:system_tray/system_tray.dart' as tray;
@@ -29,7 +27,7 @@ import 'package:system_tray/system_tray.dart' as tray;
 void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await HuntImages.init();
+  await Settings.instance.init();
 
   final db = StatsDb(predefinedProfileId: Constants.profileId);
   final tracker = TrackerEngine(db, listenGameLog: true);
@@ -166,52 +164,16 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  bool _pause = false;
-
-  @override
-  void initState() {
-    _runPauseLoop();
-    super.initState();
-  }
-
-  void _togglePause(bool pause) {
-    setState(() {
-      _pause = pause;
-    });
-  }
-
-  void _runPauseLoop() async {
-    while (true) {
-      await Future.delayed(const Duration(minutes: 10));
-      _togglePause(true);
-      await Future.delayed(const Duration(seconds: 5));
-      _togglePause(false);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: backgroundColor,
-      body: _pause ? _createPauseWidget() : _createContentWidget(context),
+      body: _createContentWidget(context),
     );
-  }
-
-  final _pauseAnimation = Uint8List.fromList(ukraine.codeUnits);
-
-  Widget _createPauseWidget() {
-    return Center(
-        child: Lottie.memory(_pauseAnimation,
-            filterQuality: FilterQuality.medium,
-            width: 128,
-            height: 128,
-            frameRate: FrameRate(60),
-            repeat: false));
   }
 
   Widget _createContentWidget(BuildContext context) {
     const textColor = Colors.white;
-    final size = MediaQuery.of(context).size;
 
     return StreamBuilder<HuntBundle?>(
       initialData: widget.engine.lastBundle,
@@ -231,37 +193,52 @@ class _MyHomePageState extends State<MyHomePage> {
         final teammates =
             bundle.match.players.where((element) => element.teammate);
 
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _PlayersPager(
-                teammates: teammates,
-                me: bundle.me,
-                textColor: textColor,
-                enemies: bundle.enemyStats,
-                cardColor: _blockColor),
-            _createIconifiedContaner(
-                icon: _alternativeStyle
-                    ? Assets.assetsIcKdaV2
-                    : Assets.assetsIcKda,
-                children: _createMyKdaWidgets(bundle, textColor: textColor)),
-            _createIconifiedContaner(
-                icon:
-                    _alternativeStyle ? Assets.assetsIcKdV2 : Assets.assetsIcKd,
-                children: _createTeamKdWidgets(bundle, textColor: textColor)),
-            if (size.height > 486) ...[
+        return SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _PlayersPager(
+                  teammates: teammates,
+                  me: bundle.me,
+                  textColor: textColor,
+                  enemies: bundle.enemyStats,
+                  cardColor: _blockColor),
+              _createIconifiedContaner(
+                  icon: Assets.assetsIcKda,
+                  children: _createMyKdaWidgets(bundle, textColor: textColor)),
+              _createIconifiedContaner(
+                  icon: Assets.assetsIcKd,
+                  children: _createTeamKdWidgets(bundle, textColor: textColor)),
               const SizedBox(
-                height: 16,
+                height: 24,
               ),
               _createSettingsWidget(context,
                   bundle: bundle, textColor: textColor),
               const SizedBox(
-                height: 16,
-              )
-            ]
-          ],
+                height: 24,
+              ),
+              _createTwitchPanel(context)
+            ],
+          ),
         );
       },
+    );
+  }
+
+  final _settings = Settings.instance;
+
+  Widget _createTwitchPanel(BuildContext context) {
+    return Container(
+      decoration: _createBlockDecoration(),
+      child: StreamBuilder<bool>(
+          stream: _settings.twitchAuthChanges
+              .map((event) => event != null)
+              .distinct(),
+          initialData: _settings.twitchAuth != null,
+          builder: (cntx, snapshot) {
+            final logged = snapshot.requireData;
+            return logged ? TwitchPanel(engine: widget.engine,) : const TwitchLoginWidget();
+          }),
     );
   }
 
@@ -274,26 +251,6 @@ class _MyHomePageState extends State<MyHomePage> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                context.localizations.style_0_name,
-                style: TextStyle(color: textColor, fontSize: 16),
-              ),
-              Switch(
-                  value: _alternativeStyle,
-                  onChanged: (checked) {
-                    setState(() {
-                      _alternativeStyle = checked;
-                    });
-                  }),
-              Text(
-                context.localizations.style_1_name,
-                style: TextStyle(color: textColor, fontSize: 16),
-              )
-            ],
-          ),
           StreamBuilder<bool>(
               stream: _autostart(),
               builder: (cnxt, snapshot) {
@@ -509,27 +466,8 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  bool _alternativeStyle = false;
-
   Decoration _createBlockDecoration() {
-    if (_alternativeStyle) {
-      return BoxDecoration(
-        color: _blockColor,
-        border: GradientBoxBorder(
-          corners: Corners(
-              topRight: HuntImages.cornerTopRight,
-              bottomRight: HuntImages.cornerBottomRight),
-          gradient: LinearGradient(colors: [
-            const Color(0xFF595A5C).withOpacity(0.1),
-            const Color(0xFFE7E7E7),
-            const Color(0xFF595A5C),
-          ]),
-          width: 2,
-        ),
-      );
-    } else {
-      return _createConcaveDecoration(color: _blockColor, radius: 8);
-    }
+    return _createConcaveDecoration(color: _blockColor, radius: 8);
   }
 
   Color get _blockColor => const Color(0xFF090909);
@@ -929,49 +867,17 @@ class PlayerWidget extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                _createStarWidget(Mmr.star1.getFilled(mmr)),
-                _createStarWidget(Mmr.star2.getFilled(mmr)),
-                _createStarWidget(Mmr.star3.getFilled(mmr)),
-                _createStarWidget(Mmr.star4.getFilled(mmr)),
-                _createStarWidget(Mmr.star5.getFilled(mmr)),
-                _createStarWidget(Mmr.star6.getFilled(mmr))
+                StarWidget(fill: Mmr.star1.getFilled(mmr)),
+                StarWidget(fill: Mmr.star2.getFilled(mmr)),
+                StarWidget(fill: Mmr.star3.getFilled(mmr)),
+                StarWidget(fill: Mmr.star4.getFilled(mmr)),
+                StarWidget(fill: Mmr.star5.getFilled(mmr)),
+                StarWidget(fill: Mmr.star6.getFilled(mmr)),
               ],
             ),
           ),
         )
       ],
-    );
-  }
-
-  Widget _createStarWidget(double fill, {double size = 16}) {
-    return Container(
-      padding: const EdgeInsets.all(1),
-      height: size,
-      width: size,
-      child: Stack(
-        children: [
-          Image.asset(
-            Assets.assetsCrossWhite20dp,
-            width: size,
-            height: size,
-            filterQuality: FilterQuality.medium,
-            color: const Color(0xFF939598).withOpacity(0.5),
-          ),
-          SizedBox(
-            height: size,
-            width: size * fill,
-            child: Image.asset(
-              Assets.assetsCrossWhite20dp,
-              alignment: Alignment.centerLeft,
-              fit: BoxFit.fitHeight,
-              height: size,
-              filterQuality: FilterQuality.medium,
-              width: size * fill,
-              color: const Color(0xFFCEB379),
-            ),
-          )
-        ],
-      ),
     );
   }
 }
