@@ -83,7 +83,7 @@ class _State extends State<TwitchPanel> {
         text: TextSpan(
             style: const TextStyle(color: Colors.white, fontSize: 12),
             children: SpanUtil.createSpans(
-                'Mission state: $formatted',
+                'Game state: $formatted',
                 formatted,
                 (highlighted) => TextSpan(
                     text: formatted,
