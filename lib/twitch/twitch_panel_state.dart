@@ -9,17 +9,22 @@ class TwitchPanelState {
 
   final bool processing;
 
+  final bool automatically;
+
   TwitchPanelState(
       {required this.missionState,
       required this.active,
+        required this.automatically,
       required this.processing});
 
   TwitchPanelState copy(
       {MissionState? missionState,
+        bool? automatically,
       Nullable<PredictionPair?>? active,
       bool? processing}) {
     return TwitchPanelState(
         processing: processing ?? this.processing,
+        automatically: automatically ?? this.automatically,
         missionState: missionState ?? this.missionState,
         active: active.getOr(this.active));
   }

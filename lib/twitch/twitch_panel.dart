@@ -120,6 +120,7 @@ class _State extends State<TwitchPanel> {
                     if (active != null) ...[
                       Text(
                         active.template.title,
+                        textAlign: TextAlign.center,
                         style: const TextStyle(
                             fontSize: 17,
                             color: Colors.white,
@@ -140,33 +141,33 @@ class _State extends State<TwitchPanel> {
                       ElevatedButton(
                           onPressed: canRunPredictions
                               ? () => _cubit.runPrediction(
-                                  automatically: _automaticallyNext ?? false,
                                   available: _mode.available)
                               : null,
                           child: const Text(
                             'Run prediction',
                           )),
-                      const SizedBox(
-                        height: 8,
-                      ),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Checkbox(
-                              activeColor: Colors.indigo,
-                              value: _automaticallyNext,
-                              onChanged: _handleAutomaticallyChanged),
-                          const Text('Automatically',
-                              style: TextStyle(fontSize: 12)),
+                    ],
+                    const SizedBox(height: 8,),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Checkbox(
+                            activeColor: Colors.indigo,
+                            value: state.automatically,
+                            onChanged: (checked) =>
+                                _cubit.setAutomatically(checked ?? false)),
+                        const Text('Automatically',
+                            style: TextStyle(fontSize: 12)),
+                        if(active == null) ... [
                           const SizedBox(
                             width: 8,
                           ),
                           ..._createModeWidgets('Solo', _Mode.solo),
                           ..._createModeWidgets('Duo', _Mode.duo),
-                          ..._createModeWidgets('Trio', _Mode.trio),
-                        ],
-                      )
-                    ]
+                          ..._createModeWidgets('Trio', _Mode.trio)
+                        ]
+                      ],
+                    )
                   ],
                 ),
               ),
@@ -199,14 +200,7 @@ class _State extends State<TwitchPanel> {
     ];
   }
 
-  bool? _automaticallyNext = false;
   _Mode _mode = _Mode.solo;
-
-  void _handleAutomaticallyChanged(bool? value) {
-    setState(() {
-      _automaticallyNext = value;
-    });
-  }
 
   void _handleModeChanged(_Mode value) {
     setState(() {

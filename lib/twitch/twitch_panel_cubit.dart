@@ -20,6 +20,7 @@ class TwitchPanelCubit extends AbstractCubit {
       : state = ObservableValue(
             current: TwitchPanelState(
                 missionState: engine.lastKnownMissionState,
+                automatically: false,
                 active: null,
                 processing: false)) {
     subscriptions.add(engine.missionState.listen(_handleMissionState));
@@ -47,12 +48,8 @@ class TwitchPanelCubit extends AbstractCubit {
     }
   }
 
-  bool _automatically = false;
-
   Future<void> runPrediction(
-      {required bool automatically,
-      required List<PredictionTemplate> available}) async {
-    _automatically = automatically;
+      {required List<PredictionTemplate> available}) async {
     _available = available;
 
     if (_activePrediction != null) {
@@ -135,7 +132,7 @@ class TwitchPanelCubit extends AbstractCubit {
         state
             .set(state.current.copy(processing: false, active: Nullable(null)));
 
-        if (_automatically) {
+        if (state.current.automatically) {
           await Future.delayed(const Duration(seconds: 10));
           await _runPredictionInternal();
         }
@@ -162,6 +159,10 @@ class TwitchPanelCubit extends AbstractCubit {
         state.set(state.current.copy(processing: false));
       }
     }
+  }
+
+  void setAutomatically(bool automatically) {
+    state.set(state.current.copy(automatically: automatically));
   }
 }
 
