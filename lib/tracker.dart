@@ -94,6 +94,9 @@ class TrackerEngine {
     final header = await db.getLastMatch(mode: LastMatchMode.lastActual);
 
     if (header != null) {
+      final firstActual =
+          await db.getLastMatch(mode: LastMatchMode.firstActual);
+
       final players = await db.getMatchPlayers(header.id);
       final match = MatchEntity(match: header, players: players);
       final ownStats = await db.getOwnStats();
@@ -105,6 +108,7 @@ class TrackerEngine {
           players.where((element) => element.teammate).map((e) => e.profileId));
 
       final bundle = HuntBundle(
+          from: firstActual?.date,
           match: match,
           me: players
               .firstWhereOrNull((element) => element.profileId == myProfileId),
@@ -171,6 +175,7 @@ class TrackerEngine {
     final teamStats = await db.getTeamStats(data.match.teamId);
 
     final bundle = HuntBundle(
+        from: lastBundle?.from ?? data.match.date,
         match: data,
         me: players
             .firstWhereOrNull((element) => element.profileId == myProfileId),

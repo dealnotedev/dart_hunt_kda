@@ -20,6 +20,7 @@ import 'package:hunt_stats/tracker.dart';
 import 'package:hunt_stats/twitch/settings.dart';
 import 'package:hunt_stats/twitch/twitch_login_widget.dart';
 import 'package:hunt_stats/twitch/twitch_panel.dart';
+import 'package:intl/intl.dart';
 import 'package:morphable_shape/morphable_shape.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:system_tray/system_tray.dart' as tray;
@@ -204,7 +205,8 @@ class _MyHomePageState extends State<MyHomePage> {
               const SizedBox(
                 height: 32,
               ),
-              _createSettingsWidget(context, textColor: textColor),
+              _createSettingsWidget(context,
+                  textColor: textColor, bundle: bundle),
               const SizedBox(
                 height: 24,
               ),
@@ -237,7 +239,10 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  Widget _createSettingsWidget(BuildContext context, {Color? textColor}) {
+  Widget _createSettingsWidget(BuildContext context,
+      {Color? textColor, required HuntBundle? bundle}) {
+    final actualFrom = bundle?.from;
+    final actualFromStyle = TextStyle(color: textColor, fontSize: 12);
     return Container(
       padding: const EdgeInsets.all(16),
       width: double.infinity,
@@ -288,6 +293,20 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: const Text('>>')),
             ],
           ),
+          const SizedBox(
+            height: 8,
+          ),
+          if (actualFrom != null) ...[
+            Text(
+              'From ${DateFormat.MMMd().add_Hm().format(actualFrom)}',
+              style: actualFromStyle,
+            )
+          ] else ...[
+            Text(
+              'No actual matches',
+              style: actualFromStyle,
+            )
+          ]
         ],
       ),
     );

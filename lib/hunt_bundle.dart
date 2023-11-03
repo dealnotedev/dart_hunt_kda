@@ -18,12 +18,15 @@ class HuntBundle {
 
   final List<EnemyStats> enemyStats;
 
+  final DateTime? from;
+
   HuntBundle(
       {required this.match,
       required this.me,
       required this.ownStats,
       required this.enemyStats,
       required this.teamStats,
+      required this.from,
       required this.previousOwnStats,
       required this.previousTeamStats,
       required this.previousMatch});
