@@ -68,81 +68,81 @@ class _State extends State<TwitchPanel> {
           final state = snapshot.requireData;
           final active = state.active;
           return Stack(
-            alignment: Alignment.center,
+            alignment: Alignment.topRight,
             children: [
-              Column(
-                children: [
-                  Text(
-                    'Mission state: ${state.missionState.name}',
-                    style: const TextStyle(color: Colors.white, fontSize: 12),
-                  ),
-                  const SizedBox(
-                    height: 8,
-                  ),
-                  if (active != null) ...[
+              SizedBox(
+                width: double.infinity,
+                child: Column(
+                  children: [
                     Text(
-                      active.template.title,
-                      style: const TextStyle(
-                          fontSize: 17,
-                          color: Colors.white,
-                          fontWeight: FontWeight.w500),
+                      'Mission state: ${state.missionState.name}',
+                      style: const TextStyle(color: Colors.white, fontSize: 12),
                     ),
                     const SizedBox(
                       height: 8,
                     ),
-                    ElevatedButton(
-                        style: ButtonStyle(
-                            backgroundColor: MaterialStateColor.resolveWith(
-                                (_) => Colors.red)),
-                        onPressed: () => _cubit.stop(),
-                        child: const Text(
-                          'Stop',
-                        ))
-                  ] else ...[
-                    ElevatedButton(
-                        onPressed: () => _cubit.runPredictionInternal(
-                            automatically: _automaticallyNext ?? false,
-                            sound: _sound ?? false),
-                        child: const Text(
-                          'Run prediction',
-                        )),
-                    const SizedBox(
-                      height: 8,
-                    ),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Checkbox(
-                            activeColor: Colors.indigo,
-                            value: _automaticallyNext,
-                            onChanged: _handleAutomaticallyChanged),
-                        const Text('Automatically',
-                            style: TextStyle(fontSize: 12)),
-                        const SizedBox(
-                          width: 8,
-                        ),
-                        Checkbox(
-                            value: _sound,
-                            activeColor: Colors.indigo,
-                            onChanged: _handleSoundChanged),
-                        const Text(
-                          'Sound',
-                          style: TextStyle(fontSize: 12),
-                        )
-                      ],
-                    )
-                  ]
-                ],
+                    if (active != null) ...[
+                      Text(
+                        active.template.title,
+                        style: const TextStyle(
+                            fontSize: 17,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w500),
+                      ),
+                      const SizedBox(
+                        height: 8,
+                      ),
+                      ElevatedButton(
+                          style: ButtonStyle(
+                              backgroundColor: MaterialStateColor.resolveWith(
+                                  (_) => Colors.red)),
+                          onPressed: () => _cubit.stop(),
+                          child: const Text(
+                            'Stop',
+                          ))
+                    ] else ...[
+                      ElevatedButton(
+                          onPressed: () => _cubit.runPrediction(
+                              automatically: _automaticallyNext ?? false,
+                              sound: _sound ?? false),
+                          child: const Text(
+                            'Run prediction',
+                          )),
+                      const SizedBox(
+                        height: 8,
+                      ),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Checkbox(
+                              activeColor: Colors.indigo,
+                              value: _automaticallyNext,
+                              onChanged: _handleAutomaticallyChanged),
+                          const Text('Automatically',
+                              style: TextStyle(fontSize: 12)),
+                          const SizedBox(
+                            width: 8,
+                          ),
+                          Checkbox(
+                              value: _sound,
+                              activeColor: Colors.indigo,
+                              onChanged: _handleSoundChanged),
+                          const Text(
+                            'Sound',
+                            style: TextStyle(fontSize: 12),
+                          )
+                        ],
+                      )
+                    ]
+                  ],
+                ),
               ),
               if (state.processing) ...[
-                const Align(
-                  alignment: Alignment.topRight,
-                  child: SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(
-                      color: Colors.white,
-                    ),
+                const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    color: Colors.white,
                   ),
                 )
               ]

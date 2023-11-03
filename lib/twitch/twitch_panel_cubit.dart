@@ -49,7 +49,7 @@ class TwitchPanelCubit extends AbstractCubit {
   bool _automatically = false;
   bool _sound = false;
 
-  Future<void> runPredictionInternal(
+  Future<void> runPrediction(
       {required bool automatically, required bool sound}) async {
     _automatically = automatically;
     _sound = sound;
@@ -58,6 +58,10 @@ class TwitchPanelCubit extends AbstractCubit {
       return;
     }
 
+    await _runPredictionInternal();
+  }
+
+  Future<void> _runPredictionInternal() async {
     final template = PredictionTemplate.universal.random;
 
     try {
@@ -127,6 +131,10 @@ class TwitchPanelCubit extends AbstractCubit {
             winningOutcomeId: winnerId);
         state
             .set(state.current.copy(processing: false, active: Nullable(null)));
+
+        if (_automatically) {
+          await _runPredictionInternal();
+        }
       } catch (_) {
         state.set(state.current.copy(processing: false));
       }
