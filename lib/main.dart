@@ -181,17 +181,9 @@ class _MyHomePageState extends State<MyHomePage> {
       builder: (cntx, snapshot) {
         final bundle = snapshot.data;
 
-        if (bundle == null) {
-          return Center(
-            child: Text(
-              context.localizations.stats_empty_text,
-              style: const TextStyle(color: textColor, fontSize: 48),
-            ),
-          );
-        }
-
         final teammates =
-            bundle.match.players.where((element) => element.teammate);
+            bundle?.match.players.where((element) => element.teammate) ??
+                <PlayerEntity>[];
 
         return SingleChildScrollView(
           child: Column(
@@ -199,9 +191,9 @@ class _MyHomePageState extends State<MyHomePage> {
             children: [
               _PlayersPager(
                   teammates: teammates,
-                  me: bundle.me,
+                  me: bundle?.me,
                   textColor: textColor,
-                  enemies: bundle.enemyStats,
+                  enemies: bundle?.enemyStats ?? [],
                   cardColor: _blockColor),
               _createIconifiedContaner(
                   icon: Assets.assetsIcKda,
@@ -212,8 +204,7 @@ class _MyHomePageState extends State<MyHomePage> {
               const SizedBox(
                 height: 32,
               ),
-              _createSettingsWidget(context,
-                  bundle: bundle, textColor: textColor),
+              _createSettingsWidget(context, textColor: textColor),
               const SizedBox(
                 height: 24,
               ),
@@ -246,8 +237,7 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  Widget _createSettingsWidget(BuildContext context,
-      {Color? textColor, required HuntBundle bundle}) {
+  Widget _createSettingsWidget(BuildContext context, {Color? textColor}) {
     return Container(
       padding: const EdgeInsets.all(16),
       width: double.infinity,
@@ -284,12 +274,6 @@ class _MyHomePageState extends State<MyHomePage> {
               ElevatedButton(
                   onPressed: _handleResetAllClick,
                   child: Text(context.localizations.button_reset_all)),
-              const SizedBox(
-                width: 8,
-              ),
-              ElevatedButton(
-                  onPressed: () => _handleResetTeamClick(bundle.teamId),
-                  child: Text(context.localizations.button_reset_team))
             ],
           ),
         ],
@@ -297,14 +281,14 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  List<Widget> _createTeamKdWidgets(HuntBundle bundle,
+  List<Widget> _createTeamKdWidgets(HuntBundle? bundle,
       {required Color textColor}) {
     final textStyle = TextStyle(color: textColor, fontSize: 18);
 
-    final stats = bundle.teamStats;
-    final kdChanges = bundle.teamKdChanges;
-    final killsChanges = bundle.teamKillsChanges;
-    final deathsChanges = bundle.teamDeathsChanges;
+    final stats = bundle?.teamStats ?? TeamStats.empty;
+    final kdChanges = bundle?.teamKdChanges;
+    final killsChanges = bundle?.teamKillsChanges;
+    final deathsChanges = bundle?.teamDeathsChanges;
 
     final kdStyle = TextStyle(
         color: kdChanges != null && kdChanges != 0
@@ -372,15 +356,15 @@ class _MyHomePageState extends State<MyHomePage> {
     ];
   }
 
-  List<Widget> _createMyKdaWidgets(HuntBundle bundle,
+  List<Widget> _createMyKdaWidgets(HuntBundle? bundle,
       {required Color textColor}) {
     final textStyle = TextStyle(color: textColor, fontSize: 20);
-    final stats = bundle.ownStats;
+    final stats = bundle?.ownStats ?? OwnStats.empty;
 
-    final kdaChanges = bundle.kdaChanges;
-    final killsChanges = bundle.ownKillsChanges;
-    final deathsChanges = bundle.ownDeatchChanges;
-    final assistsChanges = bundle.ownAssistsChanges;
+    final kdaChanges = bundle?.kdaChanges;
+    final killsChanges = bundle?.ownKillsChanges;
+    final deathsChanges = bundle?.ownDeatchChanges;
+    final assistsChanges = bundle?.ownAssistsChanges;
 
     final hasDirectionIcon = kdaChanges != null && kdaChanges != 0;
     final kdaStyle = TextStyle(
@@ -544,14 +528,6 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  void _handleResetTeamClick(String teamId) async {
-    await widget.engine.invalidateTeam(teamId);
-
-    if (mounted) {
-      _showSnackbar(context, text: context.localizations.toast_invalidated);
-    }
-  }
-
   void _showSnackbar(BuildContext context,
       {required String text, Duration? duration}) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -580,6 +556,7 @@ ShapeDecoration _createConcaveDecoration(
 }
 
 class MyTeamWidget extends StatelessWidget {
+  final PlayerEntity? me;
   final Iterable<PlayerEntity> teammates;
   final Color? textColor;
   final Color cardColor;
@@ -588,7 +565,8 @@ class MyTeamWidget extends StatelessWidget {
       {super.key,
       required this.teammates,
       required this.textColor,
-      required this.cardColor});
+      required this.cardColor,
+      this.me});
 
   @override
   Widget build(BuildContext context) {
@@ -601,20 +579,25 @@ class MyTeamWidget extends StatelessWidget {
           const SizedBox(
             width: 4,
           ),
-          ...teammates.map((e) => Expanded(
-                  child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: PlayerWidget(
-                  player: e,
-                  textColor: textColor,
-                ),
-              ))),
+          if (teammates.isEmpty) ...[_createPlayerWidget(me)] else
+            ...teammates.map(_createPlayerWidget),
           const SizedBox(
             width: 4,
           )
         ],
       ),
     );
+  }
+
+  Widget _createPlayerWidget(PlayerEntity? e) {
+    return Expanded(
+        child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: PlayerWidget(
+        player: e,
+        textColor: textColor,
+      ),
+    ));
   }
 }
 
@@ -797,6 +780,7 @@ class _PlayersState extends State<_PlayersPager> {
             onPageChanged: (index) => _pageIndex = index,
             children: [
               MyTeamWidget(
+                  me: widget.me,
                   teammates: widget.teammates,
                   textColor: widget.textColor,
                   cardColor: widget.cardColor),
