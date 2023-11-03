@@ -74,7 +74,7 @@ class TwitchPanelCubit extends AbstractCubit {
         broadcasterId: broadcasterId,
         title: template.title,
         outcomes: template.outcomes,
-        predictionWindow: 180);
+        predictionWindow: 300);
   }
 
   void _handleMissionState(MissionState event) async {
