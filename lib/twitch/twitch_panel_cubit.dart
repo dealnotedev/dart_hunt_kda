@@ -133,6 +133,7 @@ class TwitchPanelCubit extends AbstractCubit {
             .set(state.current.copy(processing: false, active: Nullable(null)));
 
         if (_automatically) {
+          await Future.delayed(const Duration(seconds: 10));
           await _runPredictionInternal();
         }
       } catch (_) {

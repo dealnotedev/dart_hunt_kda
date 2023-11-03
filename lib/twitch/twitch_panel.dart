@@ -67,6 +67,9 @@ class _State extends State<TwitchPanel> {
         builder: (cntx, snapshot) {
           final state = snapshot.requireData;
           final active = state.active;
+          final bool canRunPredictions =
+              state.missionState != MissionState.started &&
+                  state.missionState != MissionState.unknown;
           return Stack(
             alignment: Alignment.topRight,
             children: [
@@ -102,9 +105,11 @@ class _State extends State<TwitchPanel> {
                           ))
                     ] else ...[
                       ElevatedButton(
-                          onPressed: () => _cubit.runPrediction(
-                              automatically: _automaticallyNext ?? false,
-                              sound: _sound ?? false),
+                          onPressed: canRunPredictions
+                              ? () => _cubit.runPrediction(
+                                  automatically: _automaticallyNext ?? false,
+                                  sound: _sound ?? false)
+                              : null,
                           child: const Text(
                             'Run prediction',
                           )),
