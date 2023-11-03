@@ -77,6 +77,8 @@ class MatchHeaderEntity {
       required this.bountyFound,
       required this.bondsFound,
       required this.teammateRevives});
+
+  int get totalEnemyKillsDowns => ownEnemyDeaths + ownEnemyDowns + teamEnemyDowns + teamEnemyDeaths;
 }
 
 class PlayerEntity {
