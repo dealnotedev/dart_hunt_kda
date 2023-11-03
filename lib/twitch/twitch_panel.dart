@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hunt_stats/prediction_template.dart';
 import 'package:hunt_stats/secrets.dart';
 import 'package:hunt_stats/tracker.dart';
 import 'package:hunt_stats/twitch/settings.dart';
@@ -108,7 +109,7 @@ class _State extends State<TwitchPanel> {
                           onPressed: canRunPredictions
                               ? () => _cubit.runPrediction(
                                   automatically: _automaticallyNext ?? false,
-                                  sound: _sound ?? false)
+                                  available: _mode.available)
                               : null,
                           child: const Text(
                             'Run prediction',
@@ -128,14 +129,9 @@ class _State extends State<TwitchPanel> {
                           const SizedBox(
                             width: 8,
                           ),
-                          Checkbox(
-                              value: _sound,
-                              activeColor: Colors.indigo,
-                              onChanged: _handleSoundChanged),
-                          const Text(
-                            'Sound',
-                            style: TextStyle(fontSize: 12),
-                          )
+                          ..._createModeWidgets('Solo', _Mode.solo),
+                          ..._createModeWidgets('Duo', _Mode.duo),
+                          ..._createModeWidgets('Trio', _Mode.trio),
                         ],
                       )
                     ]
@@ -158,8 +154,21 @@ class _State extends State<TwitchPanel> {
     );
   }
 
+  List<Widget> _createModeWidgets(String title, _Mode mode) {
+    return [
+      Checkbox(
+          value: _mode == mode,
+          activeColor: Colors.indigo,
+          onChanged: (_) => _handleModeChanged(mode)),
+      Text(
+        title,
+        style: const TextStyle(fontSize: 12),
+      ),
+    ];
+  }
+
   bool? _automaticallyNext = false;
-  bool? _sound = false;
+  _Mode _mode = _Mode.solo;
 
   void _handleAutomaticallyChanged(bool? value) {
     setState(() {
@@ -167,9 +176,26 @@ class _State extends State<TwitchPanel> {
     });
   }
 
-  void _handleSoundChanged(bool? value) {
+  void _handleModeChanged(_Mode value) {
     setState(() {
-      _sound = value;
+      _mode = value;
     });
+  }
+}
+
+enum _Mode {
+  solo,
+  duo,
+  trio;
+
+  List<PredictionTemplate> get available {
+    switch (this) {
+      case _Mode.solo:
+        return PredictionTemplate.solo;
+      case _Mode.duo:
+        return PredictionTemplate.duo;
+      case _Mode.trio:
+        return PredictionTemplate.trio;
+    }
   }
 }

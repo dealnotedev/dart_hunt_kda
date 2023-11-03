@@ -12,11 +12,11 @@ class PredictionTemplate {
 
   static final universal = [extracted, deathsOrKills, hasKills];
 
-  static final solo = <PredictionTemplate>[];
+  static final solo = [...universal];
 
-  static final duo = [assistsCount, teamKills, killsMoreTeammate];
+  static final duo = [assistsCount, teamKills, killsMoreTeammate, ...universal];
 
-  static final trio = [assistsCount, teamKills];
+  static final trio = [assistsCount, teamKills, ...universal];
 
   static final killsMoreTeammate = PredictionTemplate(
       title: 'Стрімер вб\'є більше ніж тіммейт?',
