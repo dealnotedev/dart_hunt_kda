@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hunt_stats/prediction_template.dart';
 import 'package:hunt_stats/secrets.dart';
+import 'package:hunt_stats/span_util.dart';
 import 'package:hunt_stats/tracker.dart';
 import 'package:hunt_stats/twitch/settings.dart';
 import 'package:hunt_stats/twitch/twitch_api.dart';
@@ -56,6 +57,40 @@ class _State extends State<TwitchPanel> {
     super.dispose();
   }
 
+  Widget _createMissionStateWidget(BuildContext context, MissionState state) {
+    final String formatted;
+    final Color color;
+
+    switch (state) {
+      case MissionState.unknown:
+        formatted = 'Unknown';
+        color = Colors.grey;
+        break;
+
+      case MissionState.started:
+        formatted = 'Active match';
+        color = Colors.red;
+        break;
+
+      case MissionState.empty:
+      case MissionState.ended:
+        formatted = 'Lobby';
+        color = Colors.green;
+        break;
+    }
+
+    return RichText(
+        text: TextSpan(
+            style: const TextStyle(color: Colors.white, fontSize: 12),
+            children: SpanUtil.createSpans(
+                'Mission state: $formatted',
+                formatted,
+                (highlighted) => TextSpan(
+                    text: formatted,
+                    style: TextStyle(
+                        color: color, fontWeight: FontWeight.bold)))));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -78,10 +113,7 @@ class _State extends State<TwitchPanel> {
                 width: double.infinity,
                 child: Column(
                   children: [
-                    Text(
-                      'Mission state: ${state.missionState.name}',
-                      style: const TextStyle(color: Colors.white, fontSize: 12),
-                    ),
+                    _createMissionStateWidget(context, state.missionState),
                     const SizedBox(
                       height: 8,
                     ),
