@@ -30,7 +30,7 @@ void main(List<String> args) async {
   await Settings.instance.init();
 
   final db = StatsDb(predefinedProfileId: Constants.profileId);
-  final tracker = TrackerEngine(db, listenGameLog: true);
+  final tracker = TrackerEngine(db, listenGameLog: true, sound: false);
 
   //final data = await tracker
   //    .extractFromFile(File('examples/attributes_zoop_duo_win.xml'));

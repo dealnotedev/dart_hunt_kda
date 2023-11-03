@@ -21,11 +21,12 @@ class TrackerEngine {
   final _mapSubject = StreamController<String>.broadcast();
 
   final bool listenGameLog;
+  final bool sound;
   final StatsDb db;
 
   final _gameEventSubject = StreamController<_TrackerEvent>.broadcast();
 
-  TrackerEngine(this.db, {required this.listenGameLog}) {
+  TrackerEngine(this.db, {required this.listenGameLog, required this.sound}) {
     _gameEventSubject.stream.listen(_handleGameEvent);
   }
 
@@ -63,7 +64,10 @@ class TrackerEngine {
 
     if (info is _MapLoading) {
       _mapSubject.add(info.levelName);
-      await _playMapSound(info.levelName);
+
+      if (sound) {
+        await _playMapSound(info.levelName);
+      }
     }
   }
 
