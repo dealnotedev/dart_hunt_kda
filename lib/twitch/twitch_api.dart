@@ -3,6 +3,13 @@ import 'package:hunt_stats/twitch/prediction.dart';
 import 'package:hunt_stats/twitch/settings.dart';
 import 'package:hunt_stats/twitch/twitch_creds_interceptor.dart';
 
+class Statuses {
+  static const resolved = 'RESOLVED';
+  static const active = 'ACTIVE';
+  static const locked = 'LOCKED';
+  static const canceled = 'CANCELED';
+}
+
 class TwitchApi {
   late final Dio dio;
 

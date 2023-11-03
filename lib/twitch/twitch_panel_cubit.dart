@@ -36,11 +36,12 @@ class TwitchPanelCubit extends AbstractCubit {
         broadcasterId: broadcasterId, count: 1, after: null);
 
     for (var prediction in response) {
-      if ('LOCKED' == prediction.status || 'ACTIVE' == prediction.status) {
+      if (Statuses.locked == prediction.status ||
+          Statuses.active == prediction.status) {
         await twitchApi.endPrediction(
             broadcasterId: broadcasterId,
             id: prediction.id,
-            status: 'CANCELED',
+            status: Statuses.canceled,
             winningOutcomeId: null);
       }
     }
@@ -127,7 +128,7 @@ class TwitchPanelCubit extends AbstractCubit {
         await twitchApi.endPrediction(
             broadcasterId: broadcasterId,
             id: active.prediction.id,
-            status: 'RESOLVED',
+            status: Statuses.resolved,
             winningOutcomeId: winnerId);
         state
             .set(state.current.copy(processing: false, active: Nullable(null)));
@@ -151,7 +152,7 @@ class TwitchPanelCubit extends AbstractCubit {
         await twitchApi.endPrediction(
             broadcasterId: broadcasterId,
             id: active.prediction.id,
-            status: 'CANCELED',
+            status: Statuses.canceled,
             winningOutcomeId: null);
         state
             .set(state.current.copy(active: Nullable(null), processing: false));
