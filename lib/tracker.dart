@@ -314,6 +314,15 @@ class TrackerEngine {
   Future<HuntMatchData> extractFromFile(File file) async {
     return HuntAttributesParser().parseFromFile(file);
   }
+
+  Future<void> validateLast({required bool reset}) async {
+    final last = await db.getLastMatch(
+        mode: reset ? LastMatchMode.lastActual : LastMatchMode.lastOutdated);
+    if (last != null) {
+      await db.outdateOne(id: last.id, outdated: reset, teamOutdated: reset);
+      await _refreshData();
+    }
+  }
 }
 
 sealed class _TrackerEvent {}

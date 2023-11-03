@@ -272,8 +272,20 @@ class _MyHomePageState extends State<MyHomePage> {
             mainAxisSize: MainAxisSize.min,
             children: [
               ElevatedButton(
+                  onPressed: () => widget.engine.validateLast(reset: false),
+                  child: const Text('<<')),
+              const SizedBox(
+                width: 8,
+              ),
+              ElevatedButton(
                   onPressed: _handleResetAllClick,
                   child: Text(context.localizations.button_reset_all)),
+              const SizedBox(
+                width: 8,
+              ),
+              ElevatedButton(
+                  onPressed: () => widget.engine.validateLast(reset: true),
+                  child: const Text('>>')),
             ],
           ),
         ],

@@ -233,6 +233,18 @@ class StatsDb {
   static String _quotes(Iterable<Object> list) =>
       list.map((e) => '?').join(',');
 
+  Future<void> outdateOne(
+      {required int id,
+      required bool outdated,
+      required bool teamOutdated}) async {
+    final db = await database;
+    await db.rawUpdate(
+        'UPDATE ${HuntMatchColumns.table} '
+        'SET ${HuntMatchColumns.outdated} = ?, ${HuntMatchColumns.teamOutdated} = ? '
+        'WHERE ${HuntMatchColumns.id} = ?',
+        [outdated ? 1 : 0, teamOutdated ? 1 : 0, id]);
+  }
+
   Future<void> outdate() async {
     final db = await database;
     await db.rawUpdate(
@@ -306,12 +318,28 @@ class StatsDb {
     }).toList();
   }
 
-  Future<MatchHeaderEntity?> getLastMatch() async {
+  Future<MatchHeaderEntity?> getLastMatch(
+      {LastMatchMode mode = LastMatchMode.lastActual}) async {
     final db = await database;
 
-    final cursor = await db.rawQuery(
-        'SELECT * FROM ${HuntMatchColumns.table} WHERE ${HuntMatchColumns.outdated} = ? ORDER BY ${HuntMatchColumns.date} DESC',
-        [0]);
+    final String where;
+    final List<Object?>? args;
+
+    switch (mode) {
+      case LastMatchMode.lastOutdated:
+        where =
+            'SELECT * FROM ${HuntMatchColumns.table} WHERE ${HuntMatchColumns.outdated} = ? ORDER BY ${HuntMatchColumns.date} DESC';
+        args = [1];
+        break;
+
+      case LastMatchMode.lastActual:
+        where =
+            'SELECT * FROM ${HuntMatchColumns.table} WHERE ${HuntMatchColumns.outdated} = ? ORDER BY ${HuntMatchColumns.date} DESC';
+        args = [0];
+        break;
+    }
+
+    final cursor = await db.rawQuery(where, args);
 
     if (cursor.isNotEmpty) {
       final row = cursor[0];
@@ -519,3 +547,5 @@ class StatsDb {
 extension _MapExt on Map<String, Object?> {
   int intOf(String column) => this[column] as int? ?? 0;
 }
+
+enum LastMatchMode { lastOutdated, lastActual }
