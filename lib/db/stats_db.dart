@@ -326,15 +326,21 @@ class StatsDb {
     final List<Object?>? args;
 
     switch (mode) {
+      case LastMatchMode.firstActual:
+        where =
+            'SELECT * FROM ${HuntMatchColumns.table} WHERE ${HuntMatchColumns.outdated} = ? ORDER BY ${HuntMatchColumns.date} ASC LIMIT 1';
+        args = [0];
+        break;
+
       case LastMatchMode.lastOutdated:
         where =
-            'SELECT * FROM ${HuntMatchColumns.table} WHERE ${HuntMatchColumns.outdated} = ? ORDER BY ${HuntMatchColumns.date} DESC';
+            'SELECT * FROM ${HuntMatchColumns.table} WHERE ${HuntMatchColumns.outdated} = ? ORDER BY ${HuntMatchColumns.date} DESC LIMIT 1';
         args = [1];
         break;
 
       case LastMatchMode.lastActual:
         where =
-            'SELECT * FROM ${HuntMatchColumns.table} WHERE ${HuntMatchColumns.outdated} = ? ORDER BY ${HuntMatchColumns.date} DESC';
+            'SELECT * FROM ${HuntMatchColumns.table} WHERE ${HuntMatchColumns.outdated} = ? ORDER BY ${HuntMatchColumns.date} DESC LIMIT 1';
         args = [0];
         break;
     }
@@ -548,4 +554,4 @@ extension _MapExt on Map<String, Object?> {
   int intOf(String column) => this[column] as int? ?? 0;
 }
 
-enum LastMatchMode { lastOutdated, lastActual }
+enum LastMatchMode { lastOutdated, lastActual, firstActual }

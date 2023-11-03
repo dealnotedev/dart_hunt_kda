@@ -91,7 +91,7 @@ class TrackerEngine {
   }
 
   Future<void> _refreshData() async {
-    final header = await db.getLastMatch();
+    final header = await db.getLastMatch(mode: LastMatchMode.lastActual);
 
     if (header != null) {
       final players = await db.getMatchPlayers(header.id);
@@ -321,7 +321,7 @@ class TrackerEngine {
 
   Future<void> validateLast({required bool reset}) async {
     final last = await db.getLastMatch(
-        mode: reset ? LastMatchMode.lastActual : LastMatchMode.lastOutdated);
+        mode: reset ? LastMatchMode.firstActual : LastMatchMode.lastOutdated);
     if (last != null) {
       await db.outdateOne(id: last.id, outdated: reset, teamOutdated: reset);
       await _refreshData();
