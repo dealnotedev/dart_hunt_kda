@@ -46,8 +46,15 @@ class TwitchPanelCubit extends AbstractCubit {
     }
   }
 
-  Future<void> runPredictionInternal() async {
-    if(_activePrediction != null){
+  bool _automatically = false;
+  bool _sound = false;
+
+  Future<void> runPredictionInternal(
+      {required bool automatically, required bool sound}) async {
+    _automatically = automatically;
+    _sound = sound;
+
+    if (_activePrediction != null) {
       return;
     }
 
@@ -120,6 +127,25 @@ class TwitchPanelCubit extends AbstractCubit {
             winningOutcomeId: winnerId);
         state
             .set(state.current.copy(processing: false, active: Nullable(null)));
+      } catch (_) {
+        state.set(state.current.copy(processing: false));
+      }
+    }
+  }
+
+  Future<void> stop() async {
+    final active = _activePrediction;
+    if (active != null) {
+      state.set(state.current.copy(processing: true));
+
+      try {
+        await twitchApi.endPrediction(
+            broadcasterId: broadcasterId,
+            id: active.prediction.id,
+            status: 'CANCELED',
+            winningOutcomeId: null);
+        state
+            .set(state.current.copy(active: Nullable(null), processing: false));
       } catch (_) {
         state.set(state.current.copy(processing: false));
       }

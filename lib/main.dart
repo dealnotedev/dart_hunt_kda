@@ -134,6 +134,7 @@ class MyApp extends StatelessWidget {
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       theme: ThemeData(
+        brightness: Brightness.dark,
         primarySwatch: Colors.indigo,
       ),
       home: Column(
@@ -209,7 +210,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   icon: Assets.assetsIcKd,
                   children: _createTeamKdWidgets(bundle, textColor: textColor)),
               const SizedBox(
-                height: 24,
+                height: 32,
               ),
               _createSettingsWidget(context,
                   bundle: bundle, textColor: textColor),
@@ -236,7 +237,11 @@ class _MyHomePageState extends State<MyHomePage> {
           initialData: _settings.twitchAuth != null,
           builder: (cntx, snapshot) {
             final logged = snapshot.requireData;
-            return logged ? TwitchPanel(engine: widget.engine,) : const TwitchLoginWidget();
+            return logged
+                ? TwitchPanel(
+                    engine: widget.engine,
+                  )
+                : const TwitchLoginWidget();
           }),
     );
   }
