@@ -17,6 +17,7 @@ import 'package:rxdart/rxdart.dart';
 
 class TrackerEngine {
   final _bundleSubject = StreamController<HuntBundle?>.broadcast();
+  final _newMatchesSubject = StreamController<MatchEntity>.broadcast();
   final _mapSubject = StreamController<String>.broadcast();
 
   final bool listenGameLog;
@@ -28,13 +29,36 @@ class TrackerEngine {
     _gameEventSubject.stream.listen(_handleGameEvent);
   }
 
+  Stream<MissionState> get missionState => _gameEventSubject.stream
+      .where((event) => event is _MissionState)
+      .cast<_MissionState>()
+      .map(_parseMissionState)
+      .distinct();
+
+  Stream<MatchEntity> get newMatches => _newMatchesSubject.stream;
+
+  static MissionState _parseMissionState(_MissionState event) {
+    switch (event.state) {
+      case 'MissionStarted':
+        return MissionState.started;
+      case 'ContentsDumped':
+        return MissionState.ended;
+      case 'Empty':
+        return MissionState.empty;
+      default:
+        return MissionState.unknown;
+    }
+  }
+
+  MissionState lastKnownMissionState = MissionState.unknown;
+
   Future<void> _handleGameEvent(_TrackerEvent info) async {
     if (info is _NewHuntMatch) {
       await _saveHuntMatch(info.match);
     }
 
     if (info is _MissionState) {
-      print(info.state);
+      lastKnownMissionState = _parseMissionState(info);
     }
 
     if (info is _MapLoading) {
@@ -155,6 +179,7 @@ class TrackerEngine {
 
     lastBundle = bundle;
     _bundleSubject.add(bundle);
+    _newMatchesSubject.add(data);
   }
 
   Future<void> invalidateMatches() async {
@@ -201,7 +226,7 @@ class TrackerEngine {
     final signatures = <String>{};
     await _checkHuntMatch(parser, attributes, signatures, initial: true);
 
-    Timer.periodic(const Duration(seconds: 15), (timer) async {
+    Timer.periodic(const Duration(seconds: 10), (timer) async {
       await _checkHuntMatch(parser, attributes, signatures, initial: false);
     });
 
@@ -322,3 +347,5 @@ class _HuntFound extends _TrackerEvent {
 
   _HuntFound(this.attributes);
 }
+
+enum MissionState { empty, unknown, started, ended }
