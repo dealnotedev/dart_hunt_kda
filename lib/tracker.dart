@@ -13,6 +13,7 @@ import 'package:hunt_stats/hunt_finder.dart';
 import 'package:hunt_stats/parser/hunt_attributes_parser.dart';
 import 'package:hunt_stats/parser/models.dart';
 import 'package:hunt_stats/ringtone.dart';
+import 'package:hunt_stats/text_stats_generator.dart';
 import 'package:rxdart/rxdart.dart';
 
 class TrackerEngine {
@@ -90,6 +91,13 @@ class TrackerEngine {
     }
   }
 
+  final _textGenerator = TextStatsGenerator(tableWidth: 32);
+
+  File get _textStatsFile {
+    final dir = File(Platform.resolvedExecutable).parent;
+    return File('${dir.path}/stats.txt');
+  }
+
   Future<void> _refreshData() async {
     final header = await db.getLastMatch(mode: LastMatchMode.lastActual);
 
@@ -118,6 +126,9 @@ class TrackerEngine {
           previousTeamStats: null,
           previousOwnStats: null,
           previousMatch: null);
+
+      await _textGenerator.write(bundle: bundle, file: _textStatsFile);
+
       lastBundle = bundle;
       _bundleSubject.add(bundle);
     } else {
@@ -187,6 +198,9 @@ class TrackerEngine {
         previousMatch: lastBundle?.match);
 
     lastBundle = bundle;
+
+    await _textGenerator.write(bundle: bundle, file: _textStatsFile);
+
     _bundleSubject.add(bundle);
     _newMatchesSubject.add(data);
   }
