@@ -127,7 +127,7 @@ class TextStatsGenerator {
         : '';
 
     final myKda =
-        '${_formatDouble(bundle.ownStats.kda)}$myKdaChangesSymbol ${bundle.ownStats.ownKills}/${bundle.ownStats.ownDeaths}/${bundle.ownStats.ownAssists}';
+        '${_formatDouble(bundle.ownStats.kda)}$myKdaChangesSymbol  ${bundle.ownStats.ownKills}/${bundle.ownStats.ownDeaths}/${bundle.ownStats.ownAssists}';
     table += _generateValuesText(title: 'My KDA', data: myKda);
     table += '\n';
     table += _generateValuesText(
@@ -144,7 +144,7 @@ class TextStatsGenerator {
         : '';
 
     final teamKd =
-        '${_formatDouble(bundle.teamStats.kd)}$teamKdChangesSymbol ${bundle.teamStats.teamKills}/${bundle.teamStats.teamDeaths}';
+        '${_formatDouble(bundle.teamStats.kd)}$teamKdChangesSymbol  ${bundle.teamStats.teamKills}/${bundle.teamStats.teamDeaths}';
     table += _generateValuesText(title: 'Team KD', data: teamKd);
     table += '\n';
     table += _generateValuesText(
@@ -161,12 +161,12 @@ class TableStyle {
   static const simple = TableStyle(
       horizontalLine: '-',
       verticalLine: '|',
-      cornerTopLeft: '◸',
-      corentTopRight: '◹',
+      cornerTopLeft: '◻',
+      corentTopRight: '◻',
       halfCrossLeft: '◻',
       halfCrossRight: '◻',
-      cornerBottomLeft: '◺',
-      cornerBottomRight: '◿');
+      cornerBottomLeft: '◻',
+      cornerBottomRight: '◻');
 
   static const bold = TableStyle(
       horizontalLine: '━',
