@@ -9,8 +9,15 @@ class TextStatsGenerator {
 
   TextStatsGenerator({required this.tableWidth, required this.style});
 
-  Future<void> write({required HuntBundle bundle, required File file}) {
-    final table = _generateTableContent(bundle);
+  Future<void> write({required HuntBundle? bundle, required File file}) {
+    final String table;
+
+    if(bundle != null) {
+      table = _generateTableContent(bundle);
+    } else {
+      table = _generateEmptyText();
+    }
+
     print(table);
     return file.writeAsString(_withPadding(table, padding: 1));
   }
@@ -63,6 +70,31 @@ class TextStatsGenerator {
     return line;
   }
 
+  String _generateCenteredText({required String text}) {
+    final availableWidth = tableWidth - 2 - 2;
+
+    final actualWidth = text.length;
+    final overflow = actualWidth - availableWidth;
+
+    final String preparedText;
+    if (overflow > 0) {
+      preparedText = text.substring(0, text.length - overflow);
+    } else {
+      preparedText = text;
+    }
+
+    final space = tableWidth - 2 - preparedText.length;
+    final spaceLeft = space ~/ 2;
+    final spaceRight = space - spaceLeft;
+
+    var line = style.verticalLine;
+    line += _generateSymbols(spaceLeft, ' ');
+    line += preparedText;
+    line += _generateSymbols(spaceRight, ' ');
+    line += style.verticalLine;
+    return line;
+  }
+
   String _generatePlayerText({required String name, required String data}) {
     final availableWidth = tableWidth - 2 - 2;
 
@@ -96,6 +128,24 @@ class TextStatsGenerator {
       text += symbol;
     }
     return text;
+  }
+
+  String _generateEmptyText(){
+    var table = '';
+
+    table += _generateSimpleLine(
+        start: style.cornerTopLeft, end: style.corentTopRight);
+    table += '\n';
+    table+= _generateValuesText(title: '', data: '');
+    table += '\n';
+    table += _generateCenteredText(text: 'Hunt!');
+    table += '\n';
+    table+= _generateValuesText(title: '', data: '');
+    table += '\n';
+    table += _generateSimpleLine(
+        start: style.cornerBottomLeft, end: style.cornerBottomRight);
+
+    return table;
   }
 
   String _generateTableContent(HuntBundle bundle) {

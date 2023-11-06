@@ -29,6 +29,9 @@ class TrackerEngine {
 
   TrackerEngine(this.db, {required this.listenGameLog, required this.sound}) {
     _gameEventSubject.stream.listen(_handleGameEvent);
+    _bundleSubject.stream.listen((bundle) async {
+      await _textGenerator.write(bundle: bundle, file: _textStatsFile);
+    });
   }
 
   Stream<MissionState> get missionState => _gameEventSubject.stream
@@ -91,7 +94,8 @@ class TrackerEngine {
     }
   }
 
-  final _textGenerator = TextStatsGenerator(tableWidth: 32, style: TableStyle.simple);
+  final _textGenerator =
+      TextStatsGenerator(tableWidth: 32, style: TableStyle.simple);
 
   File get _textStatsFile {
     final dir = File(Platform.resolvedExecutable).parent;
@@ -126,9 +130,6 @@ class TrackerEngine {
           previousTeamStats: null,
           previousOwnStats: null,
           previousMatch: null);
-
-      await _textGenerator.write(bundle: bundle, file: _textStatsFile);
-
       lastBundle = bundle;
       _bundleSubject.add(bundle);
     } else {
@@ -198,8 +199,6 @@ class TrackerEngine {
         previousMatch: lastBundle?.match);
 
     lastBundle = bundle;
-
-    await _textGenerator.write(bundle: bundle, file: _textStatsFile);
 
     _bundleSubject.add(bundle);
     _newMatchesSubject.add(data);
