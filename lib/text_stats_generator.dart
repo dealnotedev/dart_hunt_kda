@@ -131,7 +131,7 @@ class TextStatsGenerator {
     table += _generateValuesText(title: 'My KDA', data: myKda);
     table += '\n';
     table += _generateValuesText(
-        title: '${bundle.ownStats.matches} matches', data: '');
+        title: _formatMatches(bundle.ownStats.matches), data: '');
     table += '\n';
 
     if (bundle.match.match.teamSize > 1) {
@@ -149,7 +149,7 @@ class TextStatsGenerator {
       table += _generateValuesText(title: 'Team KD', data: teamKd);
       table += '\n';
       table += _generateValuesText(
-          title: '${bundle.teamStats.matches} matches', data: '');
+          title: _formatMatches(bundle.teamStats.matches), data: '');
       table += '\n';
     }
 
@@ -157,6 +157,10 @@ class TextStatsGenerator {
         start: style.cornerBottomLeft, end: style.cornerBottomRight);
 
     return table;
+  }
+
+  static String _formatMatches(int count) {
+    return count == 1 ? '1 match' : '$count matches';
   }
 }
 
