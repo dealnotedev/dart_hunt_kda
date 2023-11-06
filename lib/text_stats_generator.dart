@@ -10,6 +10,7 @@ class TextStatsGenerator {
 
   Future<void> write({required HuntBundle bundle, required File file}) {
     final table = _generateTableContent(bundle);
+    print(table);
     return file.writeAsString(table);
   }
 
@@ -26,21 +27,11 @@ class TextStatsGenerator {
   }
 
   String _generateSimpleLine({required String start, required String end}) {
-    String line = '';
-    for (int i = 0; i < tableWidth; i++) {
-      if (i == 0) {
-        line += start;
-      } else if (i == tableWidth - 1) {
-        line += end;
-      } else {
-        line += '-';
-      }
-    }
-    return line;
+    return ' $start${_generateSymbols(tableWidth - 4, '-')}$end ';
   }
 
   String _generateValuesText({required String title, required String data}) {
-    final availableWidth = tableWidth - 2 - 2;
+    final availableWidth = tableWidth - 2 - 2 - 2;
 
     final actualWidth = title.length + data.length + 1;
     final overflow = actualWidth - availableWidth;
@@ -52,9 +43,9 @@ class TextStatsGenerator {
       preparedTitle = title;
     }
 
-    final space = tableWidth - 2 - preparedTitle.length - 2 - data.length;
+    final space = tableWidth - 2 - preparedTitle.length - 2 - data.length - 2;
 
-    String line = '| ';
+    String line = ' | ';
     line += preparedTitle;
 
     for (int i = 0; i < space; i++) {
@@ -62,12 +53,12 @@ class TextStatsGenerator {
     }
 
     line += data;
-    line += ' |';
+    line += ' | ';
     return line;
   }
 
   String _generatePlayerText({required String name, required String data}) {
-    final availableWidth = tableWidth - 2 - 2;
+    final availableWidth = tableWidth - 2 - 2 - 2;
 
     final actualWidth = name.length + data.length + 1;
     final overflow = actualWidth - availableWidth;
@@ -79,11 +70,11 @@ class TextStatsGenerator {
       preparedName = name;
     }
 
-    final space = tableWidth - 2 - preparedName.length - 1 - data.length;
+    final space = tableWidth - 2 - preparedName.length - 1 - data.length - 2;
     final spaceLeft = space ~/ 2;
     final spaceRight = space - spaceLeft;
 
-    String line = '|';
+    String line = ' |';
     for (int i = 0; i < spaceLeft; i++) {
       line += ' ';
     }
@@ -94,14 +85,14 @@ class TextStatsGenerator {
       line += ' ';
     }
 
-    line += '|';
+    line += '| ';
     return line;
   }
 
-  static String _generateStars(int count) {
+  static String _generateSymbols(int count, String symbol) {
     String text = '';
     for (int i = 0; i < count; i++) {
-      text += '*';
+      text += symbol;
     }
     return text;
   }
@@ -119,7 +110,7 @@ class TextStatsGenerator {
 
       final stars = mmr.count + (fill ?? 0.0);
       final data =
-          '${_generateStars(mmr.count)} ${stars.toStringAsPrecision(2)}';
+          '${_generateSymbols(mmr.count, '*')} ${stars.toStringAsPrecision(2)}';
       table += _generatePlayerText(name: player.username, data: data);
       table += '\n';
     }
@@ -136,6 +127,11 @@ class TextStatsGenerator {
         '${_formatDouble(bundle.ownStats.kda)}$myKdaChangesSymbol ${bundle.ownStats.ownKills}/${bundle.ownStats.ownDeaths}/${bundle.ownStats.ownAssists}';
     table += _generateValuesText(title: 'My KDA', data: myKda);
     table += '\n';
+    table += _generateValuesText(title: '${bundle.ownStats.matches} matches', data: '');
+    table += '\n';
+
+    table += _generateSimpleLine(start: '◻', end: '◻');
+    table += '\n';
 
     final teamKdChanges = bundle.teamKdChanges;
     final teamKdChangesSymbol = teamKdChanges != null && teamKdChanges != 0
@@ -145,6 +141,8 @@ class TextStatsGenerator {
     final teamKd =
         '${_formatDouble(bundle.teamStats.kd)}$teamKdChangesSymbol ${bundle.teamStats.teamKills}/${bundle.teamStats.teamDeaths}';
     table += _generateValuesText(title: 'Team KD', data: teamKd);
+    table += '\n';
+    table += _generateValuesText(title: '${bundle.teamStats.matches} matches', data: '');
     table += '\n';
     table += _generateSimpleLine(start: '◺', end: '◿');
 

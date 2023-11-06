@@ -91,7 +91,7 @@ class TrackerEngine {
     }
   }
 
-  final _textGenerator = TextStatsGenerator(tableWidth: 32);
+  final _textGenerator = TextStatsGenerator(tableWidth: 34);
 
   File get _textStatsFile {
     final dir = File(Platform.resolvedExecutable).parent;
