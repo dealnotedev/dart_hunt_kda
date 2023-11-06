@@ -187,7 +187,7 @@ class TextStatsGenerator {
       table += _generateValuesText(
           title: '${_formatMatches(bundle.ownStats.matches)}, last:',
           data:
-              '${lastMatch.totalOwnEnemyDeathsDowns}/${lastMatch.totalOwnDeathsDowns}/${lastMatch.ownAssists}');
+              '${lastMatch.totalOwnEnemyDeathsDowns.valueOrHyphen}/${lastMatch.totalOwnDeathsDowns.valueOrHyphen}/${lastMatch.ownAssists.valueOrHyphen}');
     } else {
       table += _generateValuesText(
           title: _formatMatches(bundle.ownStats.matches), data: '');
@@ -214,7 +214,7 @@ class TextStatsGenerator {
         table += _generateValuesText(
             title: '${_formatMatches(bundle.teamStats.matches)}, last:',
             data:
-                '${lastMatch.totalEnemyDeathsDowns}/${lastMatch.totalDeathsDowns}');
+                '${lastMatch.totalEnemyDeathsDowns.valueOrHyphen}/${lastMatch.totalDeathsDowns.valueOrHyphen}');
       } else {
         table += _generateValuesText(
             title: _formatMatches(bundle.teamStats.matches), data: '');
@@ -276,6 +276,10 @@ class TableStyle {
       required this.halfCrossRight,
       required this.cornerBottomLeft,
       required this.cornerBottomRight});
+}
+
+extension _IntExt on int {
+  String get valueOrHyphen => this > 0 ? '$this' : '-';
 }
 
 extension _DoubleExt on double {
