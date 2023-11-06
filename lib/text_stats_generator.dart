@@ -81,11 +81,11 @@ class TextStatsGenerator {
     final spaceRight = space - spaceLeft;
 
     var line = style.verticalLine;
-    line+=_generateSymbols(spaceLeft, ' ');
+    line += _generateSymbols(spaceLeft, ' ');
     line += preparedName;
     line += ' ';
     line += data;
-    line+=_generateSymbols(spaceRight, ' ');
+    line += _generateSymbols(spaceRight, ' ');
     line += style.verticalLine;
     return line;
   }
@@ -134,22 +134,25 @@ class TextStatsGenerator {
         title: '${bundle.ownStats.matches} matches', data: '');
     table += '\n';
 
-    table += _generateSimpleLine(
-        start: style.halfCrossLeft, end: style.halfCrossRight);
-    table += '\n';
+    if (bundle.match.match.teamSize > 1) {
+      table += _generateSimpleLine(
+          start: style.halfCrossLeft, end: style.halfCrossRight);
+      table += '\n';
 
-    final teamKdChanges = bundle.teamKdChanges;
-    final teamKdChangesSymbol = teamKdChanges != null && teamKdChanges != 0
-        ? (teamKdChanges > 0 ? '△' : '▽')
-        : '';
+      final teamKdChanges = bundle.teamKdChanges;
+      final teamKdChangesSymbol = teamKdChanges != null && teamKdChanges != 0
+          ? (teamKdChanges > 0 ? '△' : '▽')
+          : '';
 
-    final teamKd =
-        '${_formatDouble(bundle.teamStats.kd)}$teamKdChangesSymbol  ${bundle.teamStats.teamKills}/${bundle.teamStats.teamDeaths}';
-    table += _generateValuesText(title: 'Team KD', data: teamKd);
-    table += '\n';
-    table += _generateValuesText(
-        title: '${bundle.teamStats.matches} matches', data: '');
-    table += '\n';
+      final teamKd =
+          '${_formatDouble(bundle.teamStats.kd)}$teamKdChangesSymbol  ${bundle.teamStats.teamKills}/${bundle.teamStats.teamDeaths}';
+      table += _generateValuesText(title: 'Team KD', data: teamKd);
+      table += '\n';
+      table += _generateValuesText(
+          title: '${bundle.teamStats.matches} matches', data: '');
+      table += '\n';
+    }
+
     table += _generateSimpleLine(
         start: style.cornerBottomLeft, end: style.cornerBottomRight);
 
