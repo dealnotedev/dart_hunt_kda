@@ -12,7 +12,7 @@ class TextStatsGenerator {
   Future<void> write({required HuntBundle? bundle, required File file}) {
     final String table;
 
-    if(bundle != null) {
+    if (bundle != null) {
       table = _generateTableContent(bundle);
     } else {
       table = _generateEmptyText();
@@ -130,17 +130,17 @@ class TextStatsGenerator {
     return text;
   }
 
-  String _generateEmptyText(){
+  String _generateEmptyText() {
     var table = '';
 
     table += _generateSimpleLine(
         start: style.cornerTopLeft, end: style.corentTopRight);
     table += '\n';
-    table+= _generateValuesText(title: '', data: '');
+    table += _generateValuesText(title: '', data: '');
     table += '\n';
     table += _generateCenteredText(text: 'Hunt!');
     table += '\n';
-    table+= _generateValuesText(title: '', data: '');
+    table += _generateValuesText(title: '', data: '');
     table += '\n';
     table += _generateSimpleLine(
         start: style.cornerBottomLeft, end: style.cornerBottomRight);
@@ -182,10 +182,17 @@ class TextStatsGenerator {
         '${_formatDouble(bundle.ownStats.kda)}$myKdaChangesSymbol  ${bundle.ownStats.ownKills}/${bundle.ownStats.ownDeaths}/${bundle.ownStats.ownAssists}';
     table += _generateValuesText(title: 'My KDA', data: myKda);
     table += '\n';
-    table += _generateValuesText(
-        title: '${_formatMatches(bundle.ownStats.matches)}, last:',
-        data:
-            '${lastMatch.totalOwnEnemyDeathsDowns}/${lastMatch.totalOwnDeathsDowns}/${lastMatch.ownAssists}');
+
+    if (bundle.ownStats.matches > 1) {
+      table += _generateValuesText(
+          title: '${_formatMatches(bundle.ownStats.matches)}, last:',
+          data:
+              '${lastMatch.totalOwnEnemyDeathsDowns}/${lastMatch.totalOwnDeathsDowns}/${lastMatch.ownAssists}');
+    } else {
+      table += _generateValuesText(
+          title: _formatMatches(bundle.ownStats.matches), data: '');
+    }
+
     table += '\n';
 
     if (lastMatch.teamSize > 1) {
@@ -202,10 +209,17 @@ class TextStatsGenerator {
           '${_formatDouble(bundle.teamStats.kd)}$teamKdChangesSymbol  ${bundle.teamStats.teamKills}/${bundle.teamStats.teamDeaths}';
       table += _generateValuesText(title: 'Team KD', data: teamKd);
       table += '\n';
-      table += _generateValuesText(
-          title: '${_formatMatches(bundle.teamStats.matches)}, last:',
-          data:
-              '${lastMatch.totalEnemyDeathsDowns}/${lastMatch.totalDeathsDowns}');
+
+      if (bundle.teamStats.matches > 1) {
+        table += _generateValuesText(
+            title: '${_formatMatches(bundle.teamStats.matches)}, last:',
+            data:
+                '${lastMatch.totalEnemyDeathsDowns}/${lastMatch.totalDeathsDowns}');
+      } else {
+        table += _generateValuesText(
+            title: _formatMatches(bundle.teamStats.matches), data: '');
+      }
+
       table += '\n';
     }
 
@@ -216,7 +230,7 @@ class TextStatsGenerator {
   }
 
   static String _formatMatches(int count) {
-    return count == 1 ? '1 match' : '$count matches';
+    return count == 1 ? '1 game' : '$count games';
   }
 }
 
