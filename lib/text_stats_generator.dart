@@ -5,13 +5,18 @@ import 'package:hunt_stats/mmr.dart';
 
 class TextStatsGenerator {
   final int tableWidth;
+  final TableStyle style;
 
-  TextStatsGenerator({required this.tableWidth});
+  TextStatsGenerator({required this.tableWidth, required this.style});
 
   Future<void> write({required HuntBundle bundle, required File file}) {
     final table = _generateTableContent(bundle);
-    print(table);
-    return file.writeAsString(table);
+    return file.writeAsString(_withPadding(table, padding: 1));
+  }
+
+  static String _withPadding(String table, {required int padding}) {
+    final space = _generateSymbols(padding, ' ');
+    return table.split('\n').map((e) => '$space$e$space').join('\n');
   }
 
   static String _formatDouble(double value,
@@ -27,11 +32,11 @@ class TextStatsGenerator {
   }
 
   String _generateSimpleLine({required String start, required String end}) {
-    return ' $start${_generateSymbols(tableWidth - 4, '-')}$end ';
+    return '$start${_generateSymbols(tableWidth - (start.length + end.length), style.horizontalLine)}$end';
   }
 
   String _generateValuesText({required String title, required String data}) {
-    final availableWidth = tableWidth - 2 - 2 - 2;
+    final availableWidth = tableWidth - 2 - 2;
 
     final actualWidth = title.length + data.length + 1;
     final overflow = actualWidth - availableWidth;
@@ -43,9 +48,9 @@ class TextStatsGenerator {
       preparedTitle = title;
     }
 
-    final space = tableWidth - 2 - preparedTitle.length - 2 - data.length - 2;
+    final space = tableWidth - 2 - preparedTitle.length - 2 - data.length;
 
-    String line = ' | ';
+    String line = '${style.verticalLine} ';
     line += preparedTitle;
 
     for (int i = 0; i < space; i++) {
@@ -53,12 +58,12 @@ class TextStatsGenerator {
     }
 
     line += data;
-    line += ' | ';
+    line += ' ${style.verticalLine}';
     return line;
   }
 
   String _generatePlayerText({required String name, required String data}) {
-    final availableWidth = tableWidth - 2 - 2 - 2;
+    final availableWidth = tableWidth - 2 - 2;
 
     final actualWidth = name.length + data.length + 1;
     final overflow = actualWidth - availableWidth;
@@ -70,11 +75,11 @@ class TextStatsGenerator {
       preparedName = name;
     }
 
-    final space = tableWidth - 2 - preparedName.length - 1 - data.length - 2;
+    final space = tableWidth - 2 - preparedName.length - 1 - data.length;
     final spaceLeft = space ~/ 2;
     final spaceRight = space - spaceLeft;
 
-    String line = ' |';
+    String line = style.verticalLine;
     for (int i = 0; i < spaceLeft; i++) {
       line += ' ';
     }
@@ -85,7 +90,7 @@ class TextStatsGenerator {
       line += ' ';
     }
 
-    line += '| ';
+    line += style.verticalLine;
     return line;
   }
 
@@ -99,7 +104,8 @@ class TextStatsGenerator {
 
   String _generateTableContent(HuntBundle bundle) {
     String table = '';
-    table += _generateSimpleLine(start: '◸', end: '◹');
+    table += _generateSimpleLine(
+        start: style.cornerTopLeft, end: style.corentTopRight);
     table += '\n';
 
     for (var player in bundle.match.players) {
@@ -115,7 +121,8 @@ class TextStatsGenerator {
       table += '\n';
     }
 
-    table += _generateSimpleLine(start: '◻', end: '◻');
+    table += _generateSimpleLine(
+        start: style.halfCrossLeft, end: style.halfCrossRight);
     table += '\n';
 
     final myKdaChanges = bundle.kdaChanges;
@@ -127,10 +134,12 @@ class TextStatsGenerator {
         '${_formatDouble(bundle.ownStats.kda)}$myKdaChangesSymbol ${bundle.ownStats.ownKills}/${bundle.ownStats.ownDeaths}/${bundle.ownStats.ownAssists}';
     table += _generateValuesText(title: 'My KDA', data: myKda);
     table += '\n';
-    table += _generateValuesText(title: '${bundle.ownStats.matches} matches', data: '');
+    table += _generateValuesText(
+        title: '${bundle.ownStats.matches} matches', data: '');
     table += '\n';
 
-    table += _generateSimpleLine(start: '◻', end: '◻');
+    table += _generateSimpleLine(
+        start: style.halfCrossLeft, end: style.halfCrossRight);
     table += '\n';
 
     final teamKdChanges = bundle.teamKdChanges;
@@ -142,12 +151,58 @@ class TextStatsGenerator {
         '${_formatDouble(bundle.teamStats.kd)}$teamKdChangesSymbol ${bundle.teamStats.teamKills}/${bundle.teamStats.teamDeaths}';
     table += _generateValuesText(title: 'Team KD', data: teamKd);
     table += '\n';
-    table += _generateValuesText(title: '${bundle.teamStats.matches} matches', data: '');
+    table += _generateValuesText(
+        title: '${bundle.teamStats.matches} matches', data: '');
     table += '\n';
-    table += _generateSimpleLine(start: '◺', end: '◿');
+    table += _generateSimpleLine(
+        start: style.cornerBottomLeft, end: style.cornerBottomRight);
 
     return table;
   }
+}
+
+class TableStyle {
+  static const simple = TableStyle(
+      horizontalLine: '-',
+      verticalLine: '|',
+      cornerTopLeft: '◸',
+      corentTopRight: '◹',
+      halfCrossLeft: '◻',
+      halfCrossRight: '◻',
+      cornerBottomLeft: '◺',
+      cornerBottomRight: '◿');
+
+  static const bold = TableStyle(
+      horizontalLine: '━',
+      verticalLine: '┃',
+      cornerTopLeft: '┏',
+      corentTopRight: '┓',
+      halfCrossLeft: '┣',
+      halfCrossRight: '┨',
+      cornerBottomLeft: '┗',
+      cornerBottomRight: '┛');
+
+  final String horizontalLine;
+  final String verticalLine;
+
+  final String cornerTopLeft;
+  final String corentTopRight;
+
+  final String halfCrossLeft;
+  final String halfCrossRight;
+
+  final String cornerBottomLeft;
+  final String cornerBottomRight;
+
+  const TableStyle(
+      {required this.horizontalLine,
+      required this.verticalLine,
+      required this.cornerTopLeft,
+      required this.corentTopRight,
+      required this.halfCrossLeft,
+      required this.halfCrossRight,
+      required this.cornerBottomLeft,
+      required this.cornerBottomRight});
 }
 
 extension _DoubleExt on double {
