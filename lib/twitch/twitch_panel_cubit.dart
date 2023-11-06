@@ -109,7 +109,7 @@ class TwitchPanelCubit extends AbstractCubit {
       await twitchApi.endPrediction(
           broadcasterId: broadcasterId,
           id: active.prediction.id,
-          status: 'LOCKED',
+          status: Statuses.locked,
           winningOutcomeId: null);
     }
   }
