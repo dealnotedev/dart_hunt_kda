@@ -38,7 +38,7 @@ class PredictionTemplate {
       title: 'Скільки вбивств зробить команда?',
       outcomes: ['Жодного', '2 або менше', '3 або більше'],
       resolver: (match) {
-        final kills = match.match.totalEnemyKillsDowns;
+        final kills = match.match.totalEnemyDeathsDowns;
         if (kills == 0) {
           return 0;
         } else if (kills < 3) {
@@ -58,7 +58,7 @@ class PredictionTemplate {
       resolver: (match) {
         if (match.match.ownAssists > 0) {
           return 2;
-        } else if (match.match.totalEnemyKillsDowns > 0) {
+        } else if (match.match.totalEnemyDeathsDowns > 0) {
           return 1;
         } else {
           return 0;

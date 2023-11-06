@@ -99,6 +99,8 @@ class TextStatsGenerator {
   }
 
   String _generateTableContent(HuntBundle bundle) {
+    final lastMatch = bundle.match.match;
+
     String table = '';
     table += _generateSimpleLine(
         start: style.cornerTopLeft, end: style.corentTopRight);
@@ -131,10 +133,12 @@ class TextStatsGenerator {
     table += _generateValuesText(title: 'My KDA', data: myKda);
     table += '\n';
     table += _generateValuesText(
-        title: _formatMatches(bundle.ownStats.matches), data: '');
+        title: '${_formatMatches(bundle.ownStats.matches)}, last:',
+        data:
+            '${lastMatch.totalOwnEnemyDeathsDowns}/${lastMatch.totalOwnDeathsDowns}/${lastMatch.ownAssists}');
     table += '\n';
 
-    if (bundle.match.match.teamSize > 1) {
+    if (lastMatch.teamSize > 1) {
       table += _generateSimpleLine(
           start: style.halfCrossLeft, end: style.halfCrossRight);
       table += '\n';
@@ -149,7 +153,9 @@ class TextStatsGenerator {
       table += _generateValuesText(title: 'Team KD', data: teamKd);
       table += '\n';
       table += _generateValuesText(
-          title: _formatMatches(bundle.teamStats.matches), data: '');
+          title: '${_formatMatches(bundle.teamStats.matches)}, last:',
+          data:
+              '${lastMatch.totalEnemyDeathsDowns}/${lastMatch.totalDeathsDowns}');
       table += '\n';
     }
 
