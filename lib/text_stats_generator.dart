@@ -11,6 +11,7 @@ class TextStatsGenerator {
 
   Future<void> write({required HuntBundle bundle, required File file}) {
     final table = _generateTableContent(bundle);
+    print(table);
     return file.writeAsString(_withPadding(table, padding: 1));
   }
 
@@ -79,17 +80,12 @@ class TextStatsGenerator {
     final spaceLeft = space ~/ 2;
     final spaceRight = space - spaceLeft;
 
-    String line = style.verticalLine;
-    for (int i = 0; i < spaceLeft; i++) {
-      line += ' ';
-    }
+    var line = style.verticalLine;
+    line+=_generateSymbols(spaceLeft, ' ');
     line += preparedName;
     line += ' ';
     line += data;
-    for (int i = 0; i < spaceRight; i++) {
-      line += ' ';
-    }
-
+    line+=_generateSymbols(spaceRight, ' ');
     line += style.verticalLine;
     return line;
   }
