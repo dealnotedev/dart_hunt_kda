@@ -186,7 +186,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
         final teammates = bundle?.match.players
                 .where((element) => element.teammate)
-                .where((teammate) => invite || me?.profileId == teammate.id) ??
+                .where((teammate) =>
+                    invite || me == null || me.profileId == teammate.id) ??
             <PlayerEntity>[];
 
         return SingleChildScrollView(

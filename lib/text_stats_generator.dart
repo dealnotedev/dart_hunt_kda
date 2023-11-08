@@ -159,6 +159,14 @@ class TextStatsGenerator {
     for (var player in bundle.match.players) {
       if (!player.teammate) continue;
 
+      final me = bundle.me;
+      final invite = bundle.match.match.isInvite;
+
+      if (me != null && me.id != player.id && !invite) {
+        // Hide random teammates from stats header
+        continue;
+      }
+
       final mmr = Mmr.get(player.mmr);
       final fill = Mmr.findNext(mmr)?.getFilled(player.mmr);
 
