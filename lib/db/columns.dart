@@ -38,6 +38,7 @@ class HuntMatchColumns {
   static const String bondsFound = 'bonds_found';
 
   static const String teammateRevives = 'teammate_revives';
+  static const String isInvite = 'is_invite';
 }
 
 class HuntPlayerColumns {

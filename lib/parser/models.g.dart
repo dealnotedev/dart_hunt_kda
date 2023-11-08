@@ -52,6 +52,7 @@ HuntMatchHeader _$HuntMatchHeaderFromJson(Map<String, dynamic> json) =>
       bountyFound: json['bountyFound'] as int,
       bondsFound: json['bondsFound'] as int,
       teammateRevives: json['teammateRevives'] as int,
+      isInvite: json['isInvite'] as bool,
     );
 
 Map<String, dynamic> _$HuntMatchHeaderToJson(HuntMatchHeader instance) =>
@@ -86,6 +87,7 @@ Map<String, dynamic> _$HuntMatchHeaderToJson(HuntMatchHeader instance) =>
       'bountyFound': instance.bountyFound,
       'bondsFound': instance.bondsFound,
       'teammateRevives': instance.teammateRevives,
+      'isInvite': instance.isInvite,
     };
 
 HuntPlayer _$HuntPlayerFromJson(Map<String, dynamic> json) => HuntPlayer(

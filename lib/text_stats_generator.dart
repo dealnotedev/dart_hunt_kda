@@ -195,7 +195,7 @@ class TextStatsGenerator {
 
     table += '\n';
 
-    if (lastMatch.teamSize > 1) {
+    if (lastMatch.teamSize > 1 && lastMatch.isInvite) {
       table += _generateSimpleLine(
           start: style.halfCrossLeft, end: style.halfCrossRight);
       table += '\n';

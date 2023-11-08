@@ -32,7 +32,7 @@ class StatsDb {
 
     return _factory.openDatabase(path,
         options: OpenDatabaseOptions(
-            version: 4,
+            version: 5,
             singleInstance: true,
             onCreate: _onCreate,
             onUpgrade: _onUpgrade));
@@ -382,7 +382,8 @@ class StatsDb {
           moneyFound: row[HuntMatchColumns.moneyFound] as int,
           bountyFound: row[HuntMatchColumns.bountyFound] as int,
           bondsFound: row[HuntMatchColumns.bondsFound] as int,
-          teammateRevives: row[HuntMatchColumns.teammateRevives] as int);
+          teammateRevives: row[HuntMatchColumns.teammateRevives] as int,
+          isInvite: row[HuntMatchColumns.isInvite] as int == 1);
 
       entity.id = row[HuntMatchColumns.id] as int;
       return entity;
@@ -427,6 +428,7 @@ class StatsDb {
     values[HuntMatchColumns.bountyFound] = entity.bountyFound;
     values[HuntMatchColumns.bondsFound] = entity.bondsFound;
     values[HuntMatchColumns.teammateRevives] = entity.teammateRevives;
+    values[HuntMatchColumns.isInvite] = entity.isInvite ? 1 : 0;
 
     final id = await db.insert(HuntMatchColumns.table, values,
         conflictAlgorithm: ConflictAlgorithm.ignore);
@@ -467,7 +469,8 @@ class StatsDb {
         '[${HuntMatchColumns.bountyFound}] INTEGER NOT NULL,'
         '[${HuntMatchColumns.bondsFound}] INTEGER NOT NULL,'
         '[${HuntMatchColumns.teammateRevives}] INTEGER NOT NULL,'
-        '[${HuntMatchColumns.signature}]	TEXT NOT NULL UNIQUE);');
+        '[${HuntMatchColumns.isInvite}] INTEGER NOT NULL,'
+        '[${HuntMatchColumns.signature}] TEXT NOT NULL UNIQUE);');
 
     await db.execute('CREATE TABLE [${HuntPlayerColumns.table}] ('
         '[${HuntMatchColumns.id}]	INTEGER PRIMARY KEY AUTOINCREMENT,'
@@ -538,6 +541,12 @@ class StatsDb {
           db, HuntMatchColumns.table, HuntMatchColumns.bondsFound);
       await _createIntNotNullColumn(
           db, HuntMatchColumns.table, HuntMatchColumns.teammateRevives);
+    }
+
+    if (oldVersion < 5) {
+      await _createIntNotNullColumn(
+          db, HuntMatchColumns.table, HuntMatchColumns.isInvite,
+          defaultValue: 1);
     }
   }
 

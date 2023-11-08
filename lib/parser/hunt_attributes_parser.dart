@@ -60,6 +60,7 @@ class HuntData {
 
     int? ownTeamSize;
     int? ownTeamMmr;
+    bool? ownTeamIsInvite;
 
     final int ownAssists = bags['kill player assist']?.amount ?? 0;
     final teamId = <int>[];
@@ -71,9 +72,11 @@ class HuntData {
       final data = teams[i];
       final ownTeam = data?['ownteam']?.node.boolValue ?? false;
       final teamSize = data?['numplayers']?.node.intValue ?? 0;
+      final isInvite = data?['isinvite']?.node.boolValue;
 
       if (ownTeam) {
         ownTeamSize = teamSize;
+        ownTeamIsInvite = isInvite;
         ownTeamMmr = data?['mmr']?.node.intValue;
       }
 
@@ -144,6 +147,7 @@ class HuntData {
     }
 
     final entity = HuntMatchHeader(
+        isInvite: ownTeamIsInvite ?? true,
         mode: mode,
         teams: teamsCount,
         ownDowns: ownDowns,
