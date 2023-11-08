@@ -181,10 +181,13 @@ class _MyHomePageState extends State<MyHomePage> {
       stream: widget.engine.lastMatch,
       builder: (cntx, snapshot) {
         final bundle = snapshot.data;
+        final me = bundle?.me;
+        final invite = bundle?.match.match.isInvite ?? true;
 
-        final teammates =
-            bundle?.match.players.where((element) => element.teammate) ??
-                <PlayerEntity>[];
+        final teammates = bundle?.match.players
+                .where((element) => element.teammate)
+                .where((teammate) => invite || me?.profileId == teammate.id) ??
+            <PlayerEntity>[];
 
         return SingleChildScrollView(
           child: Column(
