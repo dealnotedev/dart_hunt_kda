@@ -51,6 +51,8 @@ class HuntMatchHeader {
   final int bondsFound;
   final int teammateRevives;
 
+  final bool isInvite;
+
   HuntMatchHeader(
       {required this.mode,
       required this.teams,
@@ -81,7 +83,8 @@ class HuntMatchHeader {
       required this.moneyFound,
       required this.bountyFound,
       required this.bondsFound,
-      required this.teammateRevives});
+      required this.teammateRevives,
+      required this.isInvite});
 
   factory HuntMatchHeader.fromJson(Map<String, dynamic> json) =>
       _$HuntMatchHeaderFromJson(json);

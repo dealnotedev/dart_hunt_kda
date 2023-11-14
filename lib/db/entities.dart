@@ -44,6 +44,8 @@ class MatchHeaderEntity {
   final int bondsFound;
   final int teammateRevives;
 
+  final bool isInvite;
+
   MatchHeaderEntity(
       {required this.mode,
       required this.teams,
@@ -76,7 +78,17 @@ class MatchHeaderEntity {
       required this.moneyFound,
       required this.bountyFound,
       required this.bondsFound,
-      required this.teammateRevives});
+      required this.teammateRevives,
+      required this.isInvite});
+
+  int get totalOwnEnemyDeathsDowns => ownEnemyDowns + ownEnemyDeaths;
+
+  int get totalOwnDeathsDowns => ownDeaths + ownDowns;
+
+  int get totalEnemyDeathsDowns =>
+      ownEnemyDeaths + ownEnemyDowns + teamEnemyDowns + teamEnemyDeaths;
+
+  int get totalDeathsDowns => ownDeaths + ownDowns + teamDowns + teamDeaths;
 }
 
 class PlayerEntity {

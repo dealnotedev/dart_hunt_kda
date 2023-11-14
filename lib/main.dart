@@ -4,12 +4,9 @@ import 'dart:io';
 import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:bitsdojo_window_platform_interface/window.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:hunt_stats/auto_launcher_windows.dart';
-import 'package:hunt_stats/border/corners.dart';
-import 'package:hunt_stats/border/gradient_box_border.dart';
 import 'package:hunt_stats/constants.dart';
 import 'package:hunt_stats/db/entities.dart';
 import 'package:hunt_stats/db/stats.dart';
@@ -17,11 +14,13 @@ import 'package:hunt_stats/db/stats_db.dart';
 import 'package:hunt_stats/extensions.dart';
 import 'package:hunt_stats/generated/assets.dart';
 import 'package:hunt_stats/hunt_bundle.dart';
-import 'package:hunt_stats/hunt_images.dart';
-import 'package:hunt_stats/lottie_animations.dart';
 import 'package:hunt_stats/mmr.dart';
+import 'package:hunt_stats/star_widget.dart';
 import 'package:hunt_stats/tracker.dart';
-import 'package:lottie/lottie.dart';
+import 'package:hunt_stats/twitch/settings.dart';
+import 'package:hunt_stats/twitch/twitch_login_widget.dart';
+import 'package:hunt_stats/twitch/twitch_panel.dart';
+import 'package:intl/intl.dart';
 import 'package:morphable_shape/morphable_shape.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:system_tray/system_tray.dart' as tray;
@@ -29,10 +28,10 @@ import 'package:system_tray/system_tray.dart' as tray;
 void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await HuntImages.init();
+  await Settings.instance.init();
 
   final db = StatsDb(predefinedProfileId: Constants.profileId);
-  final tracker = TrackerEngine(db, listenGameLog: true);
+  final tracker = TrackerEngine(db, listenGameLog: true, sound: true);
 
   //final data = await tracker
   //    .extractFromFile(File('examples/attributes_zoop_duo_win.xml'));
@@ -135,8 +134,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      debugShowCheckedModeBanner: false,
       theme: ThemeData(
+        brightness: Brightness.dark,
         primarySwatch: Colors.indigo,
       ),
       home: Column(
@@ -166,107 +165,88 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  bool _pause = false;
-
-  @override
-  void initState() {
-    _runPauseLoop();
-    super.initState();
-  }
-
-  void _togglePause(bool pause) {
-    setState(() {
-      _pause = pause;
-    });
-  }
-
-  void _runPauseLoop() async {
-    while (true) {
-      await Future.delayed(const Duration(minutes: 10));
-      _togglePause(true);
-      await Future.delayed(const Duration(seconds: 5));
-      _togglePause(false);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: backgroundColor,
-      body: _pause ? _createPauseWidget() : _createContentWidget(context),
+      body: _createContentWidget(context),
     );
-  }
-
-  final _pauseAnimation = Uint8List.fromList(ukraine.codeUnits);
-
-  Widget _createPauseWidget() {
-    return Center(
-        child: Lottie.memory(_pauseAnimation,
-            filterQuality: FilterQuality.medium,
-            width: 128,
-            height: 128,
-            frameRate: FrameRate(60),
-            repeat: false));
   }
 
   Widget _createContentWidget(BuildContext context) {
     const textColor = Colors.white;
-    final size = MediaQuery.of(context).size;
 
     return StreamBuilder<HuntBundle?>(
       initialData: widget.engine.lastBundle,
       stream: widget.engine.lastMatch,
       builder: (cntx, snapshot) {
         final bundle = snapshot.data;
+        final me = bundle?.me;
+        final invite = bundle?.match.match.isInvite ?? true;
 
-        if (bundle == null) {
-          return Center(
-            child: Text(
-              context.localizations.stats_empty_text,
-              style: const TextStyle(color: textColor, fontSize: 48),
-            ),
-          );
-        }
+        final teammates = bundle?.match.players
+                .where((element) => element.teammate)
+                .where((teammate) =>
+                    invite || me == null || me.profileId == teammate.id) ??
+            <PlayerEntity>[];
 
-        final teammates =
-            bundle.match.players.where((element) => element.teammate);
-
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _PlayersPager(
-                teammates: teammates,
-                me: bundle.me,
-                textColor: textColor,
-                enemies: bundle.enemyStats,
-                cardColor: _blockColor),
-            _createIconifiedContaner(
-                icon: _alternativeStyle
-                    ? Assets.assetsIcKdaV2
-                    : Assets.assetsIcKda,
-                children: _createMyKdaWidgets(bundle, textColor: textColor)),
-            _createIconifiedContaner(
-                icon:
-                    _alternativeStyle ? Assets.assetsIcKdV2 : Assets.assetsIcKd,
-                children: _createTeamKdWidgets(bundle, textColor: textColor)),
-            if (size.height > 486) ...[
+        return SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _PlayersPager(
+                  teammates: teammates,
+                  me: bundle?.me,
+                  textColor: textColor,
+                  enemies: bundle?.enemyStats ?? [],
+                  cardColor: _blockColor),
+              _createIconifiedContaner(
+                  icon: Assets.assetsIcKda,
+                  children: _createMyKdaWidgets(bundle, textColor: textColor)),
+              _createIconifiedContaner(
+                  icon: Assets.assetsIcKd,
+                  children: _createTeamKdWidgets(bundle, textColor: textColor)),
               const SizedBox(
-                height: 16,
+                height: 32,
               ),
               _createSettingsWidget(context,
-                  bundle: bundle, textColor: textColor),
+                  textColor: textColor, bundle: bundle),
               const SizedBox(
-                height: 16,
-              )
-            ]
-          ],
+                height: 24,
+              ),
+              _createTwitchPanel(context)
+            ],
+          ),
         );
       },
     );
   }
 
+  final _settings = Settings.instance;
+
+  Widget _createTwitchPanel(BuildContext context) {
+    return Container(
+      decoration: _createBlockDecoration(),
+      child: StreamBuilder<bool>(
+          stream: _settings.twitchAuthChanges
+              .map((event) => event != null)
+              .distinct(),
+          initialData: _settings.twitchAuth != null,
+          builder: (cntx, snapshot) {
+            final logged = snapshot.requireData;
+            return logged
+                ? TwitchPanel(
+                    engine: widget.engine,
+                  )
+                : const TwitchLoginWidget();
+          }),
+    );
+  }
+
   Widget _createSettingsWidget(BuildContext context,
-      {Color? textColor, required HuntBundle bundle}) {
+      {Color? textColor, required HuntBundle? bundle}) {
+    final actualFrom = bundle?.from;
+    final actualFromStyle = TextStyle(color: textColor, fontSize: 12);
     return Container(
       padding: const EdgeInsets.all(16),
       width: double.infinity,
@@ -274,26 +254,6 @@ class _MyHomePageState extends State<MyHomePage> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                context.localizations.style_0_name,
-                style: TextStyle(color: textColor, fontSize: 16),
-              ),
-              Switch(
-                  value: _alternativeStyle,
-                  onChanged: (checked) {
-                    setState(() {
-                      _alternativeStyle = checked;
-                    });
-                  }),
-              Text(
-                context.localizations.style_1_name,
-                style: TextStyle(color: textColor, fontSize: 16),
-              )
-            ],
-          ),
           StreamBuilder<bool>(
               stream: _autostart(),
               builder: (cnxt, snapshot) {
@@ -321,29 +281,49 @@ class _MyHomePageState extends State<MyHomePage> {
             mainAxisSize: MainAxisSize.min,
             children: [
               ElevatedButton(
+                  onPressed: () => widget.engine.validateLast(reset: false),
+                  child: const Text('<<')),
+              const SizedBox(
+                width: 8,
+              ),
+              ElevatedButton(
                   onPressed: _handleResetAllClick,
                   child: Text(context.localizations.button_reset_all)),
               const SizedBox(
                 width: 8,
               ),
               ElevatedButton(
-                  onPressed: () => _handleResetTeamClick(bundle.teamId),
-                  child: Text(context.localizations.button_reset_team))
+                  onPressed: () => widget.engine.validateLast(reset: true),
+                  child: const Text('>>')),
             ],
           ),
+          const SizedBox(
+            height: 8,
+          ),
+          if (actualFrom != null) ...[
+            Text(
+              'From ${DateFormat.MMMd().add_Hm().format(actualFrom)}',
+              style: actualFromStyle,
+            )
+          ] else ...[
+            Text(
+              'No actual matches',
+              style: actualFromStyle,
+            )
+          ]
         ],
       ),
     );
   }
 
-  List<Widget> _createTeamKdWidgets(HuntBundle bundle,
+  List<Widget> _createTeamKdWidgets(HuntBundle? bundle,
       {required Color textColor}) {
     final textStyle = TextStyle(color: textColor, fontSize: 18);
 
-    final stats = bundle.teamStats;
-    final kdChanges = bundle.teamKdChanges;
-    final killsChanges = bundle.teamKillsChanges;
-    final deathsChanges = bundle.teamDeathsChanges;
+    final stats = bundle?.teamStats ?? TeamStats.empty;
+    final kdChanges = bundle?.teamKdChanges;
+    final killsChanges = bundle?.teamKillsChanges;
+    final deathsChanges = bundle?.teamDeathsChanges;
 
     final kdStyle = TextStyle(
         color: kdChanges != null && kdChanges != 0
@@ -411,15 +391,15 @@ class _MyHomePageState extends State<MyHomePage> {
     ];
   }
 
-  List<Widget> _createMyKdaWidgets(HuntBundle bundle,
+  List<Widget> _createMyKdaWidgets(HuntBundle? bundle,
       {required Color textColor}) {
     final textStyle = TextStyle(color: textColor, fontSize: 20);
-    final stats = bundle.ownStats;
+    final stats = bundle?.ownStats ?? OwnStats.empty;
 
-    final kdaChanges = bundle.kdaChanges;
-    final killsChanges = bundle.ownKillsChanges;
-    final deathsChanges = bundle.ownDeatchChanges;
-    final assistsChanges = bundle.ownAssistsChanges;
+    final kdaChanges = bundle?.kdaChanges;
+    final killsChanges = bundle?.ownKillsChanges;
+    final deathsChanges = bundle?.ownDeatchChanges;
+    final assistsChanges = bundle?.ownAssistsChanges;
 
     final hasDirectionIcon = kdaChanges != null && kdaChanges != 0;
     final kdaStyle = TextStyle(
@@ -509,27 +489,8 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  bool _alternativeStyle = false;
-
   Decoration _createBlockDecoration() {
-    if (_alternativeStyle) {
-      return BoxDecoration(
-        color: _blockColor,
-        border: GradientBoxBorder(
-          corners: Corners(
-              topRight: HuntImages.cornerTopRight,
-              bottomRight: HuntImages.cornerBottomRight),
-          gradient: LinearGradient(colors: [
-            const Color(0xFF595A5C).withOpacity(0.1),
-            const Color(0xFFE7E7E7),
-            const Color(0xFF595A5C),
-          ]),
-          width: 2,
-        ),
-      );
-    } else {
-      return _createConcaveDecoration(color: _blockColor, radius: 8);
-    }
+    return _createConcaveDecoration(color: _blockColor, radius: 8);
   }
 
   Color get _blockColor => const Color(0xFF090909);
@@ -602,14 +563,6 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  void _handleResetTeamClick(String teamId) async {
-    await widget.engine.invalidateTeam(teamId);
-
-    if (mounted) {
-      _showSnackbar(context, text: context.localizations.toast_invalidated);
-    }
-  }
-
   void _showSnackbar(BuildContext context,
       {required String text, Duration? duration}) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -638,6 +591,7 @@ ShapeDecoration _createConcaveDecoration(
 }
 
 class MyTeamWidget extends StatelessWidget {
+  final PlayerEntity? me;
   final Iterable<PlayerEntity> teammates;
   final Color? textColor;
   final Color cardColor;
@@ -646,7 +600,8 @@ class MyTeamWidget extends StatelessWidget {
       {super.key,
       required this.teammates,
       required this.textColor,
-      required this.cardColor});
+      required this.cardColor,
+      this.me});
 
   @override
   Widget build(BuildContext context) {
@@ -659,20 +614,25 @@ class MyTeamWidget extends StatelessWidget {
           const SizedBox(
             width: 4,
           ),
-          ...teammates.map((e) => Expanded(
-                  child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: PlayerWidget(
-                  player: e,
-                  textColor: textColor,
-                ),
-              ))),
+          if (teammates.isEmpty) ...[_createPlayerWidget(me)] else
+            ...teammates.map(_createPlayerWidget),
           const SizedBox(
             width: 4,
           )
         ],
       ),
     );
+  }
+
+  Widget _createPlayerWidget(PlayerEntity? e) {
+    return Expanded(
+        child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: PlayerWidget(
+        player: e,
+        textColor: textColor,
+      ),
+    ));
   }
 }
 
@@ -855,6 +815,7 @@ class _PlayersState extends State<_PlayersPager> {
             onPageChanged: (index) => _pageIndex = index,
             children: [
               MyTeamWidget(
+                  me: widget.me,
                   teammates: widget.teammates,
                   textColor: widget.textColor,
                   cardColor: widget.cardColor),
@@ -929,49 +890,17 @@ class PlayerWidget extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                _createStarWidget(Mmr.star1.getFilled(mmr)),
-                _createStarWidget(Mmr.star2.getFilled(mmr)),
-                _createStarWidget(Mmr.star3.getFilled(mmr)),
-                _createStarWidget(Mmr.star4.getFilled(mmr)),
-                _createStarWidget(Mmr.star5.getFilled(mmr)),
-                _createStarWidget(Mmr.star6.getFilled(mmr))
+                StarWidget(fill: Mmr.star1.getFilled(mmr)),
+                StarWidget(fill: Mmr.star2.getFilled(mmr)),
+                StarWidget(fill: Mmr.star3.getFilled(mmr)),
+                StarWidget(fill: Mmr.star4.getFilled(mmr)),
+                StarWidget(fill: Mmr.star5.getFilled(mmr)),
+                StarWidget(fill: Mmr.star6.getFilled(mmr)),
               ],
             ),
           ),
         )
       ],
-    );
-  }
-
-  Widget _createStarWidget(double fill, {double size = 16}) {
-    return Container(
-      padding: const EdgeInsets.all(1),
-      height: size,
-      width: size,
-      child: Stack(
-        children: [
-          Image.asset(
-            Assets.assetsCrossWhite20dp,
-            width: size,
-            height: size,
-            filterQuality: FilterQuality.medium,
-            color: const Color(0xFF939598).withOpacity(0.5),
-          ),
-          SizedBox(
-            height: size,
-            width: size * fill,
-            child: Image.asset(
-              Assets.assetsCrossWhite20dp,
-              alignment: Alignment.centerLeft,
-              fit: BoxFit.fitHeight,
-              height: size,
-              filterQuality: FilterQuality.medium,
-              width: size * fill,
-              color: const Color(0xFFCEB379),
-            ),
-          )
-        ],
-      ),
     );
   }
 }

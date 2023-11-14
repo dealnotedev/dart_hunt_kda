@@ -32,7 +32,7 @@ class StatsDb {
 
     return _factory.openDatabase(path,
         options: OpenDatabaseOptions(
-            version: 4,
+            version: 5,
             singleInstance: true,
             onCreate: _onCreate,
             onUpgrade: _onUpgrade));
@@ -233,6 +233,18 @@ class StatsDb {
   static String _quotes(Iterable<Object> list) =>
       list.map((e) => '?').join(',');
 
+  Future<void> outdateOne(
+      {required int id,
+      required bool outdated,
+      required bool teamOutdated}) async {
+    final db = await database;
+    await db.rawUpdate(
+        'UPDATE ${HuntMatchColumns.table} '
+        'SET ${HuntMatchColumns.outdated} = ?, ${HuntMatchColumns.teamOutdated} = ? '
+        'WHERE ${HuntMatchColumns.id} = ?',
+        [outdated ? 1 : 0, teamOutdated ? 1 : 0, id]);
+  }
+
   Future<void> outdate() async {
     final db = await database;
     await db.rawUpdate(
@@ -306,12 +318,34 @@ class StatsDb {
     }).toList();
   }
 
-  Future<MatchHeaderEntity?> getLastMatch() async {
+  Future<MatchHeaderEntity?> getLastMatch(
+      {LastMatchMode mode = LastMatchMode.lastActual}) async {
     final db = await database;
 
-    final cursor = await db.rawQuery(
-        'SELECT * FROM ${HuntMatchColumns.table} WHERE ${HuntMatchColumns.outdated} = ? ORDER BY ${HuntMatchColumns.date} DESC',
-        [0]);
+    final String where;
+    final List<Object?>? args;
+
+    switch (mode) {
+      case LastMatchMode.firstActual:
+        where =
+            'SELECT * FROM ${HuntMatchColumns.table} WHERE ${HuntMatchColumns.outdated} = ? ORDER BY ${HuntMatchColumns.date} ASC LIMIT 1';
+        args = [0];
+        break;
+
+      case LastMatchMode.lastOutdated:
+        where =
+            'SELECT * FROM ${HuntMatchColumns.table} WHERE ${HuntMatchColumns.outdated} = ? ORDER BY ${HuntMatchColumns.date} DESC LIMIT 1';
+        args = [1];
+        break;
+
+      case LastMatchMode.lastActual:
+        where =
+            'SELECT * FROM ${HuntMatchColumns.table} WHERE ${HuntMatchColumns.outdated} = ? ORDER BY ${HuntMatchColumns.date} DESC LIMIT 1';
+        args = [0];
+        break;
+    }
+
+    final cursor = await db.rawQuery(where, args);
 
     if (cursor.isNotEmpty) {
       final row = cursor[0];
@@ -348,7 +382,8 @@ class StatsDb {
           moneyFound: row[HuntMatchColumns.moneyFound] as int,
           bountyFound: row[HuntMatchColumns.bountyFound] as int,
           bondsFound: row[HuntMatchColumns.bondsFound] as int,
-          teammateRevives: row[HuntMatchColumns.teammateRevives] as int);
+          teammateRevives: row[HuntMatchColumns.teammateRevives] as int,
+          isInvite: row[HuntMatchColumns.isInvite] as int == 1);
 
       entity.id = row[HuntMatchColumns.id] as int;
       return entity;
@@ -393,6 +428,7 @@ class StatsDb {
     values[HuntMatchColumns.bountyFound] = entity.bountyFound;
     values[HuntMatchColumns.bondsFound] = entity.bondsFound;
     values[HuntMatchColumns.teammateRevives] = entity.teammateRevives;
+    values[HuntMatchColumns.isInvite] = entity.isInvite ? 1 : 0;
 
     final id = await db.insert(HuntMatchColumns.table, values,
         conflictAlgorithm: ConflictAlgorithm.ignore);
@@ -433,7 +469,8 @@ class StatsDb {
         '[${HuntMatchColumns.bountyFound}] INTEGER NOT NULL,'
         '[${HuntMatchColumns.bondsFound}] INTEGER NOT NULL,'
         '[${HuntMatchColumns.teammateRevives}] INTEGER NOT NULL,'
-        '[${HuntMatchColumns.signature}]	TEXT NOT NULL UNIQUE);');
+        '[${HuntMatchColumns.isInvite}] INTEGER NOT NULL,'
+        '[${HuntMatchColumns.signature}] TEXT NOT NULL UNIQUE);');
 
     await db.execute('CREATE TABLE [${HuntPlayerColumns.table}] ('
         '[${HuntMatchColumns.id}]	INTEGER PRIMARY KEY AUTOINCREMENT,'
@@ -505,6 +542,12 @@ class StatsDb {
       await _createIntNotNullColumn(
           db, HuntMatchColumns.table, HuntMatchColumns.teammateRevives);
     }
+
+    if (oldVersion < 5) {
+      await _createIntNotNullColumn(
+          db, HuntMatchColumns.table, HuntMatchColumns.isInvite,
+          defaultValue: 1);
+    }
   }
 
   static Future<void> _createIntNotNullColumn(
@@ -519,3 +562,5 @@ class StatsDb {
 extension _MapExt on Map<String, Object?> {
   int intOf(String column) => this[column] as int? ?? 0;
 }
+
+enum LastMatchMode { lastOutdated, lastActual, firstActual }

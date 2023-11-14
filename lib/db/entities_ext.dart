@@ -21,6 +21,7 @@ extension MatchHeaderExt on HuntMatchHeader {
   MatchHeaderEntity toEntity(
       {required bool teamOutdated, required bool outdated}) {
     return MatchHeaderEntity(
+        isInvite: isInvite,
         mode: mode,
         teams: teams,
         teamSize: teamSize,

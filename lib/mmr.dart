@@ -53,7 +53,7 @@ enum Mmr {
   }
 
   static double getNextPart(Mmr current, int mmr) {
-    final Mmr? next = Mmr._findNext(current);
+    final Mmr? next = Mmr.findNext(current);
 
     if (next != null) {
       final add = mmr - next.min;
@@ -65,7 +65,7 @@ enum Mmr {
     }
   }
 
-  static Mmr? _findNext(Mmr current) {
+  static Mmr? findNext(Mmr current) {
     const all = Mmr.values;
 
     for (int i = 0; i < all.length; i++) {

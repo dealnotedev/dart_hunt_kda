@@ -13,6 +13,8 @@ class OwnStats {
 
   final int matches;
 
+  static final empty = OwnStats(ownKills: 0, ownDeaths: 0, teamKills: 0, teamDeaths: 0, matches: 0, ownAssists: 0);
+
   OwnStats(
       {required this.ownKills,
       required this.ownDeaths,
@@ -34,6 +36,8 @@ class TeamStats {
   final int teamDeaths;
 
   final int matches;
+
+  static final empty = TeamStats(teamKills: 0, teamDeaths: 0, matches: 0);
 
   TeamStats(
       {required this.teamKills,
