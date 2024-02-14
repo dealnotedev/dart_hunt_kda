@@ -371,7 +371,7 @@
  <Attr name="ControllerShoulderBoostStrength" value="1.5"/>
  <Attr name="ControllerShoulderX" value="1.1"/>
  <Attr name="ControllerShoulderY" value="0.9"/>
- <Attr name="DepthOfField" value="1"/>
+ <Attr name="DepthOfField" value="0"/>
  <Attr name="DialogueVolume" value="1"/>
  <Attr name="DoNotShowLargestEmptySlotHasSizeSuggestion" value="1"/>
  <Attr name="DoNotShowNoTeammateSuggestion" value="1"/>
@@ -3517,7 +3517,7 @@
  <Attr name="OpenActiveDailies" value="0"/>
  <Attr name="OpenActiveQuests" value="0"/>
  <Attr name="OptionsOpenedFromPauseMenu" value="1"/>
- <Attr name="PCLevelLoadingTimeMissionUnload" value="34"/>
+ <Attr name="PCLevelLoadingTimeMissionUnload" value="32"/>
  <Attr name="PC_aim_1" value="257"/>
  <Attr name="PC_aim_2" value="-1"/>
  <Attr name="PC_aim_ToggleMode" value="1"/>
