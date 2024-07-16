@@ -1,66 +1,60 @@
-import 'package:hunt_stats/db/entities.dart';
-import 'package:hunt_stats/db/stats.dart';
-
 class HuntBundle {
-  final PlayerEntity? me;
+  final int kills;
 
-  final MatchEntity match;
+  final int deaths;
 
-  final OwnStats ownStats;
+  final int currentMatchKills;
 
-  final OwnStats? previousOwnStats;
+  final int currentMatchDeaths;
 
-  final TeamStats teamStats;
-
-  final TeamStats? previousTeamStats;
-
-  final MatchEntity? previousMatch;
-
-  final List<EnemyStats> enemyStats;
+  final int matches;
 
   HuntBundle(
-      {required this.match,
-      required this.me,
-      required this.ownStats,
-      required this.enemyStats,
-      required this.teamStats,
-      required this.previousOwnStats,
-      required this.previousTeamStats,
-      required this.previousMatch});
+      {required this.kills,
+      required this.deaths,
+      required this.currentMatchDeaths,
+      required this.currentMatchKills,
+      required this.matches});
 
-  String get teamId => match.match.teamId;
+  double get kd => kills.toDouble() / deaths.toDouble();
 
-  int? get totalKillsChanges =>
-      _intDiff(previousOwnStats?.totalKills, ownStats.totalKills);
+  int? get killsChanges => currentMatchKills > 0 ? currentMatchKills : null;
 
-  static int? _intDiff(int? previous, int current) =>
-      (previous != null && previous != current) ? current - previous : null;
-
-  int? get totalDeathsChanges =>
-      _intDiff(previousOwnStats?.totalDeaths, ownStats.totalDeaths);
-
-  int? get ownKillsChanges =>
-      _intDiff(previousOwnStats?.ownKills, ownStats.ownKills);
-
-  int? get ownDeatchChanges =>
-      _intDiff(previousOwnStats?.ownDeaths, ownStats.ownDeaths);
-
-  int? get ownAssistsChanges =>
-      _intDiff(previousOwnStats?.ownAssists, ownStats.ownAssists);
-
-  int? get teamKillsChanges =>
-      _intDiff(previousTeamStats?.teamKills, teamStats.teamKills);
-
-  int? get teamDeathsChanges =>
-      _intDiff(previousTeamStats?.teamDeaths, teamStats.teamDeaths);
-
-  double? get teamKdChanges {
-    final prev = previousTeamStats?.kd;
-    return prev != null && prev.isFinite ? teamStats.kd - prev : null;
-  }
+  int? get deatchChanges => currentMatchDeaths > 0 ? currentMatchDeaths : null;
 
   double? get kdaChanges {
-    final prev = previousOwnStats?.kda;
-    return prev != null && prev.isFinite ? ownStats.kda - prev : null;
+    final killsBefore = kills - currentMatchKills;
+    final deathsBefore = deaths - currentMatchDeaths;
+
+    final kdBefore = killsBefore.toDouble() / deathsBefore.toDouble();
+    final kdCurrent = kills.toDouble() / deaths.toDouble();
+
+    if (kdBefore.isFinite &&
+        kdBefore > 0 &&
+        kdCurrent.isFinite &&
+        kdCurrent > 0 &&
+        kdCurrent != kdBefore) {
+      return kdCurrent - kdBefore;
+    } else {
+      return null;
+    }
+  }
+
+  HuntBundle add({required int kills, required int deaths}) {
+    return HuntBundle(
+        matches: matches,
+        kills: this.kills + kills,
+        deaths: this.deaths + deaths,
+        currentMatchDeaths: currentMatchDeaths + deaths,
+        currentMatchKills: currentMatchKills + kills);
+  }
+
+  HuntBundle resetMatchData() {
+    return HuntBundle(
+        kills: kills,
+        matches: matches + 1,
+        deaths: deaths,
+        currentMatchDeaths: 0,
+        currentMatchKills: 0);
   }
 }

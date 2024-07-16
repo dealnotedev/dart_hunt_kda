@@ -4,7 +4,7 @@
   "style_1_name": "Style 2",
   "startup_on_text": "Startup",
   "startup_off_text": "Disabled",
-  "my_kda_title": "My KDA",
+  "my_kd_title": "My KD",
   "team_kd_title": "Team KD",
   "matches_count": "{matches,plural, =1{{matches} match} other{{matches} matches}}",
   "@matches_count": {

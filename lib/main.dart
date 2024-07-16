@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:io';
 
 import 'package:animated_flip_counter/animated_flip_counter.dart';
@@ -7,33 +6,19 @@ import 'package:bitsdojo_window_platform_interface/window.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:hunt_stats/auto_launcher_windows.dart';
-import 'package:hunt_stats/constants.dart';
-import 'package:hunt_stats/db/entities.dart';
-import 'package:hunt_stats/db/stats_db.dart';
 import 'package:hunt_stats/extensions.dart';
 import 'package:hunt_stats/generated/assets.dart';
 import 'package:hunt_stats/hunt_bundle.dart';
-import 'package:hunt_stats/hunt_images.dart';
 import 'package:hunt_stats/mmr.dart';
 import 'package:hunt_stats/tracker.dart';
-import 'package:morphable_shape/morphable_shape.dart';
 import 'package:system_tray/system_tray.dart' as tray;
 
 void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await HuntImages.init();
-
-  final db = StatsDb(predefinedProfileId: Constants.profileId);
-  final tracker = TrackerEngine(db, listenGameLog: true);
-
-  //final data = await tracker
-  //    .extractFromFile(File('examples/attributes_zoop_duo_win.xml'));
-  //await File('json.json').writeAsString(json.encode(data));
+  final tracker = TrackerEngine()..startTracking();
 
   runApp(MyApp(engine: tracker));
-
-  await tracker.start();
 
   doWhenWindowReady(() {
     final window = appWindow;
@@ -58,24 +43,6 @@ final launcher = AppAutoLauncherImplWindows(
     appName: 'Hunt: Stats',
     appPath: Platform.resolvedExecutable,
     args: ['-silent']);
-
-final _starupPublisher = StreamController<bool>.broadcast();
-
-Stream<bool> _autostart() async* {
-  final enabled = await launcher.isEnabled();
-  yield enabled;
-
-  yield* _starupPublisher.stream;
-}
-
-void _setStartupEnabled(bool enabled) async {
-  if (enabled) {
-    await launcher.enable();
-  } else {
-    await launcher.disable();
-  }
-  _starupPublisher.add(enabled);
-}
 
 void _startSystemTray(DesktopWindow window) async {
   final systemTray = tray.SystemTray();
@@ -157,17 +124,12 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Widget _createContentWidget(BuildContext context) {
     const textColor = Colors.white;
-    final size = MediaQuery.of(context).size;
 
-    return StreamBuilder<HuntBundle?>(
-      initialData: widget.engine.lastBundle,
-      stream: widget.engine.lastMatch,
+    return StreamBuilder<HuntBundle>(
+      initialData: widget.engine.bundle.current,
+      stream: widget.engine.bundle.changes,
       builder: (cntx, snapshot) {
-        final bundle = snapshot.data;
-
-        if (bundle == null) {
-          return Container();
-        }
+        final bundle = snapshot.requireData;
 
         return Column(
           mainAxisSize: MainAxisSize.min,
@@ -175,7 +137,11 @@ class _MyHomePageState extends State<MyHomePage> {
             SizedBox(
               height: 48,
               child: MoveWindow(
-                child: SimplePlayerWidget(player: bundle.me, textColor: textColor, bgColor: _blockColor,),
+                child: SimplePlayerWidget(
+                  mmr: 0,
+                  textColor: textColor,
+                  bgColor: _blockColor,
+                ),
               ),
             ),
             const Expanded(child: SizedBox.shrink()),
@@ -185,76 +151,31 @@ class _MyHomePageState extends State<MyHomePage> {
               color: _blockColor,
               child: Row(
                 children: [
-                  Image.asset(Assets.assetsIcKda, width: 48, height: 48,),
-                  const SizedBox(width: 4,),
-                  ... _createMyKdaWidgets(bundle, textColor: textColor)
+                  Image.asset(
+                    Assets.assetsIcKda,
+                    width: 48,
+                    height: 48,
+                  ),
+                  const SizedBox(
+                    width: 4,
+                  ),
+                  ..._createMyKdaWidgets(bundle, textColor: textColor)
                 ],
               ),
             ),
-            if (size.height > 486) ...[
-              const SizedBox(
-                height: 16,
-              ),
-              _createSettingsWidget(context,
-                  bundle: bundle, textColor: textColor),
-            ]
           ],
         );
       },
     );
   }
 
-  Widget _createSettingsWidget(BuildContext context,
-      {Color? textColor, required HuntBundle bundle}) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      width: double.infinity,
-      decoration: _createBlockDecoration(),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          StreamBuilder<bool>(
-              stream: _autostart(),
-              builder: (cnxt, snapshot) {
-                return Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      context.localizations.startup_off_text,
-                      style: TextStyle(color: textColor, fontSize: 16),
-                    ),
-                    Switch(
-                        value: snapshot.data ?? false,
-                        onChanged: _setStartupEnabled),
-                    Text(
-                      context.localizations.startup_on_text,
-                      style: TextStyle(color: textColor, fontSize: 16),
-                    )
-                  ],
-                );
-              }),
-          const SizedBox(
-            height: 16,
-          ),
-          Row(mainAxisSize: MainAxisSize.min, children: [
-            ElevatedButton(
-                onPressed: _handleResetAllClick,
-                child: Text(context.localizations.button_reset_all)),
-          ]),
-        ],
-      ),
-    );
-  }
-
   List<Widget> _createMyKdaWidgets(HuntBundle bundle,
       {required Color textColor}) {
     final textStyle = TextStyle(color: textColor, fontSize: 20);
-    final stats = bundle.ownStats;
 
     final kdaChanges = bundle.kdaChanges;
-    final killsChanges = bundle.ownKillsChanges;
-    final deathsChanges = bundle.ownDeatchChanges;
-    final assistsChanges = bundle.ownAssistsChanges;
+    final killsChanges = bundle.killsChanges;
+    final deathsChanges = bundle.deatchChanges;
 
     final hasDirectionIcon = kdaChanges != null && kdaChanges != 0;
     final kdaStyle = TextStyle(
@@ -266,30 +187,32 @@ class _MyHomePageState extends State<MyHomePage> {
 
     return [
       Text(
-        'KDA',
+        'KD',
         style: TextStyle(
             color: textColor, fontSize: 18, fontWeight: FontWeight.bold),
       ),
-      const SizedBox(width: 8,),
+      const SizedBox(
+        width: 8,
+      ),
       Expanded(
-          child:
-              Text('(${context.localizations.matches_count(stats.matches)})',
-                  style: const TextStyle(
-                      color: _colorBlue, fontSize: 14, fontWeight: FontWeight.w500)
-      )),
+          child: Text('(${context.localizations.matches_count(bundle.matches)})',
+              style: const TextStyle(
+                  color: _colorBlue,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500))),
       Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (stats.kda.isFinite) ...[
+          if (bundle.kd.isFinite) ...[
             AnimatedFlipCounter(
-              value: stats.kda,
+              value: bundle.kd,
               fractionDigits: 2,
               duration: const Duration(seconds: 1),
               textStyle: kdaStyle,
             )
           ] else ...[
             Text(
-              formatDouble(stats.kda),
+              formatDouble(bundle.kd),
               style: kdaStyle,
             )
           ],
@@ -304,20 +227,21 @@ class _MyHomePageState extends State<MyHomePage> {
       Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(stats.ownKills.toString(), style: textStyle),
+          Text(bundle.kills.toString(), style: textStyle),
           if (killsChanges != null) ...[
             _createChangesWidget(killsChanges, positive: true)
           ],
           Text(_spacedSlash(trimLeft: killsChanges != null), style: textStyle),
-          Text(stats.ownDeaths.toString(), style: textStyle),
+          Text(bundle.deaths.toString(), style: textStyle),
           if (deathsChanges != null) ...[
             _createChangesWidget(deathsChanges, positive: false)
           ],
-          Text(_spacedSlash(trimLeft: deathsChanges != null), style: textStyle),
-          Text(stats.ownAssists.toString(), style: textStyle),
-          if (assistsChanges != null) ...[
-            _createChangesWidget(assistsChanges, positive: true)
-          ]
+
+          //Text(_spacedSlash(trimLeft: deathsChanges != null), style: textStyle),
+          //Text(stats.ownAssists.toString(), style: textStyle),
+          //if (assistsChanges != null) ...[
+          //  _createChangesWidget(assistsChanges, positive: true)
+          //]
         ],
       ),
     ];
@@ -339,10 +263,6 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  Decoration _createBlockDecoration() {
-    return _createConcaveDecoration(color: _blockColor, radius: 8);
-  }
-
   Color get _blockColor => const Color(0xFF090909);
 
   static String formatDouble(double value,
@@ -356,40 +276,6 @@ class _MyHomePageState extends State<MyHomePage> {
     final formatted = value.toPrecision(precision).toString();
     return plusIfPositive && value > 0 ? '+$formatted' : formatted;
   }
-
-  void _handleResetAllClick() async {
-    await widget.engine.invalidateMatches();
-
-    if (mounted) {
-      _showSnackbar(context, text: context.localizations.toast_invalidated);
-    }
-  }
-
-  void _showSnackbar(BuildContext context,
-      {required String text, Duration? duration}) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      backgroundColor: _colorRed,
-      duration: duration ?? const Duration(milliseconds: 2000),
-      content: Text(
-        text,
-        style: const TextStyle(color: Colors.white),
-      ),
-    ));
-  }
-}
-
-ShapeDecoration _createConcaveDecoration(
-    {required Color color, required double radius}) {
-  const cornerStyles = RectangleCornerStyles.all(CornerStyle.concave);
-
-  final border = RectangleShapeBorder(
-    borderRadius:
-        DynamicBorderRadius.all(DynamicRadius.circular(Length(radius))),
-    cornerStyles: cornerStyles,
-  );
-
-  return ShapeDecoration(shape: border, color: color);
 }
 
 const _colorBlue = Color(0xFF1592E4);
@@ -408,23 +294,22 @@ extension Ex on double {
 }
 
 class SimplePlayerWidget extends StatelessWidget {
-
   final Color? bgColor;
-  final PlayerEntity? player;
+  final int mmr;
   final Color? textColor;
 
-  const SimplePlayerWidget({super.key, this.player, this.textColor, this.bgColor});
+  const SimplePlayerWidget(
+      {super.key, required this.mmr, this.textColor, this.bgColor});
 
   @override
   Widget build(BuildContext context) {
-    final mmr = player?.mmr ?? -1;
     return Container(
       color: bgColor,
       constraints: const BoxConstraints(minHeight: 48),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
         children: [
-          Text(player?.username ?? context.localizations.me,
+          Text('dealnote.dev',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(

@@ -4,7 +4,7 @@
   "style_1_name": "Стиль 2",
   "startup_on_text": "Автостарт",
   "startup_off_text": "Вимкнений",
-  "my_kda_title": "Мій KDA",
+  "my_kd_title": "Мій KD",
   "team_kd_title": "KD команди",
   "matches_count": "{matches,plural, =1{{matches} матч} few{{matches} матчі} other{{matches} матчів}}",
   "@matches_count": {
