@@ -23,7 +23,7 @@ void main(List<String> args) async {
   doWhenWindowReady(() {
     final window = appWindow;
 
-    const initialSize = Size(368, 320);
+    const initialSize = Size(368, 368);
     window.minSize = initialSize;
     window.size = initialSize;
     window.alignment = Alignment.center;
@@ -117,7 +117,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: const Color(0xFF090909),
       body: _createContentWidget(context),
     );
   }
@@ -144,7 +144,20 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               ),
             ),
-            const Expanded(child: SizedBox.shrink()),
+            Expanded(
+                child: Column(
+              children: [
+                AspectRatio(
+                  aspectRatio: 400 / 295,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 1),
+                    child: Container(
+                      color: const Color(0xFF2A2A2A),
+                    ),
+                  ),
+                )
+              ],
+            )),
             Container(
               constraints: const BoxConstraints(minHeight: 48),
               padding: const EdgeInsets.only(left: 8, right: 16),
@@ -195,7 +208,8 @@ class _MyHomePageState extends State<MyHomePage> {
         width: 8,
       ),
       Expanded(
-          child: Text('(${context.localizations.matches_count(bundle.matches)})',
+          child: Text(
+              '(${context.localizations.matches_count(bundle.matches)})',
               style: const TextStyle(
                   color: _colorBlue,
                   fontSize: 14,
