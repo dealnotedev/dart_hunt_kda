@@ -22,7 +22,7 @@ class HuntBundle {
       required this.assists,
       required this.matches});
 
-  double get kd => kills.toDouble() / deaths.toDouble();
+  double get kd => (kills + assists).toDouble() / deaths.toDouble();
 
   int? get killsChanges => currentMatchKills > 0 ? currentMatchKills : null;
 
