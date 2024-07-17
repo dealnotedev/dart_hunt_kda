@@ -187,6 +187,7 @@ class _MyHomePageState extends State<MyHomePage> {
     final kdaChanges = bundle.kdaChanges;
     final killsChanges = bundle.killsChanges;
     final deathsChanges = bundle.deatchChanges;
+    final assistsChanges = bundle.assistsChanges;
 
     final hasDirectionIcon = kdaChanges != null && kdaChanges != 0;
     final kdaStyle = TextStyle(
@@ -198,7 +199,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     return [
       Text(
-        'KD',
+        'KDA',
         style: TextStyle(
             color: textColor, fontSize: 18, fontWeight: FontWeight.bold),
       ),
@@ -248,12 +249,11 @@ class _MyHomePageState extends State<MyHomePage> {
           if (deathsChanges != null) ...[
             _createChangesWidget(deathsChanges, positive: false)
           ],
-
-          //Text(_spacedSlash(trimLeft: deathsChanges != null), style: textStyle),
-          //Text(stats.ownAssists.toString(), style: textStyle),
-          //if (assistsChanges != null) ...[
-          //  _createChangesWidget(assistsChanges, positive: true)
-          //]
+          Text(_spacedSlash(trimLeft: deathsChanges != null), style: textStyle),
+          Text(bundle.assists.toString(), style: textStyle),
+          if (assistsChanges != null) ...[
+            _createChangesWidget(assistsChanges, positive: true)
+          ]
         ],
       ),
     ];

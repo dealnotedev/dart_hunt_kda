@@ -38,6 +38,10 @@ class TrackerEngine {
       bundle.set(bundle.current.add(kills: info.kills, deaths: info.deaths));
     }
 
+    if (info is _AssistsEvent) {
+      bundle.set(bundle.current.addAssist(assists: info.count));
+    }
+
     if (info is _MissionState) {
       final missionActive = info.state == 'MissionStarted';
 
@@ -53,8 +57,10 @@ class TrackerEngine {
 
   final bundle = ObservableValue(
       current: HuntBundle(
+          assists: 0,
           kills: 0,
           deaths: 0,
+          currentMatchAssists: 0,
           currentMatchDeaths: 0,
           currentMatchKills: 0,
           matches: 0));
@@ -112,6 +118,8 @@ class TrackerEngine {
         length = 0;
       }
 
+      bool awaitForAssists = false;
+
       await logFile
           .openRead(length)
           .transform(utf8.decoder)
@@ -122,6 +130,25 @@ class TrackerEngine {
           .transform(const LineSplitter())
           .forEach((s) {
             final parts = s.split(' ').map((e) => e.trim()).toList();
+
+            //<21:35:09> <Flash> 	 category: accolade_players_killed_assist [#!NO_CONTEXT!#]
+            //<21:35:09> <Flash> 	 kills: 1 [#!NO_CONTEXT!#]
+
+            if (parts.contains('category:') &&
+                parts.contains('accolade_players_killed_assist')) {
+              awaitForAssists = true;
+            }
+
+            if (awaitForAssists) {
+              final killsIndex = parts.indexOf('kills:');
+
+              if (killsIndex != -1) {
+                awaitForAssists = false;
+
+                final assists = int.parse(parts[killsIndex + 1]);
+                _gameEventSubject.add(_AssistsEvent(count: assists));
+              }
+            }
 
             final map = _findMissionMap(parts);
             if (map != null) {
@@ -196,6 +223,12 @@ class TrackerEngine {
       return null;
     }
   }
+}
+
+class _AssistsEvent extends _BaseEvent {
+  final int count;
+
+  _AssistsEvent({required this.count});
 }
 
 class _StatsEvent extends _BaseEvent {
