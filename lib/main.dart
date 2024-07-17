@@ -23,28 +23,10 @@ void main(List<String> args) async {
 
   runApp(MyApp(engine: tracker));
 
-  final server = await HttpServer.bind(InternetAddress.anyIPv4, 4080);
-  await server.forEach((HttpRequest request) {
-    if (request.uri.path == '/huntapi/state') {
-      final state = tracker.state;
-
-      final json =
-          jsonEncode({'active_match': state.activeMatch, 'map': state.map});
-
-      request.response.statusCode == HttpStatus.ok;
-      request.response.write(json);
-    } else {
-      request.response.statusCode == HttpStatus.badRequest;
-      request.response.write('Very bad request :(');
-    }
-
-    request.response.close();
-  });
-
   doWhenWindowReady(() {
     final window = appWindow;
 
-    const initialSize = Size(368, 368);
+    const initialSize = Size(368, 56);
     window.minSize = initialSize;
     window.size = initialSize;
     window.alignment = Alignment.center;
@@ -57,6 +39,24 @@ void main(List<String> args) async {
     }
 
     _startSystemTray(window);
+  });
+
+  final server = await HttpServer.bind(InternetAddress.anyIPv4, 4080);
+  await server.forEach((HttpRequest request) {
+    if (request.uri.path == '/huntapi/state') {
+      final state = tracker.state;
+
+      final json =
+      jsonEncode({'active_match': state.activeMatch, 'map': state.map});
+
+      request.response.statusCode == HttpStatus.ok;
+      request.response.write(json);
+    } else {
+      request.response.statusCode == HttpStatus.badRequest;
+      request.response.write('Very bad request :(');
+    }
+
+    request.response.close();
   });
 }
 
@@ -152,52 +152,29 @@ class _MyHomePageState extends State<MyHomePage> {
       builder: (cntx, snapshot) {
         final bundle = snapshot.requireData;
 
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(
-              height: 48,
-              child: MoveWindow(
-                child: SimplePlayerWidget(
-                  mmr: 0,
-                  textColor: textColor,
-                  bgColor: _blockColor,
-                ),
-              ),
-            ),
-            Expanded(
-                child: Column(
-              children: [
-                AspectRatio(
-                  aspectRatio: 400 / 295,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 1),
-                    child: Container(
-                      color: const Color(0xFF2A2A2A),
+        return Container(
+          alignment: Alignment.center,
+          constraints: const BoxConstraints(minHeight: 48),
+          padding: const EdgeInsets.only(left: 8, right: 16),
+          color: _blockColor,
+          child: Row(
+            children: [
+              SizedBox(
+                  height: 48,
+                  width: 48,
+                  child: MoveWindow(
+                    child: Image.asset(
+                      Assets.assetsIcKda,
+                      width: 48,
+                      height: 48,
                     ),
-                  ),
-                )
-              ],
-            )),
-            Container(
-              constraints: const BoxConstraints(minHeight: 48),
-              padding: const EdgeInsets.only(left: 8, right: 16),
-              color: _blockColor,
-              child: Row(
-                children: [
-                  Image.asset(
-                    Assets.assetsIcKda,
-                    width: 48,
-                    height: 48,
-                  ),
-                  const SizedBox(
-                    width: 4,
-                  ),
-                  ..._createMyKdaWidgets(bundle, textColor: textColor)
-                ],
+                  )),
+              const SizedBox(
+                width: 4,
               ),
-            ),
-          ],
+              ..._createMyKdaWidgets(bundle, textColor: textColor)
+            ],
+          ),
         );
       },
     );
