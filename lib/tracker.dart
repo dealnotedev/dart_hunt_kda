@@ -29,8 +29,6 @@ class TrackerEngine {
     if (info is _MapLoading) {
       _lastMap = info.levelName;
 
-      print(_lastMap);
-
       if (mapSounds) {
         await _playMapSound(info.levelName);
       }
