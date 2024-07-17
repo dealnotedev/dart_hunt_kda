@@ -10,21 +10,30 @@ import 'package:hunt_stats/observable_value.dart';
 import 'package:hunt_stats/ringtone.dart';
 
 class TrackerEngine {
-  final _mapSubject = StreamController<String>.broadcast();
-
   final _gameEventSubject = StreamController<_BaseEvent>.broadcast();
 
-  TrackerEngine() {
+  final bool mapSounds;
+  final Duration updateInterval;
+
+  TrackerEngine({required this.mapSounds, required this.updateInterval}) {
     _gameEventSubject.stream.listen(_handleGameEvent);
   }
 
   bool? _missionActive;
+  String? _lastMap;
+
+  TrackerState get state =>
+      TrackerState(activeMatch: _missionActive, map: _lastMap);
 
   Future<void> _handleGameEvent(_BaseEvent info) async {
     if (info is _MapLoading) {
-      _mapSubject.add(info.levelName);
+      _lastMap = info.levelName;
 
-      await _playMapSound(info.levelName);
+      print(_lastMap);
+
+      if (mapSounds) {
+        await _playMapSound(info.levelName);
+      }
     }
 
     if (info is _StatsEvent) {
@@ -53,7 +62,7 @@ class TrackerEngine {
           matches: 0));
 
   Future<void> _playMapSound(String mapName) async {
-    switch (mapName.trim().toLowerCase().split('/')[1]) {
+    switch (mapName) {
       case 'creek':
         RingtonePlayer.play(Assets.assetsCreek);
         break;
@@ -66,8 +75,6 @@ class TrackerEngine {
     }
   }
 
-  Stream<String> get map => _mapSubject.stream;
-
   void startTracking() async {
     final finder = HuntFinder();
 
@@ -79,10 +86,22 @@ class TrackerEngine {
     final userDirectory = file.parent.parent.parent;
     final logFile = File('${userDirectory.path}\\game.log');
 
+    final initial = await _findMissionState(logFile);
+
+    final initialState = initial.state;
+    final initialMap = initial.map;
+
+    if (initialState != null) {
+      _gameEventSubject.add(_MissionState(state: initialState));
+    }
+    if (initialMap != null) {
+      _gameEventSubject.add(_MapLoading(initialMap));
+    }
+
     var length = await logFile.length();
 
     while (true) {
-      await Future.delayed(const Duration(seconds: 1));
+      await Future.delayed(updateInterval);
 
       final start = DateTime.now().millisecondsSinceEpoch;
 
@@ -106,13 +125,12 @@ class TrackerEngine {
           .forEach((s) {
             final parts = s.split(' ').map((e) => e.trim()).toList();
 
-            final index = parts.indexOf('PrepareLevel');
-            if (index != -1) {
-              _gameEventSubject.add(_MapLoading(parts[index + 1]));
+            final map = _findMissionMap(parts);
+            if (map != null) {
+              _gameEventSubject.add(_MapLoading(map));
             }
 
             final savedIndex = parts.indexOf('Saved');
-
             int kills = 0;
             int deaths = 0;
 
@@ -143,6 +161,33 @@ class TrackerEngine {
         print('Processed in ${end - start}ms');
       }
     }
+  }
+
+  static String? _findMissionMap(List<String> parts) {
+    final index = parts.indexOf('PrepareLevel');
+    if (index != -1) {
+      return parts[index + 1].trim().toLowerCase().split('/')[1];
+    } else {
+      return null;
+    }
+  }
+
+  static Future<({String? state, String? map})> _findMissionState(
+      File logFile) async {
+    String? state;
+    String? map;
+
+    await logFile
+        .openRead()
+        .transform(utf8.decoder)
+        .transform(const LineSplitter())
+        .forEach((s) {
+      final parts = s.split(' ');
+      state = _findMissionBag(parts) ?? state;
+      map = _findMissionMap(parts) ?? map;
+    });
+
+    return (state: state, map: map);
   }
 
   static String? _findMissionBag(List<String> parts) {
@@ -182,3 +227,10 @@ class _HuntFound extends _BaseEvent {
 }
 
 abstract class _BaseEvent {}
+
+class TrackerState {
+  final bool? activeMatch;
+  final String? map;
+
+  TrackerState({required this.activeMatch, required this.map});
+}

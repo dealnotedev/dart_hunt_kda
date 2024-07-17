@@ -16,7 +16,9 @@ import 'package:system_tray/system_tray.dart' as tray;
 void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  final tracker = TrackerEngine()..startTracking();
+  final tracker =
+      TrackerEngine(mapSounds: true, updateInterval: const Duration(seconds: 1))
+        ..startTracking();
 
   runApp(MyApp(engine: tracker));
 
