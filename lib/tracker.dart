@@ -39,7 +39,7 @@ class TrackerEngine {
     }
 
     if (info is _AssistsEvent) {
-      bundle.set(bundle.current.addAssist(assists: info.count));
+      bundle.set(bundle.current.setAssists(assists: info.count));
     }
 
     if (info is _MissionState) {

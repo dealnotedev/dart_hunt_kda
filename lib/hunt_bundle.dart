@@ -22,7 +22,13 @@ class HuntBundle {
       required this.assists,
       required this.matches});
 
-  double get kd => (kills + assists).toDouble() / deaths.toDouble();
+  int get totalKills => kills + currentMatchKills;
+
+  int get totalDeaths => deaths + currentMatchDeaths;
+
+  int get totalAssists => assists + currentMatchAssists;
+
+  double get kd => (totalKills + totalAssists).toDouble() / totalDeaths.toDouble();
 
   int? get killsChanges => currentMatchKills > 0 ? currentMatchKills : null;
 
@@ -32,13 +38,14 @@ class HuntBundle {
   int? get deatchChanges => currentMatchDeaths > 0 ? currentMatchDeaths : null;
 
   double? get kdaChanges {
-    final killsBefore = kills - currentMatchKills;
-    final deathsBefore = deaths - currentMatchDeaths;
-    final assistsBefore = assists - currentMatchAssists;
+    final killsBefore = kills;
+    final deathsBefore = deaths;
+    final assistsBefore = assists;
 
     final kdBefore =
         (killsBefore + assistsBefore).toDouble() / deathsBefore.toDouble();
-    final kdCurrent = (kills + assists).toDouble() / deaths.toDouble();
+
+    final kdCurrent = (totalKills + totalAssists).toDouble() / totalDeaths.toDouble();
 
     if (kdBefore.isFinite &&
         kdBefore > 0 &&
@@ -58,7 +65,18 @@ class HuntBundle {
         currentMatchDeaths: currentMatchDeaths,
         currentMatchKills: currentMatchKills,
         currentMatchAssists: currentMatchAssists + assists,
-        assists: this.assists + assists,
+        assists: this.assists,
+        matches: matches);
+  }
+
+  HuntBundle setAssists({required int assists}) {
+    return HuntBundle(
+        kills: kills,
+        deaths: deaths,
+        currentMatchDeaths: currentMatchDeaths,
+        currentMatchKills: currentMatchKills,
+        currentMatchAssists: assists,
+        assists: this.assists,
         matches: matches);
   }
 
@@ -66,8 +84,8 @@ class HuntBundle {
     return HuntBundle(
         matches: matches,
         assists: assists,
-        kills: this.kills + kills,
-        deaths: this.deaths + deaths,
+        kills: this.kills,
+        deaths: this.deaths,
         currentMatchAssists: currentMatchAssists,
         currentMatchDeaths: currentMatchDeaths + deaths,
         currentMatchKills: currentMatchKills + kills);
@@ -75,10 +93,10 @@ class HuntBundle {
 
   HuntBundle resetMatchData() {
     return HuntBundle(
-        kills: kills,
+        kills: kills + currentMatchKills,
         matches: matches + 1,
-        deaths: deaths,
-        assists: assists,
+        deaths: deaths + currentMatchDeaths,
+        assists: assists + currentMatchAssists,
         currentMatchAssists: 0,
         currentMatchDeaths: 0,
         currentMatchKills: 0);

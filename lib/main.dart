@@ -47,7 +47,7 @@ void main(List<String> args) async {
       final state = tracker.state;
 
       final json =
-      jsonEncode({'active_match': state.activeMatch, 'map': state.map});
+          jsonEncode({'active_match': state.activeMatch, 'map': state.map});
 
       request.response.statusCode == HttpStatus.ok;
       request.response.write(json);
@@ -152,29 +152,36 @@ class _MyHomePageState extends State<MyHomePage> {
       builder: (cntx, snapshot) {
         final bundle = snapshot.requireData;
 
-        return Container(
-          alignment: Alignment.center,
-          constraints: const BoxConstraints(minHeight: 48),
-          padding: const EdgeInsets.only(left: 8, right: 16),
-          color: _blockColor,
-          child: Row(
-            children: [
-              SizedBox(
-                  height: 48,
-                  width: 48,
-                  child: MoveWindow(
-                    child: Image.asset(
-                      Assets.assetsIcKda,
-                      width: 48,
+        return Column(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              alignment: Alignment.center,
+              constraints: const BoxConstraints(minHeight: 48),
+              padding: const EdgeInsets.only(left: 8, right: 16),
+              color: _blockColor,
+              width: double.infinity,
+              child: Row(
+                children: [
+                  SizedBox(
                       height: 48,
-                    ),
-                  )),
-              const SizedBox(
-                width: 4,
+                      width: 48,
+                      child: MoveWindow(
+                        child: Image.asset(
+                          Assets.assetsIcKda,
+                          width: 48,
+                          height: 48,
+                        ),
+                      )),
+                  const SizedBox(
+                    width: 4,
+                  ),
+                  ..._createMyKdaWidgets(bundle, textColor: textColor)
+                ],
               ),
-              ..._createMyKdaWidgets(bundle, textColor: textColor)
-            ],
-          ),
+            )
+          ],
         );
       },
     );
@@ -240,17 +247,17 @@ class _MyHomePageState extends State<MyHomePage> {
       Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(bundle.kills.toString(), style: textStyle),
+          Text(bundle.totalKills.toString(), style: textStyle),
           if (killsChanges != null) ...[
             _createChangesWidget(killsChanges, positive: true)
           ],
           Text(_spacedSlash(trimLeft: killsChanges != null), style: textStyle),
-          Text(bundle.deaths.toString(), style: textStyle),
+          Text(bundle.totalDeaths.toString(), style: textStyle),
           if (deathsChanges != null) ...[
             _createChangesWidget(deathsChanges, positive: false)
           ],
           Text(_spacedSlash(trimLeft: deathsChanges != null), style: textStyle),
-          Text(bundle.assists.toString(), style: textStyle),
+          Text(bundle.totalAssists.toString(), style: textStyle),
           if (assistsChanges != null) ...[
             _createChangesWidget(assistsChanges, positive: true)
           ]
