@@ -8,6 +8,7 @@ import 'package:hunt_stats/hunt_bundle.dart';
 import 'package:hunt_stats/hunt_finder.dart';
 import 'package:hunt_stats/observable_value.dart';
 import 'package:hunt_stats/ringtone.dart';
+import 'package:hunt_stats/text_stats_generator.dart';
 
 class TrackerEngine {
   final _gameEventSubject = StreamController<_BaseEvent>.broadcast();
@@ -24,6 +25,8 @@ class TrackerEngine {
 
   TrackerState get state =>
       TrackerState(activeMatch: _missionActive, map: _lastMap);
+
+  final _textGenerator = TextStatsGenerator(tableWidth: 32, style: TableStyle.simple);
 
   Future<void> _handleGameEvent(_BaseEvent info) async {
     if (info is _MapLoading) {
