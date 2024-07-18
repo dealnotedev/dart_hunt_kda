@@ -125,7 +125,7 @@ class TrackerEngine {
 
       await logFile
           .openRead(length)
-          .transform(utf8.decoder)
+          .transform(const Utf8Decoder(allowMalformed: true))
           .map((s) {
             length += s.length;
             return s;
@@ -207,7 +207,7 @@ class TrackerEngine {
 
     await logFile
         .openRead()
-        .transform(utf8.decoder)
+        .transform(const Utf8Decoder(allowMalformed: true))
         .transform(const LineSplitter())
         .forEach((s) {
       final parts = s.split(' ');
