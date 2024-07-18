@@ -26,7 +26,8 @@ class TrackerEngine {
   TrackerState get state =>
       TrackerState(activeMatch: _missionActive, map: _lastMap);
 
-  final _textGenerator = TextStatsGenerator(tableWidth: 32, style: TableStyle.simple);
+  final _textGenerator =
+      TextStatsGenerator(tableWidth: 32, style: TableStyle.simple);
 
   Future<void> _handleGameEvent(_BaseEvent info) async {
     if (info is _MapLoading) {
@@ -45,6 +46,10 @@ class TrackerEngine {
       bundle.set(bundle.current.setAssists(assists: info.count));
     }
 
+    if (info is _StatsEvent || info is _AssistsEvent) {
+      await _textGenerator.write(bundle: bundle.current, file: _textStatsFile);
+    }
+
     if (info is _MissionState) {
       final missionActive = info.state == 'MissionStarted';
 
@@ -56,6 +61,11 @@ class TrackerEngine {
         }
       }
     }
+  }
+
+  File get _textStatsFile {
+    final dir = File(Platform.resolvedExecutable).parent;
+    return File('${dir.path}/stats.txt');
   }
 
   final bundle = ObservableValue(
@@ -150,6 +160,10 @@ class TrackerEngine {
 
                 final assists = int.parse(parts[killsIndex + 1]);
                 _gameEventSubject.add(_AssistsEvent(count: assists));
+
+                if (kDebugMode) {
+                  print(s);
+                }
               }
             }
 
