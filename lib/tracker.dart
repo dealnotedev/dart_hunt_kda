@@ -43,7 +43,11 @@ class TrackerEngine {
     }
 
     if (info is _AssistsEvent) {
-      bundle.set(bundle.current.setAssists(assists: info.count));
+      if (bundle.current.currentMatchAssists != info.count) {
+        bundle.set(bundle.current.setAssists(assists: info.count));
+      } else {
+        return;
+      }
     }
 
     if (info is _StatsEvent || info is _AssistsEvent) {
@@ -144,8 +148,16 @@ class TrackerEngine {
           .forEach((s) {
             final parts = s.split(' ').map((e) => e.trim()).toList();
 
+            //<23:46:52> <Flash> bountyList - cat: accolade_clues_found, bounty: 50, data.xp: 0, data.gold: 0 [#!NO_CONTEXT!#]
+            //<23:25:40> <Flash> boss_data() [#!NO_CONTEXT!#]
+
             //<21:35:09> <Flash> 	 category: accolade_players_killed_assist [#!NO_CONTEXT!#]
             //<21:35:09> <Flash> 	 kills: 1 [#!NO_CONTEXT!#]
+
+            if (parts.contains('<Flash>') && parts.contains('boss_data()')) {
+              // reset assists count
+              _gameEventSubject.add(_AssistsEvent(count: 0));
+            }
 
             if (parts.contains('category:') &&
                 parts.contains('accolade_players_killed_assist')) {
