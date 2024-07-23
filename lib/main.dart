@@ -170,6 +170,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       child: MoveWindow(
                         child: Image.asset(
                           Assets.assetsIcKda,
+                          filterQuality: FilterQuality.medium,
                           width: 48,
                           height: 48,
                         ),
