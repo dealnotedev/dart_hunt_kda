@@ -184,12 +184,21 @@ class TrackerEngine {
               _gameEventSubject.add(_MapLoading(map));
             }
 
+            //<21:08:36> [Error] [Geforce Experience] Failed to save video 'PLAYER_DOWNED': NVGSDK_ERR_IPC_FAILED
+            //<21:08:36> [Error] [Geforce Experience] Failed to save video 'HUNTER_KILLED': NVGSDK_ERR_IPC_FAILED
+            //<21:14:11> [Geforce Experience] Saved video 'PLAYER_DOWNED'
+            //<20:46:16> [Geforce Experience] Saved video 'HUNTER_KILLED'
+
             final savedIndex = parts.indexOf('Saved');
+            final saveIndex = parts.indexOf('save');
+
+            final preVideoIndex = savedIndex != -1 ? savedIndex : saveIndex;
+
             int kills = 0;
             int deaths = 0;
 
-            if (savedIndex != -1 && parts[savedIndex + 1] == 'video') {
-              switch (parts[savedIndex + 2]) {
+            if (preVideoIndex != -1 && parts[preVideoIndex + 1] == 'video') {
+              switch (parts[savedIndex + 2].replaceAll(':', '')) {
                 case '\'HUNTER_KILLED\'':
                   kills++;
                   break;
