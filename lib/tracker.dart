@@ -198,7 +198,9 @@ class TrackerEngine {
             int deaths = 0;
 
             if (preVideoIndex != -1 && parts[preVideoIndex + 1] == 'video') {
-              switch (parts[savedIndex + 2].replaceAll(':', '')) {
+              final videoType = parts[preVideoIndex + 2].replaceAll(':', '');
+
+              switch (videoType) {
                 case '\'HUNTER_KILLED\'':
                   kills++;
                   break;
