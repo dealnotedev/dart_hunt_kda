@@ -14,9 +14,15 @@ class TrackerEngine {
   final _gameEventSubject = StreamController<_BaseEvent>.broadcast();
 
   final bool mapSounds;
+  final bool killSound;
+  final bool deathSound;
   final Duration updateInterval;
 
-  TrackerEngine({required this.mapSounds, required this.updateInterval}) {
+  TrackerEngine(
+      {required this.mapSounds,
+      required this.updateInterval,
+      required this.deathSound,
+      required this.killSound}) {
     _gameEventSubject.stream.listen(_handleGameEvent);
   }
 
@@ -29,6 +35,8 @@ class TrackerEngine {
   final _textGenerator =
       TextStatsGenerator(tableWidth: 32, style: TableStyle.simple);
 
+  Completer<void>? _soundCompleter;
+
   Future<void> _handleGameEvent(_BaseEvent info) async {
     if (info is _MapLoading) {
       _lastMap = info.levelName;
@@ -38,8 +46,31 @@ class TrackerEngine {
       }
     }
 
+    bool writeFileStats = false;
+
     if (info is _StatsEvent) {
       bundle.set(bundle.current.add(kills: info.kills, deaths: info.deaths));
+
+      await _soundCompleter?.future;
+
+      if (info.kills > 0) {
+        if (killSound) {
+          RingtonePlayer.play(Assets.assetsKill);
+        }
+      } else if (info.deaths > 0) {
+        if (deathSound) {
+          RingtonePlayer.play(Assets.assetsDeath);
+        }
+      }
+
+      if (info.deaths > 0 || info.kills > 0) {
+        _soundCompleter = Completer();
+
+        await Future.delayed(const Duration(seconds: 1));
+
+        _soundCompleter?.complete();
+        _soundCompleter = null;
+      }
     }
 
     if (info is _AssistsEvent) {
@@ -51,7 +82,7 @@ class TrackerEngine {
     }
 
     if (info is _StatsEvent || info is _AssistsEvent) {
-      await _textGenerator.write(bundle: bundle.current, file: _textStatsFile);
+      writeFileStats = true;
     }
 
     if (info is _MissionState) {
@@ -62,8 +93,13 @@ class TrackerEngine {
 
         if (missionActive) {
           bundle.set(bundle.current.resetMatchData());
+          writeFileStats = true;
         }
       }
+    }
+
+    if (writeFileStats) {
+      _textGenerator.write(bundle: bundle.current, file: _textStatsFile);
     }
   }
 
@@ -84,6 +120,8 @@ class TrackerEngine {
 
   Future<void> _playMapSound(String mapName) async {
     switch (mapName) {
+      case 'colorado':
+        break;
       case 'creek':
         RingtonePlayer.play(Assets.assetsCreek);
         break;
@@ -97,6 +135,8 @@ class TrackerEngine {
   }
 
   void startTracking() async {
+    _textGenerator.write(bundle: bundle.current, file: _textStatsFile);
+
     final finder = HuntFinder();
 
     final file = await finder.findHuntAttributes();

@@ -28,7 +28,7 @@ class HuntBundle {
 
   int get totalAssists => assists + currentMatchAssists;
 
-  double get kd => (totalKills + totalAssists).toDouble() / totalDeaths.toDouble();
+  double get kda => (totalKills + totalAssists).toDouble() / totalDeaths.toDouble();
 
   int? get killsChanges => currentMatchKills > 0 ? currentMatchKills : null;
 

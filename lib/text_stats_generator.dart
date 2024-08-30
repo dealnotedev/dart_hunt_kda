@@ -9,18 +9,13 @@ class TextStatsGenerator {
 
   TextStatsGenerator({required this.tableWidth, required this.style});
 
-  Future<void> write({required HuntBundle? bundle, required File file}) {
-    final String table;
-
-    if (bundle != null) {
-      table = _generateTableContent(bundle);
-    } else {
-      table = _generateEmptyText();
-    }
+  Future<void> write({required HuntBundle bundle, required File file}) {
+    final String table = _generateTableContent(bundle);
 
     if (kDebugMode) {
       print(table);
     }
+
     return file.writeAsString(_withPadding(table, padding: 1));
   }
 
@@ -105,24 +100,6 @@ class TextStatsGenerator {
     return text;
   }
 
-  String _generateEmptyText() {
-    var table = '';
-
-    table += _generateSimpleLine(
-        start: style.cornerTopLeft, end: style.corentTopRight);
-    table += '\n';
-    table += _generateValuesText(title: '', data: '');
-    table += '\n';
-    table += _generateCenteredText(text: 'Hunt!');
-    table += '\n';
-    table += _generateValuesText(title: '', data: '');
-    table += '\n';
-    table += _generateSimpleLine(
-        start: style.cornerBottomLeft, end: style.cornerBottomRight);
-
-    return table;
-  }
-
   String _generateTableContent(HuntBundle bundle) {
     String table = '';
 
@@ -136,15 +113,15 @@ class TextStatsGenerator {
         : '';
 
     final myKda =
-        '${_formatDouble(bundle.kd)}$myKdaChangesSymbol  ${bundle.totalKills}/${bundle.totalDeaths}/${bundle.totalAssists}';
-    table += _generateValuesText(title: 'My KDA', data: myKda);
+        '${_formatDouble(bundle.kda)}$myKdaChangesSymbol  ${bundle.totalKills}/${bundle.totalDeaths}';
+    table += _generateValuesText(title: 'My K/D', data: myKda);
     table += '\n';
 
-    if (bundle.matches > 1) {
+    if (bundle.matches > 0) {
       table += _generateValuesText(
-          title: '${_formatMatches(bundle.matches)}, last:',
+          title: '${_formatMatches(bundle.matches)}, current:',
           data:
-              '${bundle.currentMatchKills.valueOrHyphen}/${bundle.currentMatchDeaths.valueOrHyphen}/${bundle.currentMatchAssists.valueOrHyphen}');
+              '${bundle.currentMatchKills.valueOrHyphen}/${bundle.currentMatchDeaths.valueOrHyphen}');
     } else {
       table +=
           _generateValuesText(title: _formatMatches(bundle.matches), data: '');

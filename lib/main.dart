@@ -17,9 +17,12 @@ import 'package:system_tray/system_tray.dart' as tray;
 void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  final tracker =
-      TrackerEngine(mapSounds: true, updateInterval: const Duration(seconds: 1))
-        ..startTracking();
+  final tracker = TrackerEngine(
+      updateInterval: const Duration(seconds: 1),
+      mapSounds: false,
+      deathSound: false,
+      killSound: false)
+    ..startTracking();
 
   runApp(MyApp(engine: tracker));
 
@@ -195,7 +198,7 @@ class _MyHomePageState extends State<MyHomePage> {
     final kdaChanges = bundle.kdaChanges;
     final killsChanges = bundle.killsChanges;
     final deathsChanges = bundle.deatchChanges;
-    final assistsChanges = bundle.assistsChanges;
+    //final assistsChanges = bundle.assistsChanges;
 
     final hasDirectionIcon = kdaChanges != null && kdaChanges != 0;
     final kdaStyle = TextStyle(
@@ -207,7 +210,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     return [
       Text(
-        'KDA',
+        'K/D',
         style: TextStyle(
             color: textColor, fontSize: 18, fontWeight: FontWeight.bold),
       ),
@@ -224,16 +227,16 @@ class _MyHomePageState extends State<MyHomePage> {
       Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (bundle.kd.isFinite) ...[
+          if (bundle.kda.isFinite) ...[
             AnimatedFlipCounter(
-              value: bundle.kd,
+              value: bundle.kda,
               fractionDigits: 2,
               duration: const Duration(seconds: 1),
               textStyle: kdaStyle,
             )
           ] else ...[
             Text(
-              formatDouble(bundle.kd),
+              formatDouble(bundle.kda),
               style: kdaStyle,
             )
           ],
@@ -257,11 +260,11 @@ class _MyHomePageState extends State<MyHomePage> {
           if (deathsChanges != null) ...[
             _createChangesWidget(deathsChanges, positive: false)
           ],
-          Text(_spacedSlash(trimLeft: deathsChanges != null), style: textStyle),
+          /*Text(_spacedSlash(trimLeft: deathsChanges != null), style: textStyle),
           Text(bundle.totalAssists.toString(), style: textStyle),
           if (assistsChanges != null) ...[
             _createChangesWidget(assistsChanges, positive: true)
-          ]
+          ]*/
         ],
       ),
     ];
