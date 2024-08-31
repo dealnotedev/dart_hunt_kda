@@ -32,8 +32,14 @@ class HuntFinder {
             final file = File(
                 '$libPath\\steamapps\\common\\Hunt Showdown\\user\\profiles\\default\\attributes.xml');
 
+            final file1896 = File(
+                '$libPath\\steamapps\\common\\Hunt Showdown 1896\\user\\profiles\\default\\attributes.xml');
+
             if (await file.exists()) {
               found.add(file);
+            }
+            if(await file.exists()){
+              found.add(file1896);
             }
           } else {
             break;
