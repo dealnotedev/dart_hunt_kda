@@ -13,7 +13,7 @@ class HuntFinder {
     desiredAccessRights: AccessRights.readOnly,
   );
 
-  Future<File> findHuntAttributes() async {
+  Future<File> findHuntGameLogFile() async {
     final steamDirectory = await _findSteamPath();
     final found = <File>[];
 
@@ -30,15 +30,15 @@ class HuntFinder {
           if (lib != null) {
             final libPath = lib['path'] as String;
             final file = File(
-                '$libPath\\steamapps\\common\\Hunt Showdown\\user\\profiles\\default\\attributes.xml');
+                '$libPath\\steamapps\\common\\Hunt Showdown\\user\\game.log');
 
             final file1896 = File(
-                '$libPath\\steamapps\\common\\Hunt Showdown 1896\\user\\profiles\\default\\attributes.xml');
+                '$libPath\\steamapps\\common\\Hunt Showdown 1896\\user\\game.log');
 
             if (await file.exists()) {
               found.add(file);
             }
-            if(await file.exists()){
+            if (await file1896.exists()) {
               found.add(file1896);
             }
           } else {
@@ -78,8 +78,7 @@ class HuntFinder {
         final data = json.decode(await settings.readAsString());
         final directory = Directory(data['hunt_path']);
 
-        final file =
-            File('$directory\\user\\profiles\\default\\attributes.xml');
+        final file = File('$directory\\user\\game.log');
 
         if (await file.exists()) {
           return file;

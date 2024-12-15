@@ -121,6 +121,7 @@ class TrackerEngine {
   Future<void> _playMapSound(String mapName) async {
     switch (mapName) {
       case 'colorado':
+        RingtonePlayer.play(Assets.assetsColorado);
         break;
       case 'creek':
         RingtonePlayer.play(Assets.assetsCreek);
@@ -139,13 +140,8 @@ class TrackerEngine {
 
     final finder = HuntFinder();
 
-    final file = await finder.findHuntAttributes();
-    final attributes = file.path;
-
-    _gameEventSubject.add(_HuntFound(attributes));
-
-    final userDirectory = file.parent.parent.parent;
-    final logFile = File('${userDirectory.path}\\game.log');
+    final logFile = await finder.findHuntGameLogFile();
+    _gameEventSubject.add(_HuntFound(logFile.path));
 
     final initial = await _findMissionState(logFile);
 

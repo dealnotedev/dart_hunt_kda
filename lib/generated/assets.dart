@@ -4,6 +4,7 @@ class Assets {
 
   static const String assetsCemetery = 'assets/cemetery.wav';
   static const String assetsCivilwar = 'assets/civilwar.wav';
+  static const String assetsColorado = 'assets/colorado.wav';
   static const String assetsCreek = 'assets/creek.wav';
   static const String assetsCrossWhite20dp = 'assets/cross_white_20dp.png';
   static const String assetsDeath = 'assets/death.wav';
