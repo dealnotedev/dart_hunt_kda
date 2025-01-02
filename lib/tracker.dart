@@ -54,11 +54,11 @@ class TrackerEngine {
       await _soundCompleter?.future;
 
       if (info.kills > 0) {
-        if (killSound) {
+        if (killSound && await File(Assets.assetsKill).exists()) {
           RingtonePlayer.play(Assets.assetsKill);
         }
       } else if (info.deaths > 0) {
-        if (deathSound) {
+        if (deathSound && await File(Assets.assetsDeath).exists()) {
           RingtonePlayer.play(Assets.assetsDeath);
         }
       }
