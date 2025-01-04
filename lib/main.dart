@@ -21,7 +21,7 @@ void main(List<String> args) async {
       updateInterval: const Duration(seconds: 1),
       mapSounds: true,
       deathSound: true,
-      killSound: false)
+      killSound: true)
     ..startTracking();
 
   runApp(MyApp(engine: tracker));

@@ -37,9 +37,9 @@ class TrackerEngine {
 
   Completer<void>? _soundCompleter;
 
-  static Future<bool> _hasFile(String assetName) {
+  static Future<bool> _hasAssetsFile(String assetName) {
     final directory = File(Platform.resolvedExecutable).parent.path;
-    return File('$directory\\data\\flutter_assets\\assets\\$assetName')
+    return File('$directory\\data\\flutter_assets\\$assetName')
         .exists();
   }
 
@@ -60,11 +60,11 @@ class TrackerEngine {
       await _soundCompleter?.future;
 
       if (info.kills > 0) {
-        if (killSound && await _hasFile(Assets.assetsKill)) {
+        if (killSound && await _hasAssetsFile(Assets.assetsKill)) {
           RingtonePlayer.play(Assets.assetsKill);
         }
       } else if (info.deaths > 0) {
-        if (deathSound && await _hasFile(Assets.assetsDeath)) {
+        if (deathSound && await _hasAssetsFile(Assets.assetsDeath)) {
           RingtonePlayer.play(Assets.assetsDeath);
         }
       }
