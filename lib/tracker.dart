@@ -37,6 +37,12 @@ class TrackerEngine {
 
   Completer<void>? _soundCompleter;
 
+  static Future<bool> _hasFile(String assetName) {
+    final directory = File(Platform.resolvedExecutable).parent.path;
+    return File('$directory\\data\\flutter_assets\\assets\\$assetName')
+        .exists();
+  }
+
   Future<void> _handleGameEvent(_BaseEvent info) async {
     if (info is _MapLoading) {
       _lastMap = info.levelName;
@@ -54,11 +60,11 @@ class TrackerEngine {
       await _soundCompleter?.future;
 
       if (info.kills > 0) {
-        if (killSound && await File(Assets.assetsKill).exists()) {
+        if (killSound && await _hasFile(Assets.assetsKill)) {
           RingtonePlayer.play(Assets.assetsKill);
         }
       } else if (info.deaths > 0) {
-        if (deathSound && await File(Assets.assetsDeath).exists()) {
+        if (deathSound && await _hasFile(Assets.assetsDeath)) {
           RingtonePlayer.play(Assets.assetsDeath);
         }
       }
