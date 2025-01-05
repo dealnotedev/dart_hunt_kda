@@ -14,15 +14,9 @@ class TrackerEngine {
   final _gameEventSubject = StreamController<_BaseEvent>.broadcast();
 
   final bool mapSounds;
-  final bool killSound;
-  final bool deathSound;
   final Duration updateInterval;
 
-  TrackerEngine(
-      {required this.mapSounds,
-      required this.updateInterval,
-      required this.deathSound,
-      required this.killSound}) {
+  TrackerEngine({required this.mapSounds, required this.updateInterval}) {
     _gameEventSubject.stream.listen(_handleGameEvent);
   }
 
@@ -36,12 +30,6 @@ class TrackerEngine {
       TextStatsGenerator(tableWidth: 32, style: TableStyle.simple);
 
   Completer<void>? _soundCompleter;
-
-  static Future<bool> _hasAssetsFile(String assetName) {
-    final directory = File(Platform.resolvedExecutable).parent.path;
-    return File('$directory\\data\\flutter_assets\\$assetName')
-        .exists();
-  }
 
   Future<void> _handleGameEvent(_BaseEvent info) async {
     if (info is _MapLoading) {
@@ -60,13 +48,9 @@ class TrackerEngine {
       await _soundCompleter?.future;
 
       if (info.kills > 0) {
-        if (killSound && await _hasAssetsFile(Assets.assetsKill)) {
-          RingtonePlayer.play(Assets.assetsKill);
-        }
+        RingtonePlayer.play(Assets.assetsKill);
       } else if (info.deaths > 0) {
-        if (deathSound && await _hasAssetsFile(Assets.assetsDeath)) {
-          RingtonePlayer.play(Assets.assetsDeath);
-        }
+        RingtonePlayer.play(Assets.assetsDeath);
       }
 
       if (info.deaths > 0 || info.kills > 0) {
