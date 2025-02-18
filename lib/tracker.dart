@@ -92,7 +92,7 @@ class TrackerEngine {
       _textGenerator.write(bundle: bundle.current, file: _textStatsFile);
     }
 
-    if(info is _MatchFinishReason){
+    if (info is _MatchFinishReason) {
       bundle.set(bundle.current.addMatchResult(success: info.success));
     }
   }
@@ -105,13 +105,13 @@ class TrackerEngine {
   final bundle = ObservableValue(
       current: HuntBundle(
           assists: 0,
-          history: [false, true, true, true, false, true, true],
-          kills: 4,
-          deaths: 2,
+          history: [true, false, false, false, true, false, false, false, false],
+          kills: 23,
+          deaths: 16,
           currentMatchAssists: 0,
           currentMatchDeaths: 1,
-          currentMatchKills: 0,
-          matches: 0));
+          currentMatchKills: 3,
+          matches: 9));
 
   Future<void> _playMapSound(String mapName) async {
     switch (mapName) {

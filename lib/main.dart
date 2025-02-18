@@ -6,6 +6,7 @@ import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:bitsdojo_window_platform_interface/window.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:gap/gap.dart';
 import 'package:hunt_stats/auto_launcher_windows.dart';
 import 'package:hunt_stats/extensions.dart';
 import 'package:hunt_stats/generated/assets.dart';
@@ -139,7 +140,9 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF090909),
-      body: _createContentWidget(context),
+      body: MoveWindow(
+        child: _createContentWidget(context),
+      ),
     );
   }
 
@@ -152,41 +155,22 @@ class _MyHomePageState extends State<MyHomePage> {
       builder: (cntx, snapshot) {
         final bundle = snapshot.requireData;
 
-        return Stack(
-          alignment: Alignment.bottomCenter,
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  alignment: Alignment.center,
-                  constraints: const BoxConstraints(minHeight: 48),
-                  padding: const EdgeInsets.only(left: 8, right: 16),
-                  color: _blockColor,
-                  width: double.infinity,
-                  child: Row(
-                    children: [
-                      SizedBox(
-                          height: 48,
-                          width: 48,
-                          child: MoveWindow(
-                            child: Image.asset(
-                              Assets.assetsIcKda,
-                              filterQuality: FilterQuality.medium,
-                              width: 48,
-                              height: 48,
-                            ),
-                          )),
-                      const SizedBox(
-                        width: 4,
-                      ),
-                      ..._createMyKdaWidgets(bundle, textColor: textColor)
-                    ],
-                  ),
-                )
-              ],
-            ),
-            _createDotsWidget(bundle, textColor: textColor)
+            Container(
+              alignment: Alignment.center,
+              constraints: const BoxConstraints(minHeight: 48),
+              padding: const EdgeInsets.only(left: 8, right: 16),
+              color: _blockColor,
+              width: double.infinity,
+              child: Row(
+                children: [
+                  const Gap(8),
+                  ..._createMyKdaWidgets(bundle, textColor: textColor)
+                ],
+              ),
+            )
           ],
         );
       },
@@ -194,61 +178,34 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget _createDotsWidget(HuntBundle bundle, {required Color textColor}) {
-    return Row(
-      children: [
-        Expanded(
-            child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          spacing: 2,
-          children: [
-            /*Text(
-              bundle.extracted.toString(),
-              style: TextStyle(
-                  height: 1,
-                  color: textColor,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500),
-            ),
-            const SizedBox(
-              width: 4,
-            ),*/
-            ..._createColoredDots(bundle.extracted, color: _colorBlue, size: 8),
-            const SizedBox(
-              width: 4,
-            ),
-            ..._createColoredDots(bundle.losses, color: _colorRed, size: 8),
-            /*const SizedBox(
-              width: 4,
-            ),
-            Text(
-              bundle.losses.toString(),
-              style: TextStyle(
-                  height: 1,
-                  color: textColor,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500),
-            ),*/
-          ],
-        )),
-      ],
+    final history = <bool?>[];
+    history.addAll(bundle.history);
+
+    if (history.length < 10) {
+      final add = 10 - history.length;
+      for (int i = 0; i < add; i++) {
+        history.add(null);
+      }
+    }
+
+    return Wrap(
+      spacing: 2,
+      runSpacing: 2,
+      children: [...history.map((r) => _createMatchResult(r))],
     );
   }
 
-  List<Widget> _createColoredDots(int count,
-      {required double size, required Color color}) {
-    final widgets = <Widget>[];
-
-    for (int i = 0; i < count; i++) {
-      widgets.add(Container(
-        width: size,
-        height: 6,
-        decoration: BoxDecoration(
-          color: color, /*borderRadius: BorderRadius.circular(size / 2.0)*/
-        ),
-      ));
-    }
-
-    return widgets;
+  Widget _createMatchResult(bool? success) {
+    return Container(
+      width: 8,
+      height: 5,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(2),
+        color: success != null
+            ? (success ? _colorBlue : _colorRed)
+            : Colors.white.withValues(alpha: 0.15),
+      ),
+    );
   }
 
   List<Widget> _createMyKdaWidgets(HuntBundle bundle,
@@ -269,21 +226,34 @@ class _MyHomePageState extends State<MyHomePage> {
         fontSize: 20);
 
     return [
-      Text(
-        'K/D',
-        style: TextStyle(
-            color: textColor, fontSize: 18, fontWeight: FontWeight.bold),
-      ),
-      const SizedBox(
-        width: 8,
-      ),
       Expanded(
-          child: Text(
-              '(${context.localizations.matches_count(bundle.matches)})',
-              style: const TextStyle(
-                  color: _colorBlue,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500))),
+          child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                'K/D',
+                style: TextStyle(
+                    color: textColor,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold),
+              ),
+              const Gap(8),
+              Expanded(
+                  child: Text(
+                      '(${context.localizations.matches_count(bundle.matches)})',
+                      style: const TextStyle(
+                          color: _colorBlue,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500))),
+            ],
+          ),
+          const Gap(2),
+          _createDotsWidget(bundle, textColor: textColor)
+        ],
+      )),
+      const Gap(8),
       Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

@@ -1,12 +1,18 @@
-## Getting Started hunt_kda
+## Що це?
 
-0. Download last build (.zip archive) from [Releases](https://github.com/dealnotedev/dart_hunt_kda/releases)
-1. Launch application
-2. Kindly await for **30 seconds**
-3. You will see the counters for the **latest** match
-4. Just play and receive updated counters **after** each match.
-5. If you're a streamer, use **"Window Capture"** and remember to apply the **green filter** overlay.
+![plot](./screens/kda_preview.png)
+Мінімалістичний застосунок для відображення ігрової статистики **Hunt: Showdown** за сесію.
 
-![plot](./screens/stream_banner.jpg)
+## Які дані будуть доступні?
+0. Кількість матчів
+1. Смерті (+окремо за поточний матч)
+2. Вбивства (+окремо за поточний матч)
+3. Співвідношення K/D
+4. Результати матчів в хронологічному порядку (успішна евакуація чи смерть)
 
-6. How to **reset** session counters? Simply **expand the height** of the application window, and you will find the control elements there.
+## Як змусити це працювати?
+0. Завантажити останню версію (2.0.0+) застосунку з Github [Releases](https://github.com/dealnotedev/dart_hunt_kda/releases)
+1. Просимо гру писати більше логів - в параметрах запуску гри в Steam додати **+log_writetofileverbosity 3**
+2. Увімкнути **Nvidia Highlights** для запису **Hunter killed** і **Player downed** (для власників Radeon та інших рішення поки немає)
+3. За бажанням періодично чистити **\steamapps\common\Hunt Showdown\user\logbackups**, бо там будуть накопичуватись старі логи
+4. Якщо в папку з ассетами покласти файл **kill.wav** або **death.wav**, то звук буде програватись при вбивстві/смерті.
