@@ -105,13 +105,13 @@ class TrackerEngine {
   final bundle = ObservableValue(
       current: HuntBundle(
           assists: 0,
-          history: [true, false, false, false, true, false, false, false, false],
-          kills: 23,
-          deaths: 16,
+          history: [],
+          kills: 0,
+          deaths: 0,
           currentMatchAssists: 0,
-          currentMatchDeaths: 1,
-          currentMatchKills: 3,
-          matches: 9));
+          currentMatchDeaths: 0,
+          currentMatchKills: 0,
+          matches: 0));
 
   Future<void> _playMapSound(String mapName) async {
     switch (mapName) {
