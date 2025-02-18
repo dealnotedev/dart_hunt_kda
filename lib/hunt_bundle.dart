@@ -13,9 +13,12 @@ class HuntBundle {
 
   final int assists;
 
+  final List<bool> history;
+
   HuntBundle(
       {required this.kills,
       required this.deaths,
+      required this.history,
       required this.currentMatchDeaths,
       required this.currentMatchKills,
       required this.currentMatchAssists,
@@ -28,7 +31,8 @@ class HuntBundle {
 
   int get totalAssists => assists + currentMatchAssists;
 
-  double get kda => (totalKills + totalAssists).toDouble() / totalDeaths.toDouble();
+  double get kda =>
+      (totalKills + totalAssists).toDouble() / totalDeaths.toDouble();
 
   int? get killsChanges => currentMatchKills > 0 ? currentMatchKills : null;
 
@@ -45,7 +49,8 @@ class HuntBundle {
     final kdBefore =
         (killsBefore + assistsBefore).toDouble() / deathsBefore.toDouble();
 
-    final kdCurrent = (totalKills + totalAssists).toDouble() / totalDeaths.toDouble();
+    final kdCurrent =
+        (totalKills + totalAssists).toDouble() / totalDeaths.toDouble();
 
     if (kdBefore.isFinite &&
         kdBefore > 0 &&
@@ -58,10 +63,27 @@ class HuntBundle {
     }
   }
 
+  int get losses => history.where((r) => !r).length;
+
+  int get extracted => history.where((r) => r).length;
+
+  HuntBundle addMatchResult({required bool success}) {
+    return HuntBundle(
+        kills: kills,
+        deaths: deaths,
+        history: List.of(history)..add(success),
+        currentMatchDeaths: currentMatchDeaths,
+        currentMatchKills: currentMatchKills,
+        currentMatchAssists: currentMatchAssists,
+        assists: assists,
+        matches: matches);
+  }
+
   HuntBundle addAssist({required int assists}) {
     return HuntBundle(
         kills: kills,
         deaths: deaths,
+        history: history,
         currentMatchDeaths: currentMatchDeaths,
         currentMatchKills: currentMatchKills,
         currentMatchAssists: currentMatchAssists + assists,
@@ -73,6 +95,7 @@ class HuntBundle {
     return HuntBundle(
         kills: kills,
         deaths: deaths,
+        history: history,
         currentMatchDeaths: currentMatchDeaths,
         currentMatchKills: currentMatchKills,
         currentMatchAssists: assists,
@@ -86,6 +109,7 @@ class HuntBundle {
         assists: assists,
         kills: this.kills,
         deaths: this.deaths,
+        history: history,
         currentMatchAssists: currentMatchAssists,
         currentMatchDeaths: currentMatchDeaths + deaths,
         currentMatchKills: currentMatchKills + kills);
@@ -97,6 +121,7 @@ class HuntBundle {
         matches: matches + 1,
         deaths: deaths + currentMatchDeaths,
         assists: assists + currentMatchAssists,
+        history: history,
         currentMatchAssists: 0,
         currentMatchDeaths: 0,
         currentMatchKills: 0);

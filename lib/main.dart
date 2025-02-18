@@ -152,40 +152,103 @@ class _MyHomePageState extends State<MyHomePage> {
       builder: (cntx, snapshot) {
         final bundle = snapshot.requireData;
 
-        return Column(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.center,
+        return Stack(
+          alignment: Alignment.bottomCenter,
           children: [
-            Container(
-              alignment: Alignment.center,
-              constraints: const BoxConstraints(minHeight: 48),
-              padding: const EdgeInsets.only(left: 8, right: 16),
-              color: _blockColor,
-              width: double.infinity,
-              child: Row(
-                children: [
-                  SizedBox(
-                      height: 48,
-                      width: 48,
-                      child: MoveWindow(
-                        child: Image.asset(
-                          Assets.assetsIcKda,
-                          filterQuality: FilterQuality.medium,
-                          width: 48,
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  alignment: Alignment.center,
+                  constraints: const BoxConstraints(minHeight: 48),
+                  padding: const EdgeInsets.only(left: 8, right: 16),
+                  color: _blockColor,
+                  width: double.infinity,
+                  child: Row(
+                    children: [
+                      SizedBox(
                           height: 48,
-                        ),
-                      )),
-                  const SizedBox(
-                    width: 4,
+                          width: 48,
+                          child: MoveWindow(
+                            child: Image.asset(
+                              Assets.assetsIcKda,
+                              filterQuality: FilterQuality.medium,
+                              width: 48,
+                              height: 48,
+                            ),
+                          )),
+                      const SizedBox(
+                        width: 4,
+                      ),
+                      ..._createMyKdaWidgets(bundle, textColor: textColor)
+                    ],
                   ),
-                  ..._createMyKdaWidgets(bundle, textColor: textColor)
-                ],
-              ),
-            )
+                )
+              ],
+            ),
+            _createDotsWidget(bundle, textColor: textColor)
           ],
         );
       },
     );
+  }
+
+  Widget _createDotsWidget(HuntBundle bundle, {required Color textColor}) {
+    return Row(
+      children: [
+        Expanded(
+            child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          spacing: 2,
+          children: [
+            /*Text(
+              bundle.extracted.toString(),
+              style: TextStyle(
+                  height: 1,
+                  color: textColor,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500),
+            ),
+            const SizedBox(
+              width: 4,
+            ),*/
+            ..._createColoredDots(bundle.extracted, color: _colorBlue, size: 8),
+            const SizedBox(
+              width: 4,
+            ),
+            ..._createColoredDots(bundle.losses, color: _colorRed, size: 8),
+            /*const SizedBox(
+              width: 4,
+            ),
+            Text(
+              bundle.losses.toString(),
+              style: TextStyle(
+                  height: 1,
+                  color: textColor,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500),
+            ),*/
+          ],
+        )),
+      ],
+    );
+  }
+
+  List<Widget> _createColoredDots(int count,
+      {required double size, required Color color}) {
+    final widgets = <Widget>[];
+
+    for (int i = 0; i < count; i++) {
+      widgets.add(Container(
+        width: size,
+        height: 6,
+        decoration: BoxDecoration(
+          color: color, /*borderRadius: BorderRadius.circular(size / 2.0)*/
+        ),
+      ));
+    }
+
+    return widgets;
   }
 
   List<Widget> _createMyKdaWidgets(HuntBundle bundle,
@@ -362,7 +425,7 @@ Widget _createStarWidget(double fill, {double size = 16}) {
           width: size,
           height: size,
           filterQuality: FilterQuality.medium,
-          color: const Color(0xFF939598).withOpacity(0.5),
+          color: const Color(0xFF939598).withValues(alpha: 0.5),
         ),
         SizedBox(
           height: size,

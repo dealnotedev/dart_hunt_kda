@@ -91,6 +91,10 @@ class TrackerEngine {
     if (writeFileStats) {
       _textGenerator.write(bundle: bundle.current, file: _textStatsFile);
     }
+
+    if(info is _MatchFinishReason){
+      bundle.set(bundle.current.addMatchResult(success: info.success));
+    }
   }
 
   File get _textStatsFile {
@@ -101,10 +105,11 @@ class TrackerEngine {
   final bundle = ObservableValue(
       current: HuntBundle(
           assists: 0,
-          kills: 0,
-          deaths: 0,
+          history: [false, true, true, true, false, true, true],
+          kills: 4,
+          deaths: 2,
           currentMatchAssists: 0,
-          currentMatchDeaths: 0,
+          currentMatchDeaths: 1,
           currentMatchKills: 0,
           matches: 0));
 
@@ -161,8 +166,6 @@ class TrackerEngine {
         length = 0;
       }
 
-      bool awaitForAssists = false;
-
       await logFile
           .openRead(length)
           .transform(const Utf8Decoder(allowMalformed: true))
@@ -185,23 +188,28 @@ class TrackerEngine {
               _gameEventSubject.add(_AssistsEvent(count: 0));
             }
 
-            if (parts.contains('category:') &&
-                parts.contains('accolade_players_killed_assist')) {
-              awaitForAssists = true;
-            }
+            //<22:00:31> [EAC] Client disconnected by server. Cause : GameSessionEnded. Reason: Remote disconnected: PlayerKickManager.
+            //<21:26:24> [EAC] Client disconnected by server. Cause : UserRequested. Reason: Remote disconnected: User requested to leave mission.
+            //<21:41:16> [EAC] Client disconnected by server. Cause : MissionRequested. Reason: Remote disconnected: (null).
 
-            if (awaitForAssists) {
-              final killsIndex = parts.indexOf('kills:');
+            final eacIndex = parts.indexOf('[EAC]');
+            if (eacIndex != -1 &&
+                parts[eacIndex + 1] == 'Client' &&
+                parts[eacIndex + 2] == 'disconnected' &&
+                parts[eacIndex + 3] == 'by' &&
+                parts[eacIndex + 4] == 'server.' &&
+                parts[eacIndex + 5] == 'Cause' &&
+                parts[eacIndex + 6] == ':') {
+              final reason = parts[eacIndex + 7];
+              switch (reason) {
+                case 'GameSessionEnded.':
+                case 'UserRequested.':
+                  _gameEventSubject.add(_MatchFinishReason(success: false));
+                  break;
 
-              if (killsIndex != -1) {
-                awaitForAssists = false;
-
-                final assists = int.parse(parts[killsIndex + 1]);
-                _gameEventSubject.add(_AssistsEvent(count: assists));
-
-                if (kDebugMode) {
-                  print(s);
-                }
+                case 'MissionRequested.':
+                  _gameEventSubject.add(_MatchFinishReason(success: true));
+                  break;
               }
             }
 
@@ -309,6 +317,12 @@ class _MissionState extends _BaseEvent {
   final String state;
 
   _MissionState({required this.state});
+}
+
+class _MatchFinishReason extends _BaseEvent {
+  final bool success;
+
+  _MatchFinishReason({required this.success});
 }
 
 class _MapLoading extends _BaseEvent {
