@@ -63,15 +63,7 @@ class TrackerEngine {
       }
     }
 
-    if (info is _AssistsEvent) {
-      if (bundle.current.currentMatchAssists != info.count) {
-        bundle.set(bundle.current.setAssists(assists: info.count));
-      } else {
-        return;
-      }
-    }
-
-    if (info is _StatsEvent || info is _AssistsEvent) {
+    if (info is _StatsEvent) {
       writeFileStats = true;
     }
 
@@ -176,17 +168,6 @@ class TrackerEngine {
           .transform(const LineSplitter())
           .forEach((s) {
             final parts = s.split(' ').map((e) => e.trim()).toList();
-
-            //<23:46:52> <Flash> bountyList - cat: accolade_clues_found, bounty: 50, data.xp: 0, data.gold: 0 [#!NO_CONTEXT!#]
-            //<23:25:40> <Flash> boss_data() [#!NO_CONTEXT!#]
-
-            //<21:35:09> <Flash> 	 category: accolade_players_killed_assist [#!NO_CONTEXT!#]
-            //<21:35:09> <Flash> 	 kills: 1 [#!NO_CONTEXT!#]
-
-            if (parts.contains('<Flash>') && parts.contains('boss_data()')) {
-              // reset assists count
-              _gameEventSubject.add(_AssistsEvent(count: 0));
-            }
 
             //<22:00:31> [EAC] Client disconnected by server. Cause : GameSessionEnded. Reason: Remote disconnected: PlayerKickManager.
             //<21:26:24> [EAC] Client disconnected by server. Cause : UserRequested. Reason: Remote disconnected: User requested to leave mission.
@@ -297,12 +278,6 @@ class TrackerEngine {
       return null;
     }
   }
-}
-
-class _AssistsEvent extends _BaseEvent {
-  final int count;
-
-  _AssistsEvent({required this.count});
 }
 
 class _StatsEvent extends _BaseEvent {
