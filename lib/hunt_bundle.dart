@@ -15,6 +15,10 @@ class HuntBundle {
 
   final List<bool> history;
 
+  final int killStreak;
+
+  final int currentMatchKillStreak;
+
   HuntBundle(
       {required this.kills,
       required this.deaths,
@@ -23,7 +27,9 @@ class HuntBundle {
       required this.currentMatchKills,
       required this.currentMatchAssists,
       required this.assists,
-      required this.matches});
+      required this.matches,
+      required this.killStreak,
+      required this.currentMatchKillStreak});
 
   int get totalKills => kills + currentMatchKills;
 
@@ -69,6 +75,8 @@ class HuntBundle {
 
   HuntBundle addMatchResult({required bool success}) {
     return HuntBundle(
+        killStreak: killStreak,
+        currentMatchKillStreak: currentMatchKillStreak,
         kills: kills,
         deaths: deaths,
         history: List.of(history)..add(success),
@@ -79,20 +87,10 @@ class HuntBundle {
         matches: matches);
   }
 
-  HuntBundle addAssist({required int assists}) {
-    return HuntBundle(
-        kills: kills,
-        deaths: deaths,
-        history: history,
-        currentMatchDeaths: currentMatchDeaths,
-        currentMatchKills: currentMatchKills,
-        currentMatchAssists: currentMatchAssists + assists,
-        assists: this.assists,
-        matches: matches);
-  }
-
   HuntBundle setAssists({required int assists}) {
     return HuntBundle(
+        killStreak: killStreak,
+        currentMatchKillStreak: currentMatchKillStreak,
         kills: kills,
         deaths: deaths,
         history: history,
@@ -103,20 +101,38 @@ class HuntBundle {
         matches: matches);
   }
 
-  HuntBundle add({required int kills, required int deaths}) {
+  HuntBundle addKill() {
     return HuntBundle(
+        killStreak: killStreak + 1,
+        currentMatchKillStreak: currentMatchKillStreak + 1,
         matches: matches,
         assists: assists,
-        kills: this.kills,
-        deaths: this.deaths,
+        kills: kills,
+        deaths: deaths,
         history: history,
         currentMatchAssists: currentMatchAssists,
-        currentMatchDeaths: currentMatchDeaths + deaths,
-        currentMatchKills: currentMatchKills + kills);
+        currentMatchDeaths: currentMatchDeaths,
+        currentMatchKills: currentMatchKills + 1);
+  }
+
+  HuntBundle addDeath() {
+    return HuntBundle(
+        killStreak: 0,
+        currentMatchKillStreak: 0,
+        matches: matches,
+        assists: assists,
+        kills: kills,
+        deaths: deaths,
+        history: history,
+        currentMatchAssists: currentMatchAssists,
+        currentMatchDeaths: currentMatchDeaths + 1,
+        currentMatchKills: currentMatchKills);
   }
 
   HuntBundle resetMatchData() {
     return HuntBundle(
+        killStreak: killStreak,
+        currentMatchKillStreak: 0,
         kills: kills + currentMatchKills,
         matches: matches + 1,
         deaths: deaths + currentMatchDeaths,
@@ -126,4 +142,12 @@ class HuntBundle {
         currentMatchDeaths: 0,
         currentMatchKills: 0);
   }
+}
+
+class KillInfo {
+  final int inMatch;
+  final int inMatchStreak;
+  final int totalStreak;
+
+  KillInfo({required this.inMatch, required this.inMatchStreak, required this.totalStreak});
 }

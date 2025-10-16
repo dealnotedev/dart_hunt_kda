@@ -40,24 +40,6 @@ void main(List<String> args) async {
 
     _startSystemTray(window);
   });
-
-  /*final server = await HttpServer.bind(InternetAddress.anyIPv4, 4080);
-  await server.forEach((HttpRequest request) {
-    if (request.uri.path == '/huntapi/state') {
-      final state = tracker.state;
-
-      final json =
-          jsonEncode({'active_match': state.activeMatch, 'map': state.map});
-
-      request.response.statusCode == HttpStatus.ok;
-      request.response.write(json);
-    } else {
-      request.response.statusCode == HttpStatus.badRequest;
-      request.response.write('Very bad request :(');
-    }
-
-    request.response.close();
-  });*/
 }
 
 final launcher = AppAutoLauncherImplWindows(

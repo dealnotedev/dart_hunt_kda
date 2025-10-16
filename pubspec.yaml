@@ -62,6 +62,8 @@ dependencies:
 
   gap: ^3.0.1
 
+  dio: ^5.9.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

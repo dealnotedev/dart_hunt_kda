@@ -11,9 +11,10 @@ class ObservableValue<T> {
 
   Stream<T> get value => Stream.value(current).concatWith([_subject.stream]);
 
-  void set(T value) {
+  T set(T value) {
     current = value;
     _subject.add(value);
+    return value;
   }
 
   Future<T> get firstNonNull =>

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hunt_stats/generated/assets.dart';
 import 'package:hunt_stats/hunt_bundle.dart';
@@ -16,8 +17,54 @@ class TrackerEngine {
   final bool mapSounds;
   final Duration updateInterval;
 
+  final _huntFinder = HuntFinder();
+
+  final bundle = ObservableValue(
+      current: HuntBundle(
+          killStreak: 0,
+          currentMatchKillStreak: 0,
+          assists: 0,
+          history: [],
+          kills: 0,
+          deaths: 0,
+          currentMatchAssists: 0,
+          currentMatchDeaths: 0,
+          currentMatchKills: 0,
+          matches: 0));
+
+  final _textGenerator =
+      TextStatsGenerator(tableWidth: 32, style: TableStyle.simple);
+
+  final _kills = StreamController<KillInfo>.broadcast();
+
+  Stream<KillInfo> get kills => _kills.stream;
+
   TrackerEngine({required this.mapSounds, required this.updateInterval}) {
     _gameEventSubject.stream.listen(_handleGameEvent);
+    _kills.stream.listen(_sendKillBroadcast);
+  }
+
+  Completer<void>? _killBroadcastCompleter;
+
+  final _dio = Dio(BaseOptions(
+    baseUrl: 'http://127.0.0.1:4080',
+    connectTimeout: const Duration(seconds: 2),
+  ));
+
+  void _sendKillBroadcast(KillInfo kill) async {
+    await _killBroadcastCompleter?.future;
+
+    try {
+      _killBroadcastCompleter = Completer();
+
+      await _dio.get('/kill', queryParameters: {
+        'in_match': kill.inMatch,
+        'in_match_streak': kill.inMatchStreak,
+        'total_streak': kill.totalStreak
+      });
+    } finally {
+      _killBroadcastCompleter?.complete();
+    }
   }
 
   bool? _missionActive;
@@ -25,9 +72,6 @@ class TrackerEngine {
 
   TrackerState get state =>
       TrackerState(activeMatch: _missionActive, map: _lastMap);
-
-  final _textGenerator =
-      TextStatsGenerator(tableWidth: 32, style: TableStyle.simple);
 
   Completer<void>? _soundCompleter;
 
@@ -43,24 +87,38 @@ class TrackerEngine {
     bool writeFileStats = false;
 
     if (info is _StatsEvent) {
-      bundle.set(bundle.current.add(kills: info.kills, deaths: info.deaths));
+      switch (info.type) {
+        case _StatsType.kill:
+          final updated = bundle.set(bundle.current.addKill());
+          _kills.add(KillInfo(
+              inMatch: updated.currentMatchKills,
+              totalStreak: updated.killStreak,
+              inMatchStreak: updated.currentMatchKillStreak));
+          break;
+
+        case _StatsType.death:
+          bundle.set(bundle.current.addDeath());
+          break;
+      }
 
       await _soundCompleter?.future;
 
-      if (info.kills > 0) {
-        RingtonePlayer.play(Assets.assetsKill);
-      } else if (info.deaths > 0) {
-        RingtonePlayer.play(Assets.assetsDeath);
+      switch (info.type) {
+        case _StatsType.kill:
+          RingtonePlayer.play(Assets.assetsKill);
+          break;
+
+        case _StatsType.death:
+          RingtonePlayer.play(Assets.assetsDeath);
+          break;
       }
 
-      if (info.deaths > 0 || info.kills > 0) {
-        _soundCompleter = Completer();
+      _soundCompleter = Completer();
 
-        await Future.delayed(const Duration(seconds: 1));
+      await Future.delayed(const Duration(seconds: 1));
 
-        _soundCompleter?.complete();
-        _soundCompleter = null;
-      }
+      _soundCompleter?.complete();
+      _soundCompleter = null;
     }
 
     if (info is _StatsEvent) {
@@ -94,17 +152,6 @@ class TrackerEngine {
     return File('${dir.path}/stats.txt');
   }
 
-  final bundle = ObservableValue(
-      current: HuntBundle(
-          assists: 0,
-          history: [],
-          kills: 0,
-          deaths: 0,
-          currentMatchAssists: 0,
-          currentMatchDeaths: 0,
-          currentMatchKills: 0,
-          matches: 0));
-
   Future<void> _playMapSound(String mapName) async {
     switch (mapName) {
       case 'colorado':
@@ -125,9 +172,7 @@ class TrackerEngine {
   void startTracking() async {
     _textGenerator.write(bundle: bundle.current, file: _textStatsFile);
 
-    final finder = HuntFinder();
-
-    final logFile = await finder.findHuntGameLogFile();
+    final logFile = await _huntFinder.findHuntGameLogFile();
     _gameEventSubject.add(_HuntFound(logFile.path));
 
     final initial = await _findMissionState(logFile);
@@ -209,25 +254,24 @@ class TrackerEngine {
 
             final preVideoIndex = savedIndex != -1 ? savedIndex : saveIndex;
 
-            int kills = 0;
-            int deaths = 0;
+            _StatsType? statsType;
 
             if (preVideoIndex != -1 && parts[preVideoIndex + 1] == 'video') {
               final videoType = parts[preVideoIndex + 2].replaceAll(':', '');
 
               switch (videoType) {
                 case '\'HUNTER_KILLED\'':
-                  kills++;
+                  statsType = _StatsType.kill;
                   break;
 
                 case '\'PLAYER_DOWNED\'':
-                  deaths++;
+                  statsType = _StatsType.death;
                   break;
               }
             }
 
-            if (kills > 0 || deaths > 0) {
-              _gameEventSubject.add(_StatsEvent(kills: kills, deaths: deaths));
+            if (statsType != null) {
+              _gameEventSubject.add(_StatsEvent(type: statsType));
             }
 
             final state = _findMissionBag(parts);
@@ -280,11 +324,12 @@ class TrackerEngine {
   }
 }
 
-class _StatsEvent extends _BaseEvent {
-  final int kills;
-  final int deaths;
+enum _StatsType { kill, death }
 
-  _StatsEvent({required this.kills, required this.deaths});
+class _StatsEvent extends _BaseEvent {
+  final _StatsType type;
+
+  _StatsEvent({required this.type});
 }
 
 class _MissionState extends _BaseEvent {
