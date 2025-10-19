@@ -57,7 +57,10 @@ class TrackerEngine {
     try {
       _killBroadcastCompleter = Completer();
 
+      final attrs = _createKillAttrs(kill.inMatch);
+
       await _dio.get('/kill', queryParameters: {
+        'text': attrs.text,
         'in_match': kill.inMatch,
         'in_match_streak': kill.inMatchStreak,
         'total_streak': kill.totalStreak
@@ -69,6 +72,55 @@ class TrackerEngine {
 
   bool? _missionActive;
   String? _lastMap;
+
+  static _KillAttrs _createKillAttrs(int streak) {
+    switch (streak) {
+      case 1:
+        return _KillAttrs(
+            text: 'First Blood', audio: Assets.assetsSxFirstBlood);
+
+      case 2:
+        return _KillAttrs(
+            text: 'Double Kill', audio: Assets.assetsSxDoubleKill);
+
+      case 3:
+        return _KillAttrs(text: 'Multi Kill', audio: Assets.assetsSxMultiKill);
+
+      case 4:
+        return _KillAttrs(text: 'Rampage', audio: Assets.assetsSxRampage);
+
+      case 5:
+        return _KillAttrs(
+            text: 'Killing Spree', audio: Assets.assetsSxKillingSpree);
+
+      case 6:
+        return _KillAttrs(text: 'Dominating', audio: Assets.assetsSxDominating);
+
+      case 7:
+        return _KillAttrs(
+            text: 'Unstoppable', audio: Assets.assetsSxUnstoppable);
+
+      case 8:
+        return _KillAttrs(text: 'Mega Kill', audio: Assets.assetsSxMegaKill);
+
+      case 9:
+        return _KillAttrs(text: 'Ultra Kill', audio: Assets.assetsSxUltraKill);
+
+      case 10:
+        return _KillAttrs(
+            text: 'Whicked Sick', audio: Assets.assetsSxWhickedSick);
+
+      case 11:
+        return _KillAttrs(
+            text: 'Monster Kill', audio: Assets.assetsSxMonsterKill);
+
+      case 12:
+        return _KillAttrs(text: 'Holy Shit', audio: Assets.assetsSxHolyShit);
+      case 13:
+      default:
+        return _KillAttrs(text: 'God Like', audio: Assets.assetsSxGodLike);
+    }
+  }
 
   TrackerState get state =>
       TrackerState(activeMatch: _missionActive, map: _lastMap);
@@ -105,7 +157,8 @@ class TrackerEngine {
 
       switch (info.type) {
         case _StatsType.kill:
-          RingtonePlayer.play(Assets.assetsKill);
+          final attrs = _createKillAttrs(bundle.current.currentMatchKills);
+          RingtonePlayer.play(attrs.audio);
           break;
 
         case _StatsType.death:
@@ -355,6 +408,13 @@ class _HuntFound extends _BaseEvent {
   final String attributes;
 
   _HuntFound(this.attributes);
+}
+
+class _KillAttrs {
+  final String text;
+  final String audio;
+
+  _KillAttrs({required this.text, required this.audio});
 }
 
 abstract class _BaseEvent {}
