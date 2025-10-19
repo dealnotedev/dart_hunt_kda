@@ -13,18 +13,5 @@ class Assets {
   static const String assetsIcValueUp = 'assets/ic_value_up.png';
   static const String assetsIcon = 'assets/icon.ico';
   static const String assetsKill = 'assets/kill.wav';
-  static const String assetsSxDominating = 'assets/sx_dominating.wav';
-  static const String assetsSxDoubleKill = 'assets/sx_double_Kill.wav';
-  static const String assetsSxFirstBlood = 'assets/sx_first_blood.wav';
-  static const String assetsSxGodLike = 'assets/sx_god_like.wav';
-  static const String assetsSxHolyShit = 'assets/sx_holy_shit.wav';
-  static const String assetsSxKillingSpree = 'assets/sx_killing_spree.wav';
-  static const String assetsSxMegaKill = 'assets/sx_mega_kill.wav';
-  static const String assetsSxMonsterKill = 'assets/sx_monster_kill.wav';
-  static const String assetsSxMultiKill = 'assets/sx_multi_kill.wav';
-  static const String assetsSxRampage = 'assets/sx_rampage.wav';
-  static const String assetsSxUltraKill = 'assets/sx_ultra_kill.wav';
-  static const String assetsSxUnstoppable = 'assets/sx_unstoppable.wav';
-  static const String assetsSxWhickedSick = 'assets/sx_whicked_sick.wav';
 
 }
