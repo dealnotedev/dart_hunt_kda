@@ -77,48 +77,48 @@ class TrackerEngine {
     switch (streak) {
       case 1:
         return _KillAttrs(
-            text: 'First Blood', audio: Assets.assetsSxFirstBlood);
+            text: 'First Blood', audio: Assets.assetsSxKill1);
 
       case 2:
         return _KillAttrs(
-            text: 'Double Kill', audio: Assets.assetsSxDoubleKill);
+            text: 'Double Kill', audio: Assets.assetsSxKill2);
 
       case 3:
-        return _KillAttrs(text: 'Multi Kill', audio: Assets.assetsSxMultiKill);
+        return _KillAttrs(text: 'Multi Kill', audio: Assets.assetsSxKill3);
 
       case 4:
-        return _KillAttrs(text: 'Rampage', audio: Assets.assetsSxRampage);
+        return _KillAttrs(text: 'Rampage', audio: Assets.assetsSxKill4);
 
       case 5:
         return _KillAttrs(
-            text: 'Killing Spree', audio: Assets.assetsSxKillingSpree);
+            text: 'Killing Spree', audio: Assets.assetsSxKill5);
 
       case 6:
-        return _KillAttrs(text: 'Dominating', audio: Assets.assetsSxDominating);
+        return _KillAttrs(text: 'Dominating', audio: Assets.assetsSxKill6);
 
       case 7:
         return _KillAttrs(
-            text: 'Unstoppable', audio: Assets.assetsSxUnstoppable);
+            text: 'Unstoppable', audio: Assets.assetsSxKill7);
 
       case 8:
-        return _KillAttrs(text: 'Mega Kill', audio: Assets.assetsSxMegaKill);
+        return _KillAttrs(text: 'Mega Kill', audio: Assets.assetsSxKill8);
 
       case 9:
-        return _KillAttrs(text: 'Ultra Kill', audio: Assets.assetsSxUltraKill);
+        return _KillAttrs(text: 'Ultra Kill', audio: Assets.assetsSxKill9);
 
       case 10:
         return _KillAttrs(
-            text: 'Whicked Sick', audio: Assets.assetsSxWhickedSick);
+            text: 'Whicked Sick', audio: Assets.assetsSxKill10);
 
       case 11:
         return _KillAttrs(
-            text: 'Monster Kill', audio: Assets.assetsSxMonsterKill);
+            text: 'Monster Kill', audio: Assets.assetsSxKill11);
 
       case 12:
-        return _KillAttrs(text: 'Holy Shit', audio: Assets.assetsSxHolyShit);
+        return _KillAttrs(text: 'Holy Shit', audio: Assets.assetsSxKill12);
       case 13:
       default:
-        return _KillAttrs(text: 'God Like', audio: Assets.assetsSxGodLike);
+        return _KillAttrs(text: 'God Like', audio: Assets.assetsSxKill13);
     }
   }
 
@@ -158,11 +158,15 @@ class TrackerEngine {
       switch (info.type) {
         case _StatsType.kill:
           final attrs = _createKillAttrs(bundle.current.currentMatchKills);
-          RingtonePlayer.play(attrs.audio);
+          if(await RingtonePlayer.isAssetExists(attrs.audio)){
+            RingtonePlayer.play(attrs.audio);
+          } else {
+            RingtonePlayer.play('assets/kill.wav');
+          }
           break;
 
         case _StatsType.death:
-          RingtonePlayer.play(Assets.assetsDeath);
+          RingtonePlayer.play('assets/death.wav');
           break;
       }
 

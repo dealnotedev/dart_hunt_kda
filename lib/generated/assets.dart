@@ -7,24 +7,22 @@ class Assets {
   static const String assetsColorado = 'assets/colorado.wav';
   static const String assetsCreek = 'assets/creek.wav';
   static const String assetsCrossWhite20dp = 'assets/cross_white_20dp.png';
-  static const String assetsDeath = 'assets/death.wav';
   static const String assetsIcKda = 'assets/ic_kda.png';
   static const String assetsIcValueDown = 'assets/ic_value_down.png';
   static const String assetsIcValueUp = 'assets/ic_value_up.png';
   static const String assetsIcon = 'assets/icon.ico';
-  static const String assetsKill = 'assets/kill.wav';
-  static const String assetsSxDominating = 'assets/sx_dominating.wav';
-  static const String assetsSxDoubleKill = 'assets/sx_double_Kill.wav';
-  static const String assetsSxFirstBlood = 'assets/sx_first_blood.wav';
-  static const String assetsSxGodLike = 'assets/sx_god_like.wav';
-  static const String assetsSxHolyShit = 'assets/sx_holy_shit.wav';
-  static const String assetsSxKillingSpree = 'assets/sx_killing_spree.wav';
-  static const String assetsSxMegaKill = 'assets/sx_mega_kill.wav';
-  static const String assetsSxMonsterKill = 'assets/sx_monster_kill.wav';
-  static const String assetsSxMultiKill = 'assets/sx_multi_kill.wav';
-  static const String assetsSxRampage = 'assets/sx_rampage.wav';
-  static const String assetsSxUltraKill = 'assets/sx_ultra_kill.wav';
-  static const String assetsSxUnstoppable = 'assets/sx_unstoppable.wav';
-  static const String assetsSxWhickedSick = 'assets/sx_whicked_sick.wav';
+  static const String assetsSxKill1 = 'assets/sx_kill_1.wav';
+  static const String assetsSxKill10 = 'assets/sx_kill_10.wav';
+  static const String assetsSxKill11 = 'assets/sx_kill_11.wav';
+  static const String assetsSxKill12 = 'assets/sx_kill_12.wav';
+  static const String assetsSxKill13 = 'assets/sx_kill_13.wav';
+  static const String assetsSxKill2 = 'assets/sx_kill_2.wav';
+  static const String assetsSxKill3 = 'assets/sx_kill_3.wav';
+  static const String assetsSxKill4 = 'assets/sx_kill_4.wav';
+  static const String assetsSxKill5 = 'assets/sx_kill_5.wav';
+  static const String assetsSxKill6 = 'assets/sx_kill_6.wav';
+  static const String assetsSxKill7 = 'assets/sx_kill_7.wav';
+  static const String assetsSxKill8 = 'assets/sx_kill_8.wav';
+  static const String assetsSxKill9 = 'assets/sx_kill_9.wav';
 
 }
