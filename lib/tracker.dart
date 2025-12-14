@@ -14,7 +14,6 @@ import 'package:hunt_stats/text_stats_generator.dart';
 class TrackerEngine {
   final _gameEventSubject = StreamController<_BaseEvent>.broadcast();
 
-  final bool mapSounds;
   final Duration updateInterval;
 
   final _huntFinder = HuntFinder();
@@ -39,7 +38,7 @@ class TrackerEngine {
 
   Stream<KillInfo> get kills => _kills.stream;
 
-  TrackerEngine({required this.mapSounds, required this.updateInterval}) {
+  TrackerEngine({required this.updateInterval}) {
     _gameEventSubject.stream.listen(_handleGameEvent);
     _kills.stream.listen(_sendKillBroadcast);
   }
@@ -131,9 +130,7 @@ class TrackerEngine {
     if (info is _MapLoading) {
       _lastMap = info.levelName;
 
-      if (mapSounds) {
-        await _playMapSound(info.levelName);
-      }
+      await _playMapSound(info.levelName);
     }
 
     bool writeFileStats = false;
@@ -211,16 +208,18 @@ class TrackerEngine {
 
   Future<void> _playMapSound(String mapName) async {
     switch (mapName) {
-      case 'colorado':
+      case '\'menu\'':
+        break;
+      case '\'levels/colorado\'':
         RingtonePlayer.play(Assets.assetsColorado);
         break;
-      case 'creek':
+      case '\'levels/creek\'':
         RingtonePlayer.play(Assets.assetsCreek);
         break;
-      case 'cemetery':
+      case '\'levels/cemetery\'':
         RingtonePlayer.play(Assets.assetsCemetery);
         break;
-      case 'civilwar':
+      case '\'levels/civilwar\'':
         RingtonePlayer.play(Assets.assetsCivilwar);
         break;
     }
@@ -347,7 +346,10 @@ class TrackerEngine {
   static String? _findMissionMap(List<String> parts) {
     final index = parts.indexOf('PrepareLevel');
     if (index != -1) {
-      return parts[index + 1].trim().toLowerCase().split('/')[1];
+      print(parts);
+      print(index);
+      print(parts[index + 1].toLowerCase());
+      return parts[index + 1].trim().toLowerCase();
     } else {
       return null;
     }

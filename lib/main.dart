@@ -18,7 +18,7 @@ void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final tracker =
-      TrackerEngine(updateInterval: const Duration(seconds: 1), mapSounds: false)
+      TrackerEngine(updateInterval: const Duration(seconds: 1))
         ..startTracking();
 
   runApp(MyApp(engine: tracker));
