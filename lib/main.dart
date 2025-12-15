@@ -5,7 +5,6 @@ import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:bitsdojo_window_platform_interface/window.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:hunt_stats/auto_launcher_windows.dart';
 import 'package:hunt_stats/extensions.dart';
 import 'package:hunt_stats/generated/assets.dart';
 import 'package:hunt_stats/hunt_bundle.dart';
@@ -41,11 +40,6 @@ void main(List<String> args) async {
     _startSystemTray(window);
   });
 }
-
-final launcher = AppAutoLauncherImplWindows(
-    appName: 'Hunt: Stats',
-    appPath: Platform.resolvedExecutable,
-    args: ['-silent']);
 
 void _startSystemTray(DesktopWindow window) async {
   final systemTray = tray.SystemTray();

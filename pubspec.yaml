@@ -37,10 +37,7 @@ dependencies:
   path: ^1.8.1
 
   win32: ^5.5.4
-
   win32_registry: ^1.0.2
-
-  ffi: ^2.0.1
 
   rxdart: ^0.27.4
 
@@ -55,10 +52,6 @@ dependencies:
   intl: ^0.20.2
 
   animated_flip_counter: ^0.2.0
-
-  path_provider: ^2.0.15
-
-  shared_preferences: ^2.2.0
 
   gap: ^3.0.1
 

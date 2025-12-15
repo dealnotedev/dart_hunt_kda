@@ -336,8 +336,8 @@ class TrackerEngine {
             }
           });
 
-      final end = DateTime.now().millisecondsSinceEpoch;
       if (kDebugMode) {
+        final end = DateTime.now().millisecondsSinceEpoch;
         print('Processed in ${end - start}ms');
       }
     }
@@ -346,9 +346,6 @@ class TrackerEngine {
   static String? _findMissionMap(List<String> parts) {
     final index = parts.indexOf('PrepareLevel');
     if (index != -1) {
-      print(parts);
-      print(index);
-      print(parts[index + 1].toLowerCase());
       return parts[index + 1].trim().toLowerCase();
     } else {
       return null;
