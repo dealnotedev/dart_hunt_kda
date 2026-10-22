@@ -1,12 +1,12 @@
 {
-  "stats_empty_text": "Hunt!",
-  "style_0_name": "Style 1",
-  "style_1_name": "Style 2",
-  "startup_on_text": "Startup",
-  "startup_off_text": "Disabled",
-  "my_kd_title": "My KD",
-  "team_kd_title": "Team KD",
-  "matches_count": "{matches,plural, =1{{matches} match} other{{matches} matches}}",
+  "stats_empty_text": "На полювання!",
+  "style_0_name": "Стиль 1",
+  "style_1_name": "Стиль 2",
+  "startup_on_text": "Автостарт",
+  "startup_off_text": "Вимкнений",
+  "my_kd_title": "Мій KD",
+  "team_kd_title": "KD команди",
+  "matches_count": "{matches,plural, =1{{matches} матч} few{{matches} матчі} other{{matches} матчів}}",
   "@matches_count": {
     "placeholders": {
       "matches": {
@@ -15,9 +15,9 @@
       }
     }
   },
-  "button_reset_all": "Reset All",
-  "button_reset_team": "Reset Team",
-  "toast_invalidated": "Invalidated",
-  "me": "Me",
-  "no_mmr_text": "No MMR"
+  "button_reset_all": "Скинути все",
+  "button_reset_team": "Скинути команду",
+  "toast_invalidated": "Дані скинуто",
+  "me": "Я",
+  "no_mmr_text": "Немає MMR"
 }
