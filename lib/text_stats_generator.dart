@@ -67,31 +67,6 @@ class TextStatsGenerator {
     return line;
   }
 
-  String _generateCenteredText({required String text}) {
-    final availableWidth = tableWidth - 2 - 2;
-
-    final actualWidth = text.length;
-    final overflow = actualWidth - availableWidth;
-
-    final String preparedText;
-    if (overflow > 0) {
-      preparedText = text.substring(0, text.length - overflow);
-    } else {
-      preparedText = text;
-    }
-
-    final space = tableWidth - 2 - preparedText.length;
-    final spaceLeft = space ~/ 2;
-    final spaceRight = space - spaceLeft;
-
-    var line = style.verticalLine;
-    line += _generateSymbols(spaceLeft, ' ');
-    line += preparedText;
-    line += _generateSymbols(spaceRight, ' ');
-    line += style.verticalLine;
-    return line;
-  }
-
   static String _generateSymbols(int count, String symbol) {
     String text = '';
     for (int i = 0; i < count; i++) {

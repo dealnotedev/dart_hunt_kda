@@ -19,7 +19,8 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.0.0 <4.0.0'
+  sdk: '>=3.13.0 <4.0.0'
+  flutter: '>=3.47.0'
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -34,28 +35,26 @@ dependencies:
   flutter_localizations:
     sdk: flutter
 
-  path: ^1.8.1
+  path: ^1.9.1
 
-  win32: ^5.5.4
-  win32_registry: ^1.0.2
+  win32: ^6.4.0
+  win32_registry: ^3.0.3
 
-  rxdart: ^0.27.4
+  rxdart: ^0.28.0
 
-  bitsdojo_window: ^0.1.5
+  ffi: ^2.2.0
 
-  bitsdojo_window_platform_interface: ^0.1.2
+  tray_manager: ^0.8.0
 
-  system_tray: ^2.0.3
+  collection: ^1.19.1
 
-  collection: ^1.16.0
+  intl: ^0.20.3
 
-  intl: ^0.20.2
-
-  animated_flip_counter: ^0.2.0
+  animated_flip_counter: ^0.3.4
 
   gap: ^3.0.1
 
-  dio: ^5.9.0
+  dio: ^5.11.1
 
 dev_dependencies:
   flutter_test:
@@ -66,9 +65,9 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^2.0.0
+  flutter_lints: ^6.0.0
 
-  build_runner: ^2.4.5
+  build_runner: ^2.17.1
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

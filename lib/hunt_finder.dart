@@ -7,33 +7,30 @@ import 'package:win32_registry/win32_registry.dart';
 class HuntFinder {
   static const _vdfCodec = VdfCodec();
 
-  static final _regKey = Registry.openPath(
-    RegistryHive.localMachine,
-    path: r'SOFTWARE\Wow6432Node\Valve\Steam',
-    desiredAccessRights: AccessRights.readOnly,
-  );
-
   Future<File> findHuntGameLogFile() async {
     final steamDirectory = await _findSteamPath();
     final found = <File>[];
 
     if (steamDirectory != null) {
-      final libraryFoldersFile =
-          File('${steamDirectory.path}\\config\\libraryfolders.vdf');
+      final libraryFoldersFile = File(
+        '${steamDirectory.path}\\config\\libraryfolders.vdf',
+      );
 
       if (await libraryFoldersFile.exists()) {
         final vdf = await libraryFoldersFile.readAsString();
         final json = _vdfCodec.decode(vdf);
 
-        for (int i = 0;; i++) {
+        for (int i = 0; ; i++) {
           final lib = json['libraryfolders'][i.toString()];
           if (lib != null) {
             final libPath = lib['path'] as String;
             final file = File(
-                '$libPath\\steamapps\\common\\Hunt Showdown\\user\\Game.log');
+              '$libPath\\steamapps\\common\\Hunt Showdown\\user\\Game.log',
+            );
 
             final file1896 = File(
-                '$libPath\\steamapps\\common\\Hunt Showdown 1896\\user\\Game.log');
+              '$libPath\\steamapps\\common\\Hunt Showdown 1896\\user\\Game.log',
+            );
 
             if (await file.exists()) {
               found.add(file);
@@ -65,7 +62,8 @@ class HuntFinder {
       default:
         final sorted = List<File>.from(files, growable: true)
           ..sort(
-              (l, r) => r.statSync().modified.compareTo(l.statSync().modified));
+            (l, r) => r.statSync().modified.compareTo(l.statSync().modified),
+          );
         return sorted.first;
     }
   }
@@ -90,7 +88,13 @@ class HuntFinder {
   }
 
   Future<Directory?> _findSteamPath() async {
-    final registryInstallPath = _regKey.getValueAsString('InstallPath');
+    final key = LOCAL_MACHINE.open(r'SOFTWARE\Wow6432Node\Valve\Steam');
+    final String? registryInstallPath;
+    try {
+      registryInstallPath = key.getString('InstallPath');
+    } finally {
+      key.close();
+    }
 
     if (registryInstallPath != null && registryInstallPath.isNotEmpty) {
       final directory = Directory(registryInstallPath);

@@ -1,8 +1,11 @@
 #include "flutter_window.h"
 
 #include <optional>
+#include <flutter/method_channel.h>
+#include <flutter/standard_method_codec.h>
 
 #include "flutter/generated_plugin_registrant.h"
+#include "bitsdojo_window/bitsdojo_window.h"
 
 FlutterWindow::FlutterWindow(const flutter::DartProject& project)
     : project_(project) {}
@@ -25,6 +28,18 @@ bool FlutterWindow::OnCreate() {
     return false;
   }
   RegisterPlugins(flutter_controller_->engine());
+  flutter::MethodChannel<> window_channel(
+      flutter_controller_->engine()->messenger(), "bitsdojo/window",
+      &flutter::StandardMethodCodec::GetInstance());
+  window_channel.SetMethodCallHandler([](const auto& call, auto result) {
+    if (call.method_name() != "dragAppWindow") {
+      result->NotImplemented();
+    } else if (bitsdojo_window::dragAppWindow()) {
+      result->Success();
+    } else {
+      result->Error("DRAG_FAILED", "Could not drag app window");
+    }
+  });
   SetChildContent(flutter_controller_->view()->GetNativeWindow());
 
   flutter_controller_->engine()->SetNextFrameCallback([&]() {
@@ -66,12 +81,10 @@ FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
       flutter_controller_->engine()->ReloadSystemFonts();
       break;
 
-    // Close-to-tray START https://github.com/antler119/system_tray/issues/7
+    // Keep the app running in the tray when its window is closed.
     case WM_CLOSE:
       ShowWindow(GetHandle(), SW_HIDE);
       return 0;
-      break;
-    // Close-to-tray END
   }
 
   return Win32Window::MessageHandler(hwnd, message, wparam, lparam);

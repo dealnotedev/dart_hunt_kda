@@ -1,8 +1,4 @@
-import 'dart:io';
-
 import 'package:animated_flip_counter/animated_flip_counter.dart';
-import 'package:bitsdojo_window/bitsdojo_window.dart';
-import 'package:bitsdojo_window_platform_interface/window.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:hunt_stats/extensions.dart';
@@ -11,7 +7,13 @@ import 'package:hunt_stats/hunt_bundle.dart';
 import 'package:hunt_stats/l10n/app_localizations.dart';
 import 'package:hunt_stats/mmr.dart';
 import 'package:hunt_stats/tracker.dart';
-import 'package:system_tray/system_tray.dart' as tray;
+import 'package:hunt_stats/tray.dart';
+import 'package:hunt_stats/window/window.dart';
+import 'package:hunt_stats/window/widgets/window_caption.dart';
+import 'package:tray_manager/tray_manager.dart' as tray;
+
+// TrayIcon releases its native handle when collected; retain it while running.
+tray.TrayIcon? _trayIcon;
 
 void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,54 +31,14 @@ void main(List<String> args) async {
     window.minSize = initialSize;
     window.size = initialSize;
     window.alignment = Alignment.center;
-    window.show();
-
     if (args.contains('-silent')) {
-      window.close();
+      window.hide();
     } else {
       window.show();
     }
 
-    _startSystemTray(window);
-  });
-}
-
-void _startSystemTray(DesktopWindow window) async {
-  final systemTray = tray.SystemTray();
-
-  await systemTray.initSystemTray(
-      title: 'system_tray',
-      iconPath: 'assets/icon.ico',
-      toolTip: 'Hunt: Stats');
-
-  final menu = tray.Menu();
-  await menu.buildFrom([
-    tray.MenuItemLabel(
-        label: 'Show',
-        onClicked: (_) => window.isVisible ? window.restore() : window.show()),
-    tray.MenuSeparator(),
-    tray.MenuItemLabel(
-        label: 'Exit',
-        onClicked: (_) async {
-          await systemTray.destroy();
-          exit(0);
-        })
-  ]);
-
-  await systemTray.setContextMenu(menu);
-
-  systemTray.registerSystemTrayEventHandler((eventName) {
-    switch (eventName) {
-      case 'double-click':
-        window.restore();
-        break;
-      case 'click':
-        window.show();
-        break;
-      case 'right-click':
-        systemTray.popUpContextMenu();
-        break;
-    }
+    _trayIcon?.dispose();
+    _trayIcon = createTrayIcon(window);
   });
 }
 
