@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:dio/dio.dart';
+import 'package:hunt_stats/hunt_events_server.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hunt_stats/generated/assets.dart';
 import 'package:hunt_stats/hunt_bundle.dart';
@@ -19,54 +19,44 @@ class TrackerEngine {
   final _huntFinder = HuntFinder();
 
   final bundle = ObservableValue(
-      current: HuntBundle(
-          killStreak: 0,
-          currentMatchKillStreak: 0,
-          assists: 0,
-          history: [],
-          kills: 0,
-          deaths: 0,
-          currentMatchAssists: 0,
-          currentMatchDeaths: 0,
-          currentMatchKills: 0,
-          matches: 0));
+    current: HuntBundle(
+      killStreak: 0,
+      currentMatchKillStreak: 0,
+      assists: 0,
+      history: [],
+      kills: 0,
+      deaths: 0,
+      currentMatchAssists: 0,
+      currentMatchDeaths: 0,
+      currentMatchKills: 0,
+      matches: 0,
+    ),
+  );
 
-  final _textGenerator =
-      TextStatsGenerator(tableWidth: 32, style: TableStyle.simple);
+  final _textGenerator = TextStatsGenerator(
+    tableWidth: 32,
+    style: TableStyle.simple,
+  );
 
   final _kills = StreamController<KillInfo>.broadcast();
 
   Stream<KillInfo> get kills => _kills.stream;
 
-  TrackerEngine({required this.updateInterval}) {
+  TrackerEngine({required this.updateInterval, required this.events}) {
     _gameEventSubject.stream.listen(_handleGameEvent);
     _kills.stream.listen(_sendKillBroadcast);
   }
 
-  Completer<void>? _killBroadcastCompleter;
+  final HuntEventsServer events;
 
-  final _dio = Dio(BaseOptions(
-    baseUrl: 'http://127.0.0.1:4080',
-    connectTimeout: const Duration(seconds: 2),
-  ));
-
-  void _sendKillBroadcast(KillInfo kill) async {
-    await _killBroadcastCompleter?.future;
-
-    try {
-      _killBroadcastCompleter = Completer();
-
-      final attrs = _createKillAttrs(kill.inMatch);
-
-      await _dio.get('/kill', queryParameters: {
-        'text': attrs.text,
-        'in_match': kill.inMatch,
-        'in_match_streak': kill.inMatchStreak,
-        'total_streak': kill.totalStreak
-      });
-    } finally {
-      _killBroadcastCompleter?.complete();
-    }
+  void _sendKillBroadcast(KillInfo kill) {
+    final attrs = _createKillAttrs(kill.inMatch);
+    events.publishKill(
+      text: attrs.text,
+      inMatch: kill.inMatch,
+      inMatchStreak: kill.inMatchStreak,
+      totalStreak: kill.totalStreak,
+    );
   }
 
   bool? _missionActive;
@@ -75,12 +65,10 @@ class TrackerEngine {
   static _KillAttrs _createKillAttrs(int streak) {
     switch (streak) {
       case 1:
-        return _KillAttrs(
-            text: 'First Blood', audio: Assets.assetsSxKill1);
+        return _KillAttrs(text: 'First Blood', audio: Assets.assetsSxKill1);
 
       case 2:
-        return _KillAttrs(
-            text: 'Double Kill', audio: Assets.assetsSxKill2);
+        return _KillAttrs(text: 'Double Kill', audio: Assets.assetsSxKill2);
 
       case 3:
         return _KillAttrs(text: 'Multi Kill', audio: Assets.assetsSxKill3);
@@ -89,15 +77,13 @@ class TrackerEngine {
         return _KillAttrs(text: 'Rampage', audio: Assets.assetsSxKill4);
 
       case 5:
-        return _KillAttrs(
-            text: 'Killing Spree', audio: Assets.assetsSxKill5);
+        return _KillAttrs(text: 'Killing Spree', audio: Assets.assetsSxKill5);
 
       case 6:
         return _KillAttrs(text: 'Dominating', audio: Assets.assetsSxKill6);
 
       case 7:
-        return _KillAttrs(
-            text: 'Unstoppable', audio: Assets.assetsSxKill7);
+        return _KillAttrs(text: 'Unstoppable', audio: Assets.assetsSxKill7);
 
       case 8:
         return _KillAttrs(text: 'Mega Kill', audio: Assets.assetsSxKill8);
@@ -106,12 +92,10 @@ class TrackerEngine {
         return _KillAttrs(text: 'Ultra Kill', audio: Assets.assetsSxKill9);
 
       case 10:
-        return _KillAttrs(
-            text: 'Whicked Sick', audio: Assets.assetsSxKill10);
+        return _KillAttrs(text: 'Whicked Sick', audio: Assets.assetsSxKill10);
 
       case 11:
-        return _KillAttrs(
-            text: 'Monster Kill', audio: Assets.assetsSxKill11);
+        return _KillAttrs(text: 'Monster Kill', audio: Assets.assetsSxKill11);
 
       case 12:
         return _KillAttrs(text: 'Holy Shit', audio: Assets.assetsSxKill12);
@@ -139,10 +123,13 @@ class TrackerEngine {
       switch (info.type) {
         case _StatsType.kill:
           final updated = bundle.set(bundle.current.addKill());
-          _kills.add(KillInfo(
+          _kills.add(
+            KillInfo(
               inMatch: updated.currentMatchKills,
               totalStreak: updated.killStreak,
-              inMatchStreak: updated.currentMatchKillStreak));
+              inMatchStreak: updated.currentMatchKillStreak,
+            ),
+          );
           break;
 
         case _StatsType.death:
@@ -155,7 +142,7 @@ class TrackerEngine {
       switch (info.type) {
         case _StatsType.kill:
           final attrs = _createKillAttrs(bundle.current.currentMatchKills);
-          if(await RingtonePlayer.isAssetExists(attrs.audio)){
+          if (await RingtonePlayer.isAssetExists(attrs.audio)) {
             RingtonePlayer.play(attrs.audio);
           } else {
             RingtonePlayer.play('assets/kill.wav');
@@ -353,7 +340,8 @@ class TrackerEngine {
   }
 
   static Future<({String? state, String? map})> _findMissionState(
-      File logFile) async {
+    File logFile,
+  ) async {
     String? state;
     String? map;
 
@@ -362,10 +350,10 @@ class TrackerEngine {
         .transform(const Utf8Decoder(allowMalformed: true))
         .transform(const LineSplitter())
         .forEach((s) {
-      final parts = s.split(' ');
-      state = _findMissionBag(parts) ?? state;
-      map = _findMissionMap(parts) ?? map;
-    });
+          final parts = s.split(' ');
+          state = _findMissionBag(parts) ?? state;
+          map = _findMissionMap(parts) ?? map;
+        });
 
     return (state: state, map: map);
   }

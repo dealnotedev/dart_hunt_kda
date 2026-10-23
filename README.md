@@ -29,3 +29,12 @@ A minimal application for displaying **Hunt: Showdown** statistics for the curre
 > To capture the statistics banner in OBS on Windows 11, use the `Windows 10 (1903 and up)` capture method.
 
 ![OBS capture method](./screens/obs_capture.png)
+
+## OBS kill events
+
+Hunt Stats publishes live kills at `ws://127.0.0.1:4080/v1/events`.
+Any number of OBS sources may connect; they receive the same new events and
+reconnect if Hunt Stats restarts. No previous kills are replayed to new clients.
+The listener belongs to Hunt Stats, so OBS sources do not compete for port 4080.
+This replaces the old outgoing HTTP `/kill` requests. Updating both applications
+is required. Tracking and local statistics still work without connected sources.

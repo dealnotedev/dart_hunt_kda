@@ -1,3 +1,7 @@
+import 'dart:async';
+import 'dart:io';
+import 'dart:ui' show AppExitResponse;
+
 import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
@@ -7,6 +11,7 @@ import 'package:hunt_stats/hunt_bundle.dart';
 import 'package:hunt_stats/l10n/app_localizations.dart';
 import 'package:hunt_stats/mmr.dart';
 import 'package:hunt_stats/tracker.dart';
+import 'package:hunt_stats/hunt_events_server.dart';
 import 'package:hunt_stats/tray.dart';
 import 'package:hunt_stats/window/window.dart';
 import 'package:hunt_stats/window/widgets/window_caption.dart';
@@ -14,13 +19,30 @@ import 'package:tray_manager/tray_manager.dart' as tray;
 
 // TrayIcon releases its native handle when collected; retain it while running.
 tray.TrayIcon? _trayIcon;
+AppLifecycleListener? _eventsLifecycle;
 
 void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  final tracker =
-      TrackerEngine(updateInterval: const Duration(seconds: 1))
-        ..startTracking();
+  final events = HuntEventsServer();
+  try {
+    await events.start();
+  } on SocketException catch (error) {
+    debugPrint('Hunt event server could not start: $error');
+  }
+  _eventsLifecycle?.dispose();
+  _eventsLifecycle = AppLifecycleListener(
+    onExitRequested: () async {
+      await events.close();
+      return AppExitResponse.exit;
+    },
+    onDetach: () => unawaited(events.close()),
+  );
+
+  final tracker = TrackerEngine(
+    updateInterval: const Duration(seconds: 1),
+    events: events,
+  )..startTracking();
 
   runApp(MyApp(engine: tracker));
 
@@ -55,9 +77,7 @@ class MyApp extends StatelessWidget {
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.indigo,
-      ),
+      theme: ThemeData(primarySwatch: Colors.indigo),
       home: MyHomePage(engine: engine),
     );
   }
@@ -77,9 +97,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF090909),
-      body: MoveWindow(
-        child: _createContentWidget(context),
-      ),
+      body: MoveWindow(child: _createContentWidget(context)),
     );
   }
 
@@ -104,10 +122,10 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Row(
                 children: [
                   const Gap(8),
-                  ..._createMyKdaWidgets(bundle, textColor: textColor)
+                  ..._createMyKdaWidgets(bundle, textColor: textColor),
                 ],
               ),
-            )
+            ),
           ],
         );
       },
@@ -145,8 +163,10 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  List<Widget> _createMyKdaWidgets(HuntBundle bundle,
-      {required Color textColor}) {
+  List<Widget> _createMyKdaWidgets(
+    HuntBundle bundle, {
+    required Color textColor,
+  }) {
     final textStyle = TextStyle(color: textColor, fontSize: 20);
 
     final kdaChanges = bundle.kdaChanges;
@@ -156,40 +176,46 @@ class _MyHomePageState extends State<MyHomePage> {
 
     final hasDirectionIcon = kdaChanges != null && kdaChanges != 0;
     final kdaStyle = TextStyle(
-        color: kdaChanges != null && kdaChanges != 0
-            ? (kdaChanges > 0 ? _colorBlue : _colorRed)
-            : textColor,
-        fontWeight: FontWeight.w500,
-        fontSize: 20);
+      color: kdaChanges != null && kdaChanges != 0
+          ? (kdaChanges > 0 ? _colorBlue : _colorRed)
+          : textColor,
+      fontWeight: FontWeight.w500,
+      fontSize: 20,
+    );
 
     return [
       Expanded(
-          child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Text(
-                'K/D',
-                style: TextStyle(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Text(
+                  'K/D',
+                  style: TextStyle(
                     color: textColor,
                     fontSize: 18,
-                    fontWeight: FontWeight.bold),
-              ),
-              const Gap(8),
-              Expanded(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const Gap(8),
+                Expanded(
                   child: Text(
-                      '(${context.localizations.matches_count(bundle.matches)})',
-                      style: const TextStyle(
-                          color: _colorBlue,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500))),
-            ],
-          ),
-          const Gap(2),
-          _createDotsWidget(bundle, textColor: textColor)
-        ],
-      )),
+                    '(${context.localizations.matches_count(bundle.matches)})',
+                    style: const TextStyle(
+                      color: _colorBlue,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const Gap(2),
+            _createDotsWidget(bundle, textColor: textColor),
+          ],
+        ),
+      ),
       const Gap(8),
       Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -200,32 +226,27 @@ class _MyHomePageState extends State<MyHomePage> {
               fractionDigits: 2,
               duration: const Duration(seconds: 1),
               textStyle: kdaStyle,
-            )
+            ),
           ] else ...[
-            Text(
-              formatDouble(bundle.kda),
-              style: kdaStyle,
-            )
+            Text(formatDouble(bundle.kda), style: kdaStyle),
           ],
           if (hasDirectionIcon) ...[
-            _createDirectionIcon(positive: kdaChanges > 0)
-          ]
+            _createDirectionIcon(positive: kdaChanges > 0),
+          ],
         ],
       ),
-      SizedBox(
-        width: hasDirectionIcon ? 8 : 16,
-      ),
+      SizedBox(width: hasDirectionIcon ? 8 : 16),
       Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(bundle.totalKills.toString(), style: textStyle),
           if (killsChanges != null) ...[
-            _createChangesWidget(killsChanges, positive: true)
+            _createChangesWidget(killsChanges, positive: true),
           ],
           Text(_spacedSlash(trimLeft: killsChanges != null), style: textStyle),
           Text(bundle.totalDeaths.toString(), style: textStyle),
           if (deathsChanges != null) ...[
-            _createChangesWidget(deathsChanges, positive: false)
+            _createChangesWidget(deathsChanges, positive: false),
           ],
           /*Text(_spacedSlash(trimLeft: deathsChanges != null), style: textStyle),
           Text(bundle.totalAssists.toString(), style: textStyle),
@@ -237,10 +258,7 @@ class _MyHomePageState extends State<MyHomePage> {
     ];
   }
 
-  static String _spacedSlash({
-    bool trimRight = false,
-    bool trimLeft = false,
-  }) =>
+  static String _spacedSlash({bool trimRight = false, bool trimLeft = false}) =>
       '${trimLeft ? '' : ' '}/${trimRight ? '' : ' '}';
 
   Widget _createDirectionIcon({required bool positive}) {
@@ -255,8 +273,11 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Color get _blockColor => const Color(0xFF090909);
 
-  static String formatDouble(double value,
-      {int precision = 2, bool plusIfPositive = false}) {
+  static String formatDouble(
+    double value, {
+    int precision = 2,
+    bool plusIfPositive = false,
+  }) {
     if (value.isNaN) {
       return '';
     }
@@ -272,11 +293,14 @@ const _colorBlue = Color(0xFF1592E4);
 const _colorRed = Color(0xFFAC2F30);
 
 Widget _createChangesWidget(int value, {bool positive = true}) {
-  return Text(value.toString(),
-      style: TextStyle(
-          color: positive ? _colorBlue : _colorRed,
-          fontSize: 14,
-          fontWeight: FontWeight.bold));
+  return Text(
+    value.toString(),
+    style: TextStyle(
+      color: positive ? _colorBlue : _colorRed,
+      fontSize: 14,
+      fontWeight: FontWeight.bold,
+    ),
+  );
 }
 
 extension Ex on double {
@@ -288,8 +312,12 @@ class SimplePlayerWidget extends StatelessWidget {
   final int mmr;
   final Color? textColor;
 
-  const SimplePlayerWidget(
-      {super.key, required this.mmr, this.textColor, this.bgColor});
+  const SimplePlayerWidget({
+    super.key,
+    required this.mmr,
+    this.textColor,
+    this.bgColor,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -299,21 +327,23 @@ class SimplePlayerWidget extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
         children: [
-          Text('dealnote.dev',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: textColor,
-                fontSize: 18,
-                fontWeight: FontWeight.w500,
-              )),
+          Text(
+            'dealnote.dev',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: textColor,
+              fontSize: 18,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
           const Expanded(child: SizedBox.shrink()),
           _createStarWidget(Mmr.star1.getFilled(mmr)),
           _createStarWidget(Mmr.star2.getFilled(mmr)),
           _createStarWidget(Mmr.star3.getFilled(mmr)),
           _createStarWidget(Mmr.star4.getFilled(mmr)),
           _createStarWidget(Mmr.star5.getFilled(mmr)),
-          _createStarWidget(Mmr.star6.getFilled(mmr))
+          _createStarWidget(Mmr.star6.getFilled(mmr)),
         ],
       ),
     );
@@ -346,7 +376,7 @@ Widget _createStarWidget(double fill, {double size = 16}) {
             width: size * fill,
             color: const Color(0xFFCEB379),
           ),
-        )
+        ),
       ],
     ),
   );
